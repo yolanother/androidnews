@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">    
+    <LinearLayout
+        android:background="@color/toolBarBackground"
+        android:layout_width="fill_parent"
+        android:layout_height="50px">
+        <TextView 
+            android:id="@+id/channelName"
+            android:textSize="22px"
+            android:textColor="@color/channelNameForeground"
+            android:textStyle="bold"
+            android:text="Channel Name"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"            
+            android:layout_gravity="center|center_vertical"
+        />        
+    </LinearLayout>    
+    <ListView android:id="@+id/newsList"
+        android:background="@color/newsItemBackground"
+        android:cacheColorHint="@color/newsItemBackground"
+        android:divider="@android:drawable/divider_horizontal_bright"
+        android:dividerHeight="1px"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">                    
+    </ListView>    
+</LinearLayout>
