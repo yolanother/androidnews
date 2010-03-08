@@ -22,10 +22,12 @@ public class Channel {
 	private List<Item> items = new ArrayList<Item>();		
 	
 	public Channel() {	
-	}
-	
+	}	
 	public Channel(String url) {
-		super();
+		this.url = url;
+	}	
+	public Channel(String title, String url) {
+		this.title = title;
 		this.url = url;
 	}
 	public String getUrl() {
@@ -65,10 +67,10 @@ public class Channel {
 		this.items = items;
 	}
 		
-	public static Channel create(String channelUrl) {
+	public static Channel create(Channel channel) {
     	try {
     		// setup the URL
-    	   URL url = new URL(channelUrl);
+    	   URL url = new URL(channel.getUrl());
     	   url.openConnection()
     	   	.setRequestProperty("User-Agent", "Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1A543a Safari/419.3");
            // create the factory
@@ -78,7 +80,7 @@ public class Channel {
            // create the reader (scanner)
            XMLReader xmlReader = parser.getXMLReader();
            // instantiate our handler
-           RssHandler rssHandler = new RssHandler(channelUrl);
+           RssHandler rssHandler = new RssHandler(channel);
            // assign our handler
            xmlReader.setContentHandler(rssHandler);
            // get our data via the Url class
@@ -90,7 +92,7 @@ public class Channel {
     	} catch (Exception ee) {
     		ee.printStackTrace();
     		// if we have a problem, simply return null
-    		return new Channel(channelUrl);
+    		return channel;
     	}
     }
 }

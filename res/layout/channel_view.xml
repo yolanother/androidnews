@@ -1,29 +1,54 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">    
+    android:layout_height="fill_parent">
     <LinearLayout
-        android:background="@color/toolBarBackground"
+        android:orientation="horizontal"    
+        android:background="@color/toolbarBackground"
+        android:paddingTop="5px"
+        android:paddingBottom="5px"
         android:layout_width="fill_parent"
-        android:layout_height="50px">
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/back"
+            android:text="Back"         
+            android:textStyle="bold" 
+            android:textColor="@color/toolbarButton"
+            android:background="@drawable/back"
+            android:paddingLeft="10px"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"  
+            android:layout_weight="1"          
+        />
         <TextView 
             android:id="@+id/channelName"
             android:textSize="22px"
-            android:textColor="@color/channelNameForeground"
+            android:textColor="@color/channelName"
             android:textStyle="bold"
-            android:text="Channel Name"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"            
-            android:layout_gravity="center|center_vertical"
-        />        
-    </LinearLayout>    
-    <ListView android:id="@+id/newsList"
-        android:background="@color/newsItemBackground"
-        android:cacheColorHint="@color/newsItemBackground"
-        android:divider="@android:drawable/divider_horizontal_bright"
-        android:dividerHeight="1px"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
-    </ListView>    
+            android:text=""
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"  
+            android:layout_weight="8"
+            android:gravity="center"
+        />
+        <ImageButton
+            android:id="@+id/refresh"
+            android:text=""
+            android:src="@drawable/refresh"
+            android:hint="Refresh"        
+            android:textStyle="bold" 
+            android:textColor="@color/toolbarButton"
+            android:paddingRight="10px"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+        />
+    </LinearLayout>
+    <ViewSwitcher
+	    android:id="@+id/switcher"
+	    android:background="@color/newsItemBackground"    	   
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"               
+    />        
 </LinearLayout>

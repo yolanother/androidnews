@@ -19,12 +19,13 @@ public class RssHandler extends DefaultHandler {
 	final int RSS_ITEM_DESCRIPTION = 24;
 	
 	Channel channel;	
-	int currentState = 0;
+	int currentState = RSS_CHANNEL;
 	private Item item;
-	private String currentTextValue = "";	
+	private StringBuffer currentTextValue;	
 	
-	public RssHandler(String url) {
-		channel = new Channel(url);
+	public RssHandler(Channel channel) {
+		this.channel = channel;
+		channel.getItems().clear();
 	}
 	
 	public Channel getChannel() {
@@ -37,10 +38,15 @@ public class RssHandler extends DefaultHandler {
 	}
 	
 	@Override
-	public void startElement(String uri, String localName, String name,
-			Attributes attributes) throws SAXException {
+	public void startElement(String uri, String localName, String name, Attributes attributes) 
+		throws SAXException {			
 		
-		currentTextValue = "";
+		currentTextValue = new StringBuffer();
+		if (uri != null && uri.length() != 0)
+		{
+			return;
+		}
+		
 		if (localName.equals("channel"))
 		{			
 			currentState = RSS_CHANNEL;
@@ -84,12 +90,16 @@ public class RssHandler extends DefaultHandler {
 			}
 			return;
 		}
-		currentState = 0;
 	}
 	
 	@Override
 	public void endElement(String uri, String localName, String name)
-			throws SAXException {
+			throws SAXException {				
+		
+		if (uri != null && uri.length() > 0)
+		{
+			return;
+		}
 		
 		if (localName.equals("item"))
 		{
@@ -99,15 +109,19 @@ public class RssHandler extends DefaultHandler {
 		if (localName.equals("title"))
 		{
 			if (currentState == RSS_ITEM_TITLE) {
-				item.setTitle(cleanUpText(currentTextValue));
+				item.setTitle(htmlDecode(cleanUpText(currentTextValue)));
 				currentState = RSS_ITEM;
 			} else {
 				channel.setTitle(cleanUpText(currentTextValue));
+				currentState = RSS_CHANNEL;
 			}			
 		}
 		if (localName.equals("pubDate"))
 		{		
-			item.setPubDate(new Date(cleanUpText(currentTextValue)));			
+			if (currentState == RSS_ITEM_PUB_DATE) {
+				item.setPubDate(new Date(cleanUpText(currentTextValue)));
+				currentState = RSS_ITEM;
+			}
 		}
 		if (localName.equals("description"))
 		{
@@ -116,6 +130,7 @@ public class RssHandler extends DefaultHandler {
 				currentState = RSS_ITEM;
 			} else {
 				channel.setDescription(cleanUpText(currentTextValue));
+				currentState = RSS_CHANNEL;
 			}			
 		}
 		if (localName.equals("link"))
@@ -125,20 +140,31 @@ public class RssHandler extends DefaultHandler {
 				currentState = RSS_ITEM;
 			} else {
 				channel.setLink(cleanUpText(currentTextValue));
+				currentState = RSS_CHANNEL;
 			}			
 		}
-		currentTextValue = "";
-	}
+		//currentTextValue = new StringBuffer();
+	}	
 	
 	@Override
 	public void characters(char[] ch, int start, int length)
 			throws SAXException {
-		String value = new String(ch, start, length);		
-		currentTextValue = currentTextValue + value;
+		StringBuffer value = new StringBuffer();
+		value.append(ch, start, length);		
+		currentTextValue.append(value);
 	}
 	
-	private String cleanUpText(String text) {
-		if (text == null) return null;
-		return text.replace("\r", "").replace("\n", "").trim();
+	public String htmlDecode(String html) {
+        return html
+        	.replace("&lt;", "<")
+        	.replace("&gt;", ">")
+        	.replace("&quot;", "\"")
+        	.replace("&apos;", "'")
+        	.replace("&amp;", "&");
 	}
+	
+	private String cleanUpText(StringBuffer text) {
+		if (text == null) return null;
+		return text.toString().replace("\r", "").replace("\t", "").trim();		
+	}	
 }

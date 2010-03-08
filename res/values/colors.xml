@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>    
-    <color name="toolBarBackground">#000000</color>
+    <color name="toolbarBackground">#000000</color>
     <color name="newsItemTitle">#333</color>
     <color name="newsItemDate">#999</color>
     <color name="newsItemBackground">#FFFFFF</color>
-    <color name="channelNameForeground">#FFFFFF</color>
+    <color name="channelName">#FFFFFF</color>
+    <color name="toolbarButton">#FFFFFF</color>
 </resources>
