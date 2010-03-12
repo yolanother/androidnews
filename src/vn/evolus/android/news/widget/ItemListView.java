@@ -19,6 +19,6 @@ public class ItemListView extends ListView {
 	}		
 	
 	public void setItems(List<Item> items) {		                  
-        this.setAdapter(new ItemListViewAdapter(getContext(),items));
+        this.setAdapter(new ItemListViewAdapter(getContext(), items));
 	}		
 }

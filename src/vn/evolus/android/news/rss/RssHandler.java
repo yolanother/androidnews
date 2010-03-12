@@ -1,12 +1,20 @@
 package vn.evolus.android.news.rss;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class RssHandler extends DefaultHandler {
+	private static Pattern imagePattern = Pattern.compile("<img[^>]*src=\"([^\"]*)", Pattern.CASE_INSENSITIVE);	
+	private static DateFormat dateFormat = new SimpleDateFormat();
+	
 	final int RSS_CHANNEL = 0;
 	final int RSS_CHANNEL_TITLE = 1;
 	final int RSS_CHANNEL_LINK = 2;
@@ -104,6 +112,7 @@ public class RssHandler extends DefaultHandler {
 		if (localName.equals("item"))
 		{
 			channel.getItems().add(item);
+			postProcessItem(item);
 			currentState = RSS_CHANNEL;
 		}
 		if (localName.equals("title"))
@@ -118,8 +127,12 @@ public class RssHandler extends DefaultHandler {
 		}
 		if (localName.equals("pubDate"))
 		{		
-			if (currentState == RSS_ITEM_PUB_DATE) {
-				item.setPubDate(new Date(cleanUpText(currentTextValue)));
+			if (currentState == RSS_ITEM_PUB_DATE) {				
+				try {
+					item.setPubDate(dateFormat.parse(cleanUpText(currentTextValue)));
+				} catch (ParseException e) {
+					item.setPubDate(new Date());
+				}				
 				currentState = RSS_ITEM;
 			}
 		}
@@ -129,7 +142,7 @@ public class RssHandler extends DefaultHandler {
 				item.setDescription(cleanUpText(currentTextValue));
 				currentState = RSS_ITEM;
 			} else {
-				channel.setDescription(cleanUpText(currentTextValue));
+				channel.setDescription(cleanUpText(currentTextValue));				
 				currentState = RSS_CHANNEL;
 			}			
 		}
@@ -143,9 +156,8 @@ public class RssHandler extends DefaultHandler {
 				currentState = RSS_CHANNEL;
 			}			
 		}
-		//currentTextValue = new StringBuffer();
-	}	
-	
+	}			
+
 	@Override
 	public void characters(char[] ch, int start, int length)
 			throws SAXException {
@@ -166,5 +178,16 @@ public class RssHandler extends DefaultHandler {
 	private String cleanUpText(StringBuffer text) {
 		if (text == null) return null;
 		return text.toString().replace("\r", "").replace("\t", "").trim();		
+	}
+	
+	private void postProcessItem(Item item) {		
+		extractItemImageFromDescription(item);
+	}
+	
+	private void extractItemImageFromDescription(Item item) {
+		Matcher matcher = imagePattern.matcher(item.getDescription());
+		if (matcher != null && matcher.find(0)) {
+			item.setImageUrl(matcher.group(1));			
+		}		
 	}	
 }

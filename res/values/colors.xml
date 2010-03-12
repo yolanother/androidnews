@@ -5,5 +5,5 @@
     <color name="newsItemDate">#999</color>
     <color name="newsItemBackground">#FFFFFF</color>
     <color name="channelName">#FFFFFF</color>
-    <color name="toolbarButton">#FFFFFF</color>
+    <color name="toolbarButton">#000</color>
 </resources>

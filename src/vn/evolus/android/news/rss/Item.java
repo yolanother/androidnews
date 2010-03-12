@@ -7,6 +7,7 @@ public class Item {
 	private String description;
 	private Date pubDate;
 	private String link;
+	private String imageUrl;
 	
 	public Item() {		
 	}
@@ -28,8 +29,8 @@ public class Item {
 		return description;
 	}
 	public void setDescription(String description) {
-		this.description = description;
-	}
+		this.description = description;		
+	}		
 	public Date getPubDate() {
 		return pubDate;
 	}
@@ -41,5 +42,11 @@ public class Item {
 	}
 	public void setLink(String link) {
 		this.link = link;
+	}
+	public String getImageUrl() {
+		return imageUrl;
+	}
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
 	}	
 }

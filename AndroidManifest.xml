@@ -3,7 +3,9 @@
       package="vn.evolus.android.news"
       android:versionCode="1"
       android:versionName="1.0">
-    <application android:icon="@drawable/icon" android:label="@string/applicationName">
+    <application 
+        android:name="Application"
+        android:icon="@drawable/icon" android:label="@string/applicationName">
         <activity android:name=".AndroidNews"
                   android:label="@string/applicationName">
             <intent-filter>

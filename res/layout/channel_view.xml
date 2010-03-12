@@ -12,14 +12,12 @@
         android:layout_height="wrap_content">
         <Button
             android:id="@+id/back"
-            android:text="Back"         
+            android:text="Back"                 
             android:textStyle="bold" 
-            android:textColor="@color/toolbarButton"
-            android:background="@drawable/back"
-            android:paddingLeft="10px"
+            android:textColor="@color/toolbarButton"            
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"  
-            android:layout_weight="1"          
+            android:layout_height="40sp"  
+            android:layout_weight="0"          
         />
         <TextView 
             android:id="@+id/channelName"
@@ -33,16 +31,12 @@
             android:gravity="center"
         />
         <ImageButton
-            android:id="@+id/refresh"
-            android:text=""
+            android:id="@+id/refresh"            
             android:src="@drawable/refresh"
-            android:hint="Refresh"        
-            android:textStyle="bold" 
-            android:textColor="@color/toolbarButton"
-            android:paddingRight="10px"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:hint="Refresh"         
+            android:layout_width="40sp"
+            android:layout_height="40sp"
+            android:layout_weight="0"
         />
     </LinearLayout>
     <ViewSwitcher

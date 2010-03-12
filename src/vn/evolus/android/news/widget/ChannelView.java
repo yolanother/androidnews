@@ -3,9 +3,9 @@ package vn.evolus.android.news.widget;
 import vn.evolus.android.news.R;
 import vn.evolus.android.news.rss.Channel;
 import vn.evolus.android.news.rss.Item;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.os.AsyncTask;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
@@ -17,6 +17,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 import android.widget.AdapterView.OnItemClickListener;
+
+import com.github.droidfu.concurrent.BetterAsyncTask;
+import com.github.droidfu.concurrent.BetterAsyncTaskCallable;
 
 public class ChannelView extends LinearLayout {	
 	private Channel channel;	
@@ -74,8 +77,32 @@ public class ChannelView extends LinearLayout {
         });               
 	}
 	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event)  {
+	    if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+	    	Log.d("DEBUG", "Back key pressed");
+	    	goBack();
+	        return false;
+	    }
+	    return super.onKeyDown(keyCode, event);
+	}
+	
 	public void refreshChannel() {		
-        new LoadChannelTask(this).execute(this.channel);
+		BetterAsyncTask<Channel, Void, Channel> task = new BetterAsyncTask<Channel, Void, Channel>(getContext()) {			
+			protected void after(Context context, Channel channel) {				
+				ChannelView.this.setChannel(channel);
+			}			
+			protected void handleError(Context context, Exception e) {
+				
+			}			
+		};		
+		task.setCallable(new BetterAsyncTaskCallable<Channel, Void, Channel>() {
+			public Channel call(BetterAsyncTask<Channel, Void, Channel> task) throws Exception {
+				return Channel.create(ChannelView.this.channel);				
+			}    			
+		});		
+		task.disableDialog();
+		task.execute();		       
 	}
 	
 	public void setChannel(Channel channel) {
@@ -106,24 +133,5 @@ public class ChannelView extends LinearLayout {
 			switcher.setOutAnimation(slideRightOut);
 			switcher.showPrevious();
 		}
-	}
-	
-	private class LoadChannelTask extends AsyncTask<Channel, Void, Channel> {
-    	private ChannelView channelView;
-    	private ProgressDialog progressDialog;
-    	public LoadChannelTask(ChannelView channelView) {
-    		this.channelView = channelView;    		
-    	}    	
-    	protected void onPreExecute() {
-    		super.onPreExecute();
-    		progressDialog = ProgressDialog.show(channelView.getContext(), "", "Refreshing. Please wait...", true);
-    	}
-		protected Channel doInBackground(Channel... channels) {			
-			return Channel.create(channels[0]);			
-		}    	    		
-		protected void onPostExecute(Channel channel) {	
-			channelView.setChannel(channel);
-	        progressDialog.dismiss();
-		}
-    }	
+	}		
 }

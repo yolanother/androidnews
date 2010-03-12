@@ -7,7 +7,6 @@ import vn.evolus.android.news.rss.Channel;
 import vn.evolus.android.news.widget.ChannelListView;
 import vn.evolus.android.news.widget.ChannelView;
 import vn.evolus.android.news.widget.ChannelViewEventListener;
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -17,7 +16,9 @@ import android.widget.AdapterView;
 import android.widget.ViewSwitcher;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class AndroidNews extends Activity {
+import com.github.droidfu.activities.BetterDefaultActivity;
+
+public class AndroidNews extends BetterDefaultActivity {
 	private List<Channel> channels;
 	private ViewSwitcher switcher;
 	private ChannelListView channelListView;
@@ -35,17 +36,27 @@ public class AndroidNews extends Activity {
 		channels.add(new Channel("TechCrunch", "http://feeds.feedburner.com/TechCrunch"));
 		channels.add(new Channel("Lifehacker", "http://feeds.gawker.com/lifehacker/full"));
 		channels.add(new Channel("Download Squad", "http://feeds.feedburner.com/downloadsquad/full"));
+						
+		channels.add(new Channel("Vietstock", "http://feeds.feedburner.com/androidnews/vietstock/chungkhoan"));
+		channels.add(new Channel("CafeF", "http://feeds.feedburner.com/androidnews/cafef/chungkhoan"));				
+		channels.add(new Channel("VNExpress - Xã hội", "http://feeds.feedburner.com/androidnews/vnexpress/xahoi"));
+		channels.add(new Channel("VNExpress - Kinh doanh", "http://feeds.feedburner.com/androidnews/vnexpress/kinhdoanh"));
+		channels.add(new Channel("VNExpress - Vi tính", "http://feeds.feedburner.com/androidnews/vnexpress/vitinh"));
+		channels.add(new Channel("VNExpress - Ôtô & Xe máy", "http://feeds.feedburner.com/androidnews/vnexpress/oto-xemay"));
+		channels.add(new Channel("Tuổi Trẻ - Xã hội", "http://feeds.feedburner.com/androidnews/tuoitre/chinhtri-xahoi"));
+		channels.add(new Channel("Tuổi Trẻ - Kinh tế", "http://feeds.feedburner.com/androidnews/tuoitre/kinhte"));
+		
+		channels.add(new Channel("Ars Technica", "http://feeds.arstechnica.com/arstechnica/everything"));
 		channels.add(new Channel("Android and Me", "http://feeds.feedburner.com/androidandme"));		
 		channels.add(new Channel("AndroidGuys", "http://feeds.feedburner.com/androidguyscom"));
-		channels.add(new Channel("Android Phone Fans", "http://feeds2.feedburner.com/AndroidPhoneFans"));
-		
+		channels.add(new Channel("Android Phone Fans", "http://feeds2.feedburner.com/AndroidPhoneFans"));		
 	}	
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        requestWindowFeature(Window.FEATURE_NO_TITLE | Window.FEATURE_INDETERMINATE_PROGRESS);
         
         switcher = new ViewSwitcher(this);
         setContentView(switcher);

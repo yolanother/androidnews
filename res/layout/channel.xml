@@ -5,6 +5,7 @@
     android:paddingTop="5px"
     android:paddingBottom="5px"
 	android:orientation="horizontal"
+	android:background="@drawable/item_background"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 	<ImageView
@@ -31,8 +32,8 @@
        android:src="@drawable/chevron"
        android:background="@android:color/transparent"
        android:paddingLeft="5px"   
-       android:layout_width="15px"
-       android:layout_height="26px"          
+       android:layout_width="20px"
+       android:layout_height="13px"          
        android:layout_weight="0"
        android:layout_gravity="center_vertical"
     />
