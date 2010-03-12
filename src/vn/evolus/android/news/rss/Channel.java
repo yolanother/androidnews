@@ -1,6 +1,7 @@
 package vn.evolus.android.news.rss;
 
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,8 +72,8 @@ public class Channel {
     	try {
     		// setup the URL
     	   URL url = new URL(channel.getUrl());
-    	   url.openConnection()
-    	   	.setRequestProperty("User-Agent", "Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1A543a Safari/419.3");
+    	   URLConnection connection = url.openConnection();
+    	   connection.setRequestProperty("User-Agent", "Mozilla/5.0(Windows; U; Windows NT 5.2; rv:1.9.2) Gecko/20100101 Firefox/3.6");
            // create the factory
            SAXParserFactory factory = SAXParserFactory.newInstance();
            // create a parser
@@ -84,7 +85,7 @@ public class Channel {
            // assign our handler
            xmlReader.setContentHandler(rssHandler);
            // get our data via the Url class
-           InputSource is = new InputSource(url.openStream());
+           InputSource is = new InputSource(connection.getInputStream());
            // perform the synchronous parse           
            xmlReader.parse(is);
            // get the results - should be a fully populated RSSFeed instance, or null on error           

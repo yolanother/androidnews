@@ -1,0 +1,4 @@
+TODO:
+
+* Save channel to disk
+* Progressive loading items into list view

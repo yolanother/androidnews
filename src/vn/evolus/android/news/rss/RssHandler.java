@@ -11,9 +11,14 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import android.util.Log;
+
 public class RssHandler extends DefaultHandler {
-	private static Pattern imagePattern = Pattern.compile("<img[^>]*src=\"([^\"]*)", Pattern.CASE_INSENSITIVE);	
-	private static DateFormat dateFormat = new SimpleDateFormat();
+	private static Pattern imagePattern = Pattern.compile("<img[^>]*src=\"([^\"]*)", Pattern.CASE_INSENSITIVE);
+	private static Pattern blackListImagePattern = Pattern.compile(
+			"(api\\.tweetmeme\\.com)|(www\\.engadget\\.com/media/post_label)|(feedads)|(feedburner)");
+	private static DateFormat dateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+	private static String feedBurnerUri = "http://purl.org/rss/1.0/modules/content/";
 	
 	final int RSS_CHANNEL = 0;
 	final int RSS_CHANNEL_TITLE = 1;
@@ -50,7 +55,7 @@ public class RssHandler extends DefaultHandler {
 		throws SAXException {			
 		
 		currentTextValue = new StringBuffer();
-		if (uri != null && uri.length() != 0)
+		if (uri != null && uri.length() != 0 && !feedBurnerUri.equals(uri))
 		{
 			return;
 		}
@@ -98,13 +103,20 @@ public class RssHandler extends DefaultHandler {
 			}
 			return;
 		}
+		if (localName.equals("encoded") && feedBurnerUri.equals(uri))
+		{
+			if (currentState >= RSS_ITEM) {
+				currentState = RSS_ITEM_DESCRIPTION;
+			}
+			return;
+		}
 	}
 	
 	@Override
 	public void endElement(String uri, String localName, String name)
 			throws SAXException {				
 		
-		if (uri != null && uri.length() > 0)
+		if (uri != null && uri.length() > 0 && !feedBurnerUri.equals(uri))
 		{
 			return;
 		}
@@ -146,6 +158,13 @@ public class RssHandler extends DefaultHandler {
 				currentState = RSS_CHANNEL;
 			}			
 		}
+		if (localName.equals("encoded") && feedBurnerUri.equals(uri))
+		{
+			if (currentState == RSS_ITEM_DESCRIPTION) {
+				item.setDescription(cleanUpText(currentTextValue));
+				currentState = RSS_ITEM;
+			}		
+		}
 		if (localName.equals("link"))
 		{
 			if (currentState == RSS_ITEM_LINK) {
@@ -172,6 +191,7 @@ public class RssHandler extends DefaultHandler {
         	.replace("&gt;", ">")
         	.replace("&quot;", "\"")
         	.replace("&apos;", "'")
+        	.replace("&nbsp;", " ")
         	.replace("&amp;", "&");
 	}
 	
@@ -186,8 +206,13 @@ public class RssHandler extends DefaultHandler {
 	
 	private void extractItemImageFromDescription(Item item) {
 		Matcher matcher = imagePattern.matcher(item.getDescription());
-		if (matcher != null && matcher.find(0)) {
-			item.setImageUrl(matcher.group(1));			
+		while (matcher.find()) {
+			String imageUrl = matcher.group(1);			
+			if (!blackListImagePattern.matcher(imageUrl).find()) {
+				Log.d("DEBUG", "Found image url: " + imageUrl);
+				item.setImageUrl(imageUrl);		
+				return;
+			}
 		}		
 	}	
 }

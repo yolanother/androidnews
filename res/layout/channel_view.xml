@@ -30,14 +30,26 @@
             android:layout_weight="8"
             android:gravity="center"
         />
-        <ImageButton
-            android:id="@+id/refresh"            
-            android:src="@drawable/refresh"
-            android:hint="Refresh"         
+        <ViewSwitcher android:id="@+id/refreshOrProgress"
             android:layout_width="40sp"
-            android:layout_height="40sp"
-            android:layout_weight="0"
-        />
+            android:layout_height="40sp">
+            <ImageButton
+	            android:id="@+id/refresh"            
+	            android:src="@drawable/refresh"
+	            android:hint="Refresh"         
+	            android:layout_width="40sp"
+	            android:layout_height="40sp"
+	            android:layout_weight="0"
+            />
+            <ProgressBar
+                android:id="@+id/progress"
+                android:indeterminate="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                style="?android:attr/progressBarStyleSmall"                                                               
+            />                            
+        </ViewSwitcher>        
     </LinearLayout>
     <ViewSwitcher
 	    android:id="@+id/switcher"

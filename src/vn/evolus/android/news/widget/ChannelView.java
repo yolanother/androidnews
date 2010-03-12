@@ -32,6 +32,7 @@ public class ChannelView extends LinearLayout {
 	ViewSwitcher switcher;
 	ItemListView itemListView;
 	ItemView itemView;
+	ViewSwitcher refreshOrProgress;
 	
 	private ChannelViewEventListener listener;
 	
@@ -49,6 +50,7 @@ public class ChannelView extends LinearLayout {
 			}			
 		});
 		
+		refreshOrProgress = (ViewSwitcher)findViewById(R.id.refreshOrProgress);
 		ImageButton refresh = (ImageButton)findViewById(R.id.refresh);
 		refresh.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -77,6 +79,14 @@ public class ChannelView extends LinearLayout {
         });               
 	}
 	
+	public void setBusy() {		
+		refreshOrProgress.setDisplayedChild(1);
+	}
+	
+	public void setIdle() {
+		refreshOrProgress.setDisplayedChild(0);
+	}
+	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event)  {
 	    if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
@@ -89,18 +99,21 @@ public class ChannelView extends LinearLayout {
 	
 	public void refreshChannel() {		
 		BetterAsyncTask<Channel, Void, Channel> task = new BetterAsyncTask<Channel, Void, Channel>(getContext()) {			
+			protected void before(Context context) {
+				ChannelView.this.setBusy();
+			}
 			protected void after(Context context, Channel channel) {				
 				ChannelView.this.setChannel(channel);
+				ChannelView.this.setIdle();
 			}			
-			protected void handleError(Context context, Exception e) {
-				
+			protected void handleError(Context context, Exception e) {				
 			}			
 		};		
 		task.setCallable(new BetterAsyncTaskCallable<Channel, Void, Channel>() {
 			public Channel call(BetterAsyncTask<Channel, Void, Channel> task) throws Exception {
 				return Channel.create(ChannelView.this.channel);				
 			}    			
-		});		
+		});
 		task.disableDialog();
 		task.execute();		       
 	}
