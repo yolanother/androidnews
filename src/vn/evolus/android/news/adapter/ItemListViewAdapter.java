@@ -7,6 +7,7 @@ import vn.evolus.android.news.R;
 import vn.evolus.android.news.rss.Item;
 import android.content.Context;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -61,7 +62,7 @@ public class ItemListViewAdapter extends BaseAdapter {
 			if (item.getImageUrl() != null) {
 				String scaledImageUrl = "http://feeds.demo.evolus.vn/resizer/?width=60&height=60&url=" + 
 					URLEncoder.encode(item.getImageUrl());
-				//Log.d("DEBUG", scaledImageUrl);
+				Log.d("DEBUG", scaledImageUrl);
 				itemImage.setImageUrl(scaledImageUrl);
 				itemImage.loadImage();
 			} else {

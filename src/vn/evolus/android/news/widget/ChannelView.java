@@ -4,8 +4,6 @@ import vn.evolus.android.news.R;
 import vn.evolus.android.news.rss.Channel;
 import vn.evolus.android.news.rss.Item;
 import android.content.Context;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
@@ -15,6 +13,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewSwitcher;
 import android.widget.AdapterView.OnItemClickListener;
 
@@ -38,6 +37,7 @@ public class ChannelView extends LinearLayout {
 	
 	public ChannelView(Context context, ChannelViewEventListener listener) {
 		super(context);
+		requestFocus();
 		
 		this.listener = listener;
 		
@@ -85,17 +85,7 @@ public class ChannelView extends LinearLayout {
 	
 	public void setIdle() {
 		refreshOrProgress.setDisplayedChild(0);
-	}
-	
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event)  {
-	    if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-	    	Log.d("DEBUG", "Back key pressed");
-	    	goBack();
-	        return false;
-	    }
-	    return super.onKeyDown(keyCode, event);
-	}
+	}	
 	
 	public void refreshChannel() {		
 		BetterAsyncTask<Channel, Void, Channel> task = new BetterAsyncTask<Channel, Void, Channel>(getContext()) {			
@@ -106,7 +96,9 @@ public class ChannelView extends LinearLayout {
 				ChannelView.this.setChannel(channel);
 				ChannelView.this.setIdle();
 			}			
-			protected void handleError(Context context, Exception e) {				
+			protected void handleError(Context context, Exception e) {
+				Toast.makeText(context, "Cannot load the feed: " + e.getMessage(), 5).show();
+				ChannelView.this.setIdle();
 			}			
 		};		
 		task.setCallable(new BetterAsyncTaskCallable<Channel, Void, Channel>() {
@@ -146,5 +138,5 @@ public class ChannelView extends LinearLayout {
 			switcher.setOutAnimation(slideRightOut);
 			switcher.showPrevious();
 		}
-	}		
+	}	
 }

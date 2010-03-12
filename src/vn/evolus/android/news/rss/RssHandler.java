@@ -14,9 +14,9 @@ import org.xml.sax.helpers.DefaultHandler;
 import android.util.Log;
 
 public class RssHandler extends DefaultHandler {
-	private static Pattern imagePattern = Pattern.compile("<img[^>]*src=\"([^\"]*)", Pattern.CASE_INSENSITIVE);
+	private static Pattern imagePattern = Pattern.compile("<img[^>]*src=[\"']([^\"']*)", Pattern.CASE_INSENSITIVE);
 	private static Pattern blackListImagePattern = Pattern.compile(
-			"(api\\.tweetmeme\\.com)|(www\\.engadget\\.com/media/post_label)|(feedads)|(feedburner)");
+			"(api\\.tweetmeme\\.com)|(www\\.engadget\\.com/media/post_label)|(feedads)|(feedburner)|((feeds|stats)\\.wordpress\\.com)");
 	private static DateFormat dateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
 	private static String feedBurnerUri = "http://purl.org/rss/1.0/modules/content/";
 	
@@ -212,6 +212,8 @@ public class RssHandler extends DefaultHandler {
 				Log.d("DEBUG", "Found image url: " + imageUrl);
 				item.setImageUrl(imageUrl);		
 				return;
+			} else {
+				Log.d("DEBUG", "MATCH BLACK LIST : " + imageUrl);
 			}
 		}		
 	}	
