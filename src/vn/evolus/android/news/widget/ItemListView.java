@@ -10,7 +10,7 @@ import android.widget.ListView;
 public class ItemListView extends ListView {
 	private ItemListViewAdapter adapter;
 	public ItemListView(Context context) {
-		super(context);
+		super(context);		
 		adapter = new ItemListViewAdapter(context);
 		this.setAdapter(adapter);
 		
@@ -20,11 +20,7 @@ public class ItemListView extends ListView {
 	}
 	
 	public void setItems(ActiveList<Item> items) {
-		this.setSelection(0);
+		this.setSelection(-1);
 		adapter.setItems(items);
-	}
-
-	public void refresh() {
-		adapter.notifyDataSetChanged();
-	}
+	}	
 }

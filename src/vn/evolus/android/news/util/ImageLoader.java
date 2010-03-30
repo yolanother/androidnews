@@ -26,7 +26,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.widget.ImageView;
 
 import com.github.droidfu.adapters.WebGalleryAdapter;
 import com.github.droidfu.widgets.WebImageView;
@@ -88,7 +87,7 @@ public class ImageLoader implements Runnable {
             executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(DEFAULT_POOL_SIZE);
         }
         if (imageCache == null) {
-            imageCache = new ImageCache(context, 25, 5);
+            imageCache = new ImageCache(context, 40, 5);
         }
     }
 
@@ -96,39 +95,15 @@ public class ImageLoader implements Runnable {
 
     private Handler handler;
 
-    private ImageLoader(String imageUrl, ImageView imageView) {
+    private ImageLoader(String imageUrl) {
         this.imageUrl = imageUrl;
-        this.handler = new ImageLoaderHandler(imageView);
+        this.handler = new ImageLoaderHandler();
     }
 
     private ImageLoader(String imageUrl, ImageLoaderHandler handler) {
         this.imageUrl = imageUrl;
         this.handler = handler;
-    }
-
-    /**
-     * Triggers the image loader for the given image and view. The image loading
-     * will be performed concurrently to the UI main thread, using a fixed size
-     * thread pool. The loaded image will be posted back to the given ImageView
-     * upon completion.
-     * 
-     * @param imageUrl
-     *        the URL of the image to download
-     * @param imageView
-     *        the ImageView which should be updated with the new image
-     */
-    public static void start(String imageUrl, ImageView imageView) {
-        ImageLoader loader = new ImageLoader(imageUrl, imageView);
-        synchronized (imageCache) {
-            Bitmap image = imageCache.get(imageUrl);
-            if (image == null) {
-                // fetch the image in the background
-                executor.execute(loader);
-            } else {
-                imageView.setImageBitmap(image);
-            }
-        }
-    }
+    }    
 
     /**
      * Triggers the image loader for the given image and handler. The image
@@ -153,6 +128,12 @@ public class ImageLoader implements Runnable {
             } else {
                 loader.notifyImageLoaded(image);
             }
+        }
+    }
+    
+    public static Bitmap get(String imageUrl) {        
+        synchronized (imageCache) {
+            return imageCache.get(imageUrl);
         }
     }
 

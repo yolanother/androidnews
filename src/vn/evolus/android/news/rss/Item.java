@@ -10,7 +10,7 @@ public class Item implements Serializable {
 	private String description;
 	private Date pubDate;
 	private String link;
-	private String imageUrl;
+	private String imageUrl;	
 	private boolean read;
 	
 	public Item() {		
@@ -45,9 +45,9 @@ public class Item implements Serializable {
 	public String getImageUrl() {
 		return imageUrl;
 	}
-	public void setImageUrl(String imageUrl) {
+	public void setImageUrl(String imageUrl) {		
 		this.imageUrl = imageUrl;
-	}
+	}		
 	public boolean getRead() {
 		return read;
 	}

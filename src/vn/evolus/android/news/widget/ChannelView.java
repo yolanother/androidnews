@@ -87,36 +87,6 @@ public class ChannelView extends LinearLayout {
 		refreshOrProgress.setDisplayedChild(0);
 	}	
 	
-	private void refreshChannel() {
-		this.setBusy();
-		
-		BetterAsyncTask<Channel, Void, Channel> task = new BetterAsyncTask<Channel, Void, Channel>(getContext()) {			
-			protected void before(Context context) {
-			}
-			protected void after(Context context, Channel channel) {				
-				ChannelView.this.onChannelUpdated(channel);				
-			}			
-			protected void handleError(Context context, Exception e) {
-				Toast.makeText(context, "Cannot load the feed: " + e.getMessage(), 5).show();
-				ChannelView.this.setIdle();
-			}			
-		};		
-		task.setCallable(new BetterAsyncTaskCallable<Channel, Void, Channel>() {
-			public Channel call(BetterAsyncTask<Channel, Void, Channel> task) throws Exception {
-				ChannelView.this.channel.update();
-				return ChannelView.this.channel;
-			}    			
-		});
-		task.disableDialog();
-		task.execute();		       
-	}
-	
-	public void onChannelUpdated(Channel channel) {
-		this.channel = channel;
-		channelName.setText(channel.getTitle());
-		this.setIdle();
-	}
-	
 	public void setChannel(Channel channel) {
 		if (this.channel != channel) {
 			this.channel = channel;
@@ -142,18 +112,52 @@ public class ChannelView extends LinearLayout {
 		}
 	}
 	
-	public void showItem(Item item) {
+	public void refresh() {
+		refreshChannel();
+	}
+	
+	private void refreshChannel() {
+		this.setBusy();
+		
+		BetterAsyncTask<Channel, Void, Channel> task = new BetterAsyncTask<Channel, Void, Channel>(getContext()) {			
+			protected void before(Context context) {
+			}
+			protected void after(Context context, Channel channel) {				
+				ChannelView.this.onChannelUpdated(channel);				
+			}			
+			protected void handleError(Context context, Exception e) {
+				Toast.makeText(context, "Cannot load the feed: " + e.getMessage(), 5).show();
+				ChannelView.this.setIdle();
+			}			
+		};		
+		task.setCallable(new BetterAsyncTaskCallable<Channel, Void, Channel>() {
+			public Channel call(BetterAsyncTask<Channel, Void, Channel> task) throws Exception {
+				ChannelView.this.channel.update();
+				return ChannelView.this.channel;
+			}    			
+		});
+		task.disableDialog();
+		task.execute();		       
+	}
+	
+	private void onChannelUpdated(Channel channel) {
+		this.channel = channel;
+		channelName.setText(channel.getTitle());
+		this.setIdle();
+	}
+
+	private void showItem(Item item) {
 		itemView.setItem(item);
 		switcher.setInAnimation(slideLeftIn);
 		switcher.setOutAnimation(slideLeftOut);
 		switcher.showNext();
 	}
 	
-	public void showChannel() {
+	private void showChannel() {
 		if (switcher.getCurrentView() != itemListView) {
 			switcher.setInAnimation(slideRightIn);
 			switcher.setOutAnimation(slideRightOut);
 			switcher.showPrevious();
 		}
-	}	
+	}		
 }

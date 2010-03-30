@@ -32,7 +32,7 @@ public class ImageLoaderHandler extends Handler {
         }
     }
 
-    Bitmap getImage() {
+    public Bitmap getImage() {
         return image;
     }
 }

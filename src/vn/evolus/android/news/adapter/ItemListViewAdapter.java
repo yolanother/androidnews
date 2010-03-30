@@ -1,24 +1,20 @@
 package vn.evolus.android.news.adapter;
 
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-
 import vn.evolus.android.news.R;
-import vn.evolus.android.news.adapter.ChannelListViewAdapter.ViewHolder;
-import vn.evolus.android.news.rss.Channel;
 import vn.evolus.android.news.rss.Item;
 import vn.evolus.android.news.util.ActiveList;
+import vn.evolus.android.news.util.ImageLoader;
+import vn.evolus.android.news.util.ImageLoaderHandler;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Handler;
+import android.os.Message;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.github.droidfu.widgets.WebImageView;
 
 public class ItemListViewAdapter extends BaseAdapter {
 	static class ViewHolder {
@@ -28,7 +24,7 @@ public class ItemListViewAdapter extends BaseAdapter {
 	}
 	
 	private int itemTitleReadColor = 0;
-	private List<View> rowViews = new ArrayList<View>();
+	private int itemTitleColor = 0;
 	private ActiveList<Item> items = new ActiveList<Item>();
 	private Context context;
 	Handler handler = new Handler();
@@ -44,20 +40,20 @@ public class ItemListViewAdapter extends BaseAdapter {
 		}
 		public void onInsert(final int location, final Item item) {			
 			handler.post(new Runnable() {
-				public void run() {
-					ItemListViewAdapter.this.addView(location, item);					
+				public void run() {					
 					ItemListViewAdapter.this.notifyDataSetChanged();
-				}					
+				}
 			});
 		}
-		public void onClear() {
-			ItemListViewAdapter.this.rowViews.clear();				
+		public void onClear() {			
 		}
 	};
 
 	public ItemListViewAdapter(Context context) {
 		this.context = context;
+		ImageLoader.initialize(context);
 		itemTitleReadColor = context.getResources().getColor(R.color.itemTitleRead);
+		itemTitleColor = context.getResources().getColor(R.color.itemTitle);
 	}
 	public int getCount() {
 		return items.size();
@@ -68,48 +64,21 @@ public class ItemListViewAdapter extends BaseAdapter {
 	public long getItemId(int position) {
 		return position;
 	}
-	public void setItems(ActiveList<Item> items) {
-		this.rowViews.clear();
+	public void setItems(ActiveList<Item> items) {		
 		if (this.items != null) {
 			this.items.removeListener(activeListListener);
 		}
 		this.items = items;		
 		this.items.addListener(activeListListener);	
 		this.notifyDataSetInvalidated();
-	}		
+	}				
 	
-	private View addView(int position, Item item) {
-		View rowView = View.inflate(context, R.layout.item, null);				
-		TextView title = (TextView)rowView.findViewById(R.id.itemTitle);
-		title.setText(item.getTitle());
-		if (item.getRead()) {
-			title.setTextColor(itemTitleReadColor);
-		}
-		TextView date = (TextView)rowView.findViewById(R.id.itemDate);
-		if (item.getPubDate() != null) {
-			date.setText(DateUtils.getRelativeDateTimeString(context, item.getPubDate().getTime(), 1, DateUtils.DAY_IN_MILLIS, 0));
-		}
-		WebImageView itemImage = (WebImageView)rowView.findViewById(R.id.itemImage);
-		itemImage.setInAnimation(null);
-		itemImage.setNoImageDrawable(R.drawable.no_image);
-		if (item.getImageUrl() != null) {
-			String scaledImageUrl = "http://feeds.demo.evolus.vn/resizer/?width=60&height=60&url=" + 
-				URLEncoder.encode(item.getImageUrl());
-			//Log.d("DEBUG", scaledImageUrl);
-			itemImage.setImageUrl(scaledImageUrl);
-			itemImage.loadImage();
-		}
-		rowViews.add(position, rowView);
-		
-		return rowView;
-	}
-	
-	public View getView(int position, View convertView, ViewGroup parent) {
-		/*
+	public View getView(int position, View convertView, ViewGroup parent) {		
 		ViewHolder holder;
+		Item item = items.get(position);
 		
 		if (convertView == null) {
-			convertView = View.inflate(context, R.layout.channel, null);
+			convertView = View.inflate(context, R.layout.item, null);
 			
 			holder = new ViewHolder();
 			holder.title = (TextView)convertView.findViewById(R.id.itemTitle);
@@ -117,31 +86,49 @@ public class ItemListViewAdapter extends BaseAdapter {
 			holder.image = (ImageView)convertView.findViewById(R.id.itemImage);
 			convertView.setTag(holder);
 		} else {
-			holder = (ViewHolder) convertView.getTag();
+			holder = (ViewHolder)convertView.getTag();
 		}
-		
-		Channel item = channels.get(position);		
+				
 		holder.title.setText(item.getTitle());
-		int unreadItems = item.countUnreadItems();
-		if (unreadItems > 0) {
-			holder.unreadCount.setText(String.valueOf(unreadItems));
+		if (item.getRead()) {
+			holder.title.setTextColor(itemTitleReadColor);
 		} else {
-			holder.unreadCount.setText("");
-		}		
-		return convertView;
-		*/
-		
-		View rowView = null;
-		Item item = this.items.get(position);
-		if (position >= rowViews.size()) {
-			rowView = addView(position, item);			
-		} else {
-			rowView = rowViews.get(position);
-			TextView title = (TextView)rowView.findViewById(R.id.itemTitle);			
-			if (item.getRead()) {
-				title.setTextColor(itemTitleReadColor);
+			holder.title.setTextColor(itemTitleColor);
+		}
+		if (item.getPubDate() != null) {
+			holder.date.setText(DateUtils.getRelativeDateTimeString(context, item.getPubDate().getTime(), 1, DateUtils.DAY_IN_MILLIS, 0));
+		}
+		holder.image.setImageResource(R.drawable.no_image);
+		String imageUrl = item.getImageUrl();
+		holder.image.setTag(imageUrl);
+		if (imageUrl != null) {
+			try {
+				Bitmap itemImage = ImageLoader.get(imageUrl);			
+				if (itemImage != null) {
+					holder.image.setImageBitmap(itemImage);
+				} else {					
+					ImageLoader.start(imageUrl, new ItemImageLoaderHandler(holder.image, imageUrl));
+				}
+			} catch (RuntimeException e) {
 			}
 		}
-		return rowView;
+		
+		return convertView;
 	}		
+	
+	private class ItemImageLoaderHandler extends ImageLoaderHandler {
+		private ImageView imageView;
+		private String imageUrl;
+		
+		public ItemImageLoaderHandler(ImageView imageView, String imageUrl) {
+			this.imageView = imageView;
+			this.imageUrl = imageUrl;
+		}
+		public void handleMessage(Message msg) {
+	        super.handleMessage(msg);
+	        if (imageUrl.equals((String)imageView.getTag())) {
+	        	imageView.setImageBitmap(super.getImage());
+	        }
+	    }
+	}
 }

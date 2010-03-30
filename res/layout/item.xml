@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:droidfu="http://github.com/droidfu/schema"    
-	android:id="@+id/newsRow" 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"    
+	android:id="@+id/newsRow"
 	android:paddingLeft="5px"
     android:paddingRight="5px"
     android:paddingTop="5px"
@@ -9,13 +8,11 @@
 	android:orientation="horizontal"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent">	
-	<com.github.droidfu.widgets.WebImageView
+	<ImageView
 	   android:id="@+id/itemImage"
        android:layout_width="60dip"
        android:layout_height="60dip"
-       android:background="#CCC"
-       droidfu:autoLoad="false"
-       droidfu:progressDrawable="..."
+       android:src="@drawable/no_image"       
     />
 	<LinearLayout	    
 	    android:paddingLeft="5px"	    

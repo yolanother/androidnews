@@ -12,14 +12,16 @@ import vn.evolus.android.news.widget.ChannelListView;
 import vn.evolus.android.news.widget.ChannelView;
 import vn.evolus.android.news.widget.ChannelViewEventListener;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
@@ -30,30 +32,75 @@ import com.github.droidfu.activities.BetterDefaultActivity;
 import com.github.droidfu.concurrent.BetterAsyncTask;
 import com.github.droidfu.concurrent.BetterAsyncTaskCallable;
 
-public class AndroidNews extends BetterDefaultActivity {
+public class AndroidNews extends BetterDefaultActivity {	
+	private final int MENU_BACK = 0;
+	private final int MENU_REFRESH = 1;
+	
 	private List<Channel> channels;
 	private ViewSwitcher switcher;
 	private ChannelListView channelListView;
 	private ChannelView channelView;
-	private ProgressDialog progressDialog;
 	
 	Animation slideLeftIn;
 	Animation slideLeftOut;
 	Animation slideRightIn;
-	Animation slideRightOut;
-	
-	public AndroidNews() {
-	}
+	Animation slideRightOut;		
 
-	@SuppressWarnings("unchecked")
+	@Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);        
+        requestWindowFeature(Window.FEATURE_NO_TITLE);  
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,   
+                                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        
+        initViews();
+        loadData();
+    }
+    
+    @Override
+	public boolean onKeyDown(int keyCode, KeyEvent event)  {    	
+	    if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+	    	if (switcher.getCurrentView() == channelView) {
+	    		channelView.goBack();	    		
+	    	} else {
+	    		confirmExit();
+	    	}	        
+	    	return false;
+	    }
+	    return super.onKeyDown(keyCode, event);
+	}
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {    	
+    	menu.add(0, MENU_BACK, 0, "Back").setIcon(R.drawable.ic_menu_back);
+    	menu.add(0, MENU_REFRESH, 1,  "Refresh").setIcon(R.drawable.ic_menu_refresh);
+    	return super.onCreateOptionsMenu(menu);
+    }
+    
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+    	return (switcher.getCurrentView() == channelView);
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	if (item.getItemId() == MENU_BACK) {
+    		channelView.goBack();
+    	} else if (item.getItemId() == MENU_REFRESH){
+    		channelView.refresh();
+    	}
+    	return super.onOptionsItemSelected(item);
+    }
+    
+	@SuppressWarnings({ "unchecked", "unused" })
 	private void loadChannels() {
 		try {
-			FileInputStream fis = this.openFileInput("channels");			
-			ObjectInputStream ois = new ObjectInputStream(fis);
+			final FileInputStream fis = this.openFileInput("channels");			
+			final ObjectInputStream ois = new ObjectInputStream(fis);
 			channels = (ArrayList<Channel>)ois.readObject();
 			fis.close();
 			Log.d("DEBUG", "Successful loading channels from disk!");
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			// initialize channels 
 			createDefaultChannels();
 		}
@@ -119,6 +166,7 @@ public class AndroidNews extends BetterDefaultActivity {
 		channels.add(new Channel("Google Android Blog", "http://feeds.feedburner.com/androinica"));
 	}
 	
+	@SuppressWarnings("unused")
 	private void saveChannels() {
 		try {
 			FileOutputStream fis = this.openFileOutput("channels", Context.MODE_PRIVATE);
@@ -129,18 +177,9 @@ public class AndroidNews extends BetterDefaultActivity {
 			e.printStackTrace();
 		}
 	}
-	
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        
-        initViews();
-        loadData();
-    }
-
+	    
     private void initViews() {    	
-        switcher = new ViewSwitcher(AndroidNews.this);
+        switcher = new ViewSwitcher(this);
         setContentView(switcher);
         
         slideLeftIn = AnimationUtils.loadAnimation(this, R.anim.slide_left_in);
@@ -167,7 +206,7 @@ public class AndroidNews extends BetterDefaultActivity {
         switcher.addView(channelView);	 		
     }
     
-    private void loadData() {    
+    private void loadData() {
     	createDefaultChannels();
     	channelListView.setChannels(channels);
     	
@@ -196,30 +235,13 @@ public class AndroidNews extends BetterDefaultActivity {
     	});
     	loadingTask.disableDialog();
     	loadingTask.execute();        
-    }
-    
-    public void finish() {
-    	//saveChannels();
-    	if (progressDialog != null) {
-    		progressDialog.dismiss();
-    	}
-    	super.finish();
-    }
-    
-    public void exit() {
-    	//progressDialog = ProgressDialog.show(this, "", "Saving data, please wait...", true);
-    	new Thread(new Runnable() {
-			public void run() {				
-				finish();				
-			}    		
-    	}).start();
-    }
+    }        
     
     public void goHome() {
+    	channelListView.refesh();
     	switcher.setInAnimation(slideRightIn);
 		switcher.setOutAnimation(slideRightOut);		
-    	switcher.showPrevious();
-    	channelListView.refesh();
+    	switcher.showPrevious();    	
     }
     
     public void showChannel(Channel channel) {
@@ -229,26 +251,13 @@ public class AndroidNews extends BetterDefaultActivity {
     	switcher.showNext();    	
     }
     
-    @Override
-	public boolean onKeyDown(int keyCode, KeyEvent event)  {    	
-	    if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-	    	if (switcher.getCurrentView() == channelView) {
-	    		channelView.goBack();	    		
-	    	} else {
-	    		confirmExit();
-	    	}	        
-	    	return false;
-	    }
-	    return super.onKeyDown(keyCode, event);
-	}        
-    
     private void confirmExit() {
     	AlertDialog.Builder builder = new AlertDialog.Builder(this);
     	builder.setMessage("Are you sure you want to exit?")
     	       .setCancelable(false)
     	       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
     	           public void onClick(DialogInterface dialog, int id) {
-    	                AndroidNews.this.exit();
+    	                AndroidNews.this.finish();
     	           }
     	       })
     	       .setNegativeButton("No", new DialogInterface.OnClickListener() {

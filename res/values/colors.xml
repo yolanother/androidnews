@@ -5,6 +5,7 @@
     <color name="itemTitleRead">#666</color>
     <color name="itemDate">#999</color>
     <color name="itemBackground">#FFFFFF</color>
+    <color name="itemReadBackground">#EEEEEE</color>
     <color name="channelName">#FFFFFF</color>
     <color name="unreadCount">#F00</color>
     <color name="toolbarButton">#EEE</color>

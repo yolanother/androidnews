@@ -1,5 +1,6 @@
 package vn.evolus.android.news.rss;
 
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -51,8 +52,8 @@ public class RssHandler extends DefaultHandler {
 	@Override
 	public void startElement(String uri, String localName, String name, Attributes attributes) 
 		throws SAXException {			
-		
-		currentTextValue = new StringBuffer();
+				
+		currentTextValue = new StringBuffer();		
 		if (uri != null && uri.length() != 0 && !feedBurnerUri.equals(uri)) {
 			return;
 		}
@@ -182,9 +183,7 @@ public class RssHandler extends DefaultHandler {
 	@Override
 	public void characters(char[] ch, int start, int length)
 			throws SAXException {
-		StringBuffer value = new StringBuffer();
-		value.append(ch, start, length);		
-		currentTextValue.append(value);	
+		currentTextValue.append(ch, start, length);	
 	}
 	
 	public String htmlDecode(String html) {
@@ -211,8 +210,9 @@ public class RssHandler extends DefaultHandler {
 		while (matcher.find()) {
 			String imageUrl = matcher.group(1);			
 			if (!blackListImagePattern.matcher(imageUrl).find()) {
-				//Log.d("DEBUG", "Found image url: " + imageUrl);
-				item.setImageUrl(imageUrl);		
+				//Log.d("DEBUG", "Found image URL: " + imageUrl);				
+				item.setImageUrl("http://feeds.demo.evolus.vn/resizer/?width=60&height=60&url=" +
+						URLEncoder.encode(imageUrl));		
 				return;
 			} else {
 				//Log.d("DEBUG", "MATCH BLACK LIST : " + imageUrl);

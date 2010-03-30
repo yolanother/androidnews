@@ -147,7 +147,7 @@ public class Channel implements Serializable {
 			istream = connection.getInputStream();
 			InputSource is = new InputSource(connection.getInputStream());
 			// perform the synchronous parse    			
-			xmlReader.parse(is);					
+			xmlReader.parse(is);						
     	} catch (Exception e) {
     		e.printStackTrace();
     		Log.e("ERROR", e.getMessage());
