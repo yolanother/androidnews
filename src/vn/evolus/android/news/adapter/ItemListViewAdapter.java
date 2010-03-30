@@ -1,104 +1,147 @@
 package vn.evolus.android.news.adapter;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 
 import vn.evolus.android.news.R;
+import vn.evolus.android.news.adapter.ChannelListViewAdapter.ViewHolder;
+import vn.evolus.android.news.rss.Channel;
 import vn.evolus.android.news.rss.Item;
+import vn.evolus.android.news.util.ActiveList;
 import android.content.Context;
+import android.os.Handler;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.droidfu.widgets.WebImageView;
 
 public class ItemListViewAdapter extends BaseAdapter {
 	static class ViewHolder {
-		WebImageView itemImage;
+		ImageView image;
 		TextView title;
 		TextView date;
 	}
 	
-	private View[] rowViews;
-	private List<Item> items;
+	private int itemTitleReadColor = 0;
+	private List<View> rowViews = new ArrayList<View>();
+	private ActiveList<Item> items = new ActiveList<Item>();
 	private Context context;
+	Handler handler = new Handler();
+	
+	private  ActiveList.ActiveListListener<Item> activeListListener = 
+		new ActiveList.ActiveListListener<Item>() {
+		public void onAdd(Item item) {				
+			handler.post(new Runnable() {
+				public void run() {
+					ItemListViewAdapter.this.notifyDataSetChanged();
+				}
+			});
+		}
+		public void onInsert(final int location, final Item item) {			
+			handler.post(new Runnable() {
+				public void run() {
+					ItemListViewAdapter.this.addView(location, item);					
+					ItemListViewAdapter.this.notifyDataSetChanged();
+				}					
+			});
+		}
+		public void onClear() {
+			ItemListViewAdapter.this.rowViews.clear();				
+		}
+	};
 
-	public ItemListViewAdapter(Context context, List<Item> items) {
+	public ItemListViewAdapter(Context context) {
 		this.context = context;
-		this.items = items;
-		rowViews = new View[items.size()];
+		itemTitleReadColor = context.getResources().getColor(R.color.itemTitleRead);
 	}
-
 	public int getCount() {
 		return items.size();
 	}
-
 	public Object getItem(int position) {		
 		return items.get(position);
 	}
-
 	public long getItemId(int position) {
 		return position;
 	}
-
-	public View getView(int position, View convertView, ViewGroup parent) {		
-				
-		if (rowViews[position] == null) {
-			View rowView = View.inflate(context, R.layout.item, null);
-			Item item = items.get(position);
-			
-			TextView title = (TextView)rowView.findViewById(R.id.itemTitle);
-			title.setText(item.getTitle());
-			TextView date = (TextView)rowView.findViewById(R.id.itemDate);
-			if (item.getPubDate() != null) {
-				date.setText(DateUtils.getRelativeDateTimeString(context, item.getPubDate().getTime(), 1, DateUtils.DAY_IN_MILLIS, 0));
-			}
-			WebImageView itemImage = (WebImageView)rowView.findViewById(R.id.itemImage);
-			itemImage.setInAnimation(null);
-			itemImage.setNoImageDrawable(R.drawable.no_image);
-			if (item.getImageUrl() != null) {
-				String scaledImageUrl = "http://feeds.demo.evolus.vn/resizer/?width=60&height=60&url=" + 
-					URLEncoder.encode(item.getImageUrl());
-				Log.d("DEBUG", scaledImageUrl);
-				itemImage.setImageUrl(scaledImageUrl);
-				itemImage.loadImage();
-			} else {
-			}
-			rowViews[position] = rowView;
+	public void setItems(ActiveList<Item> items) {
+		this.rowViews.clear();
+		if (this.items != null) {
+			this.items.removeListener(activeListListener);
 		}
-		return rowViews[position];
+		this.items = items;		
+		this.items.addListener(activeListListener);	
+		this.notifyDataSetInvalidated();
+	}		
+	
+	private View addView(int position, Item item) {
+		View rowView = View.inflate(context, R.layout.item, null);				
+		TextView title = (TextView)rowView.findViewById(R.id.itemTitle);
+		title.setText(item.getTitle());
+		if (item.getRead()) {
+			title.setTextColor(itemTitleReadColor);
+		}
+		TextView date = (TextView)rowView.findViewById(R.id.itemDate);
+		if (item.getPubDate() != null) {
+			date.setText(DateUtils.getRelativeDateTimeString(context, item.getPubDate().getTime(), 1, DateUtils.DAY_IN_MILLIS, 0));
+		}
+		WebImageView itemImage = (WebImageView)rowView.findViewById(R.id.itemImage);
+		itemImage.setInAnimation(null);
+		itemImage.setNoImageDrawable(R.drawable.no_image);
+		if (item.getImageUrl() != null) {
+			String scaledImageUrl = "http://feeds.demo.evolus.vn/resizer/?width=60&height=60&url=" + 
+				URLEncoder.encode(item.getImageUrl());
+			//Log.d("DEBUG", scaledImageUrl);
+			itemImage.setImageUrl(scaledImageUrl);
+			itemImage.loadImage();
+		}
+		rowViews.add(position, rowView);
+		
+		return rowView;
+	}
+	
+	public View getView(int position, View convertView, ViewGroup parent) {
 		/*
 		ViewHolder holder;
-		if (convertView == null) {				
-			convertView = View.inflate(context, R.layout.item, null);
-			
-			Log.d("DEBUG", "Create new convertView for position " + position);
+		
+		if (convertView == null) {
+			convertView = View.inflate(context, R.layout.channel, null);
 			
 			holder = new ViewHolder();
-			holder.title = (TextView)rowView.findViewById(R.id.itemTitle);			
-			holder.date = (TextView)rowView.findViewById(R.id.itemDate);						
-			holder.itemImage = (WebImageView)rowView.findViewById(R.id.itemImage);
-			holder.itemImage.setInAnimation(null);
-			rowView.setTag(holder);
+			holder.title = (TextView)convertView.findViewById(R.id.itemTitle);
+			holder.date = (TextView)convertView.findViewById(R.id.itemDate);
+			holder.image = (ImageView)convertView.findViewById(R.id.itemImage);
+			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
 		
-		Item item = items.get(position);		
+		Channel item = channels.get(position);		
 		holder.title.setText(item.getTitle());
-		if (item.getPubDate() != null) {
-			holder.date.setText(DateUtils.getRelativeDateTimeString(context, item.getPubDate().getTime(), 1, DateUtils.DAY_IN_MILLIS, 0));
-		}
-		if (item.getImageUrl() != null) {
-			String scaledImageUrl = "http://feeds.demo.evolus.vn/resizer/?width=60&height=60&url=" + 
-				URLEncoder.encode(item.getImageUrl());
-			holder.itemImage.setImageUrl(scaledImageUrl);
-			holder.itemImage.loadImage();
+		int unreadItems = item.countUnreadItems();
+		if (unreadItems > 0) {
+			holder.unreadCount.setText(String.valueOf(unreadItems));
+		} else {
+			holder.unreadCount.setText("");
 		}		
 		return convertView;
 		*/
+		
+		View rowView = null;
+		Item item = this.items.get(position);
+		if (position >= rowViews.size()) {
+			rowView = addView(position, item);			
+		} else {
+			rowView = rowViews.get(position);
+			TextView title = (TextView)rowView.findViewById(R.id.itemTitle);			
+			if (item.getRead()) {
+				title.setTextColor(itemTitleReadColor);
+			}
+		}
+		return rowView;
 	}		
 }

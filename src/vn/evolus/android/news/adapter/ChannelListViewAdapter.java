@@ -15,6 +15,7 @@ public class ChannelListViewAdapter extends BaseAdapter {
 	static class ViewHolder {
 		ImageView image;
 		TextView title;
+		TextView unreadCount;
 	}
 	
 	private List<Channel> channels;
@@ -44,7 +45,8 @@ public class ChannelListViewAdapter extends BaseAdapter {
 			convertView = View.inflate(context, R.layout.channel, null);
 			
 			holder = new ViewHolder();
-			holder.title = (TextView)convertView.findViewById(R.id.title);						
+			holder.title = (TextView)convertView.findViewById(R.id.title);
+			holder.unreadCount = (TextView)convertView.findViewById(R.id.unreadCount);
 			holder.image = (ImageView)convertView.findViewById(R.id.image);
 			convertView.setTag(holder);
 		} else {
@@ -52,7 +54,13 @@ public class ChannelListViewAdapter extends BaseAdapter {
 		}
 		
 		Channel item = channels.get(position);		
-		holder.title.setText(item.getTitle());		
+		holder.title.setText(item.getTitle());
+		int unreadItems = item.countUnreadItems();
+		if (unreadItems > 0) {
+			holder.unreadCount.setText(String.valueOf(unreadItems));
+		} else {
+			holder.unreadCount.setText("");
+		}
 		
 		return convertView;
 	}		

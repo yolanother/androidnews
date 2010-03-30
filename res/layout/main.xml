@@ -4,13 +4,13 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">            
     <TextView                
-        android:textSize="22px"
+        android:textSize="22sp"
         android:textColor="@color/channelName"
-        android:textStyle="bold"
-        android:padding="5px"
+        android:textStyle="bold"        
         android:text="@string/applicationName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:background="@color/toolbarBackground"
+        android:layout_width="fill_parent"
+        android:layout_height="50sp"
         android:layout_gravity="center"
         android:gravity="center"
     />
@@ -18,8 +18,8 @@
         android:id="@+id/channelListView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="@color/newsItemBackground"        
-        android:cacheColorHint="@color/newsItemBackground"
+        android:background="@color/itemBackground"        
+        android:cacheColorHint="@color/itemBackground"
         android:divider="@android:drawable/divider_horizontal_bright"
     />       
 </LinearLayout>

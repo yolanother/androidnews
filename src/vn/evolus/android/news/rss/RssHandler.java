@@ -1,7 +1,6 @@
 package vn.evolus.android.news.rss;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -11,19 +10,18 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import android.util.Log;
-
 public class RssHandler extends DefaultHandler {
 	private static Pattern imagePattern = Pattern.compile("<img[^>]*src=[\"']([^\"']*)", Pattern.CASE_INSENSITIVE);
 	private static Pattern blackListImagePattern = Pattern.compile(
-			"(api\\.tweetmeme\\.com)|(www\\.engadget\\.com/media/post_label)|(feedads)|(feedburner)|((feeds|stats)\\.wordpress\\.com)");
+			"(api\\.tweetmeme\\.com)|(www\\.engadget\\.com/media/post_label)|(feedads)|(feedburner)|((feeds|stats)\\.wordpress\\.com)|(cdn\\.stumble-upon\\.com)|(vietnamnet\\.gif)|(images\\.pheedo\\.com/images/mm)");
 	private static DateFormat dateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
-	private static String feedBurnerUri = "http://purl.org/rss/1.0/modules/content/";
-	
+	private static String feedBurnerUri = "http://purl.org/rss/1.0/modules/content/";	
+
 	final int RSS_CHANNEL = 0;
 	final int RSS_CHANNEL_TITLE = 1;
 	final int RSS_CHANNEL_LINK = 2;
-	final int RSS_CHANNEL_DESCRIPTION = 3;
+	final int RSS_CHANNEL_DESCRIPTION = 3;	
+	final int RSS_CHANNEL_IMAGE = 4;
 	
 	final int RSS_ITEM = 20;
 	final int RSS_ITEM_TITLE = 21;
@@ -38,16 +36,16 @@ public class RssHandler extends DefaultHandler {
 	
 	public RssHandler(Channel channel) {
 		this.channel = channel;
-		channel.getItems().clear();
 	}
 	
 	public Channel getChannel() {
 		return channel;
-	}	
+	}
 	
 	@Override
 	public void startDocument() throws SAXException {
 		item = new Item();
+		currentState = RSS_CHANNEL;
 	}
 	
 	@Override
@@ -55,47 +53,48 @@ public class RssHandler extends DefaultHandler {
 		throws SAXException {			
 		
 		currentTextValue = new StringBuffer();
-		if (uri != null && uri.length() != 0 && !feedBurnerUri.equals(uri))
-		{
+		if (uri != null && uri.length() != 0 && !feedBurnerUri.equals(uri)) {
 			return;
 		}
 		
-		if (localName.equals("channel"))
-		{			
+		if (localName.equals("channel")) {			
 			currentState = RSS_CHANNEL;
 			return;
 		}
-		if (localName.equals("item"))
-		{
+		if (localName.equals("item")) {
 			item = new Item();
 			currentState = RSS_ITEM;
 			return;
 		}
-		if (localName.equals("title"))
-		{
+		if (localName.equals("image")) {
+			if (currentState == RSS_CHANNEL) {
+				currentState = RSS_CHANNEL_IMAGE;
+			}
+			return;
+		}
+		if (localName.equals("title")) {
 			if (currentState >= RSS_ITEM) {
 				currentState = RSS_ITEM_TITLE;
-			} else {
+			} else if (currentState == RSS_CHANNEL){
 				currentState = RSS_CHANNEL_TITLE;
 			}
 			return;
 		}	
-		if (localName.equals("pubDate"))
-		{
-			currentState = RSS_ITEM_PUB_DATE;
+		if (localName.equals("pubDate")) {
+			if (currentState >= RSS_ITEM) {
+				currentState = RSS_ITEM_PUB_DATE;
+			}
 			return;
 		}
-		if (localName.equals("link"))
-		{
+		if (localName.equals("link")) {
 			if (currentState >= RSS_ITEM) {
 				currentState = RSS_ITEM_LINK;
-			} else {
+			} else if (currentState == RSS_CHANNEL) {
 				currentState = RSS_CHANNEL_LINK;
 			}
 			return;
 		}	
-		if (localName.equals("description"))
-		{
+		if (localName.equals("description")) {
 			if (currentState >= RSS_ITEM) {
 				currentState = RSS_ITEM_DESCRIPTION;
 			} else {
@@ -103,8 +102,7 @@ public class RssHandler extends DefaultHandler {
 			}
 			return;
 		}
-		if (localName.equals("encoded") && feedBurnerUri.equals(uri))
-		{
+		if (localName.equals("encoded") && feedBurnerUri.equals(uri)) {
 			if (currentState >= RSS_ITEM) {
 				currentState = RSS_ITEM_DESCRIPTION;
 			}
@@ -116,64 +114,68 @@ public class RssHandler extends DefaultHandler {
 	public void endElement(String uri, String localName, String name)
 			throws SAXException {				
 		
-		if (uri != null && uri.length() > 0 && !feedBurnerUri.equals(uri))
-		{
+		if (uri != null && uri.length() > 0 && !feedBurnerUri.equals(uri)) {
+			return;
+		}		
+		if (localName.equals("image")) {			
+			if (currentState == RSS_CHANNEL_IMAGE) {
+				currentState = RSS_CHANNEL;
+			}
 			return;
 		}
-		
-		if (localName.equals("item"))
-		{
-			channel.getItems().add(item);
+		if (localName.equals("item")) {
 			postProcessItem(item);
+			channel.addItem(item);			
 			currentState = RSS_CHANNEL;
-		}
-		if (localName.equals("title"))
-		{
+		}		
+		if (localName.equals("title")) {
 			if (currentState == RSS_ITEM_TITLE) {
 				item.setTitle(htmlDecode(cleanUpText(currentTextValue)));
 				currentState = RSS_ITEM;
-			} else {
+			} else if (currentState == RSS_CHANNEL_TITLE) {
 				channel.setTitle(cleanUpText(currentTextValue));
 				currentState = RSS_CHANNEL;
 			}			
 		}
-		if (localName.equals("pubDate"))
-		{		
+		if (localName.equals("pubDate")) {
 			if (currentState == RSS_ITEM_PUB_DATE) {				
 				try {
 					item.setPubDate(dateFormat.parse(cleanUpText(currentTextValue)));
-				} catch (ParseException e) {
-					item.setPubDate(new Date());
+				} catch (Throwable e) {
+					e.printStackTrace();
+					item.setPubDate(new Date(System.currentTimeMillis()));
 				}				
 				currentState = RSS_ITEM;
+			} else {
+				currentState = RSS_CHANNEL;
 			}
 		}
-		if (localName.equals("description"))
-		{
+		if (localName.equals("description")) {
 			if (currentState == RSS_ITEM_DESCRIPTION) {
 				item.setDescription(cleanUpText(currentTextValue));
 				currentState = RSS_ITEM;
-			} else {
+			} else if (currentState == RSS_CHANNEL_DESCRIPTION) {
 				channel.setDescription(cleanUpText(currentTextValue));				
 				currentState = RSS_CHANNEL;
 			}			
 		}
-		if (localName.equals("encoded") && feedBurnerUri.equals(uri))
-		{
+		if (localName.equals("encoded") && feedBurnerUri.equals(uri)) {
 			if (currentState == RSS_ITEM_DESCRIPTION) {
 				item.setDescription(cleanUpText(currentTextValue));
 				currentState = RSS_ITEM;
 			}		
 		}
-		if (localName.equals("link"))
-		{
+		if (localName.equals("link")) {
 			if (currentState == RSS_ITEM_LINK) {
 				item.setLink(cleanUpText(currentTextValue));
+				if (channel.existItem(item)) {
+					throw new SAXException("Found existing item. Stop parsing.");
+				}
 				currentState = RSS_ITEM;
-			} else {
+			} else if (currentState == RSS_CHANNEL_LINK) {
 				channel.setLink(cleanUpText(currentTextValue));
 				currentState = RSS_CHANNEL;
-			}			
+			}
 		}
 	}			
 
@@ -182,7 +184,7 @@ public class RssHandler extends DefaultHandler {
 			throws SAXException {
 		StringBuffer value = new StringBuffer();
 		value.append(ch, start, length);		
-		currentTextValue.append(value);
+		currentTextValue.append(value);	
 	}
 	
 	public String htmlDecode(String html) {
@@ -209,11 +211,11 @@ public class RssHandler extends DefaultHandler {
 		while (matcher.find()) {
 			String imageUrl = matcher.group(1);			
 			if (!blackListImagePattern.matcher(imageUrl).find()) {
-				Log.d("DEBUG", "Found image url: " + imageUrl);
+				//Log.d("DEBUG", "Found image url: " + imageUrl);
 				item.setImageUrl(imageUrl);		
 				return;
 			} else {
-				Log.d("DEBUG", "MATCH BLACK LIST : " + imageUrl);
+				//Log.d("DEBUG", "MATCH BLACK LIST : " + imageUrl);
 			}
 		}		
 	}	

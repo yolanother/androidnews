@@ -6,8 +6,8 @@
     <LinearLayout
         android:orientation="horizontal"    
         android:background="@color/toolbarBackground"
-        android:paddingTop="5px"
-        android:paddingBottom="5px"
+        android:paddingTop="10px"
+        android:paddingBottom="10px"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
         <Button
@@ -16,8 +16,12 @@
             android:textStyle="bold" 
             android:textColor="@color/toolbarButton"            
             android:layout_width="wrap_content"
-            android:layout_height="40sp"  
-            android:layout_weight="0"          
+            android:background="@drawable/back_bg"
+            android:layout_height="35sp"  
+            android:layout_weight="0"    
+            android:layout_marginLeft="5px"
+            android:layout_marginRight="5px"
+            android:layout_gravity="center_vertical"                          
         />
         <TextView 
             android:id="@+id/channelName"
@@ -25,20 +29,26 @@
             android:textColor="@color/channelName"
             android:textStyle="bold"
             android:text=""
+            android:ellipsize="marquee"
+            android:maxLines="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"  
             android:layout_weight="8"
             android:gravity="center"
         />
         <ViewSwitcher android:id="@+id/refreshOrProgress"
-            android:layout_width="40sp"
-            android:layout_height="40sp">
+            android:layout_width="35sp"
+            android:layout_height="35sp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="5px"
+            android:layout_marginRight="5px">
             <ImageButton
 	            android:id="@+id/refresh"            
 	            android:src="@drawable/refresh"
+	            android:background="@drawable/refresh_bg"
 	            android:hint="Refresh"         
-	            android:layout_width="40sp"
-	            android:layout_height="40sp"
+	            android:layout_width="35sp"
+	            android:layout_height="35sp"
 	            android:layout_weight="0"
             />
             <ProgressBar
@@ -53,8 +63,8 @@
     </LinearLayout>
     <ViewSwitcher
 	    android:id="@+id/switcher"
-	    android:background="@color/newsItemBackground"    	   
+	    android:background="@color/itemBackground"    	   
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent"               
-    />        
+    />
 </LinearLayout>

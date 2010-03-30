@@ -10,12 +10,12 @@ import android.util.AttributeSet;
 import android.widget.ListView;
 
 public class ChannelListView extends ListView {				
-	
+	ChannelListViewAdapter adapter = null;
 	public ChannelListView(Context context) {
 		super(context);		
 		
-		this.setBackgroundColor(getResources().getColor(R.color.newsItemBackground));
-		this.setCacheColorHint(getResources().getColor(R.color.newsItemBackground));
+		this.setBackgroundColor(getResources().getColor(R.color.itemBackground));
+		this.setCacheColorHint(getResources().getColor(R.color.itemBackground));
 		this.setDivider(getResources().getDrawable(android.R.drawable.divider_horizontal_bright));
 	}
 	
@@ -27,7 +27,14 @@ public class ChannelListView extends ListView {
 		super(context, attrs, defStyle);			
 	}
 	
-	public void setChannels(List<Channel> channels) {		                  
-        this.setAdapter(new ChannelListViewAdapter(getContext(), channels));
-	}		
+	public void setChannels(List<Channel> channels) {		   
+		adapter = new ChannelListViewAdapter(getContext(), channels);
+        this.setAdapter(adapter);
+	}	
+	
+	public void refesh() {
+		if (adapter != null) {
+			adapter.notifyDataSetChanged();
+		}
+	}
 }

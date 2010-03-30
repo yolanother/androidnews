@@ -20,8 +20,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import com.github.droidfu.concurrent.BetterAsyncTask;
 import com.github.droidfu.concurrent.BetterAsyncTaskCallable;
 
-public class ChannelView extends LinearLayout {	
-	private Channel channel;	
+public class ChannelView extends LinearLayout {
+	private Channel channel;
 	Animation slideLeftIn;
 	Animation slideLeftOut;
 	Animation slideRightIn;
@@ -79,7 +79,7 @@ public class ChannelView extends LinearLayout {
         });               
 	}
 	
-	public void setBusy() {		
+	public void setBusy() {
 		refreshOrProgress.setDisplayedChild(1);
 	}
 	
@@ -87,14 +87,14 @@ public class ChannelView extends LinearLayout {
 		refreshOrProgress.setDisplayedChild(0);
 	}	
 	
-	public void refreshChannel() {		
+	private void refreshChannel() {
+		this.setBusy();
+		
 		BetterAsyncTask<Channel, Void, Channel> task = new BetterAsyncTask<Channel, Void, Channel>(getContext()) {			
 			protected void before(Context context) {
-				ChannelView.this.setBusy();
 			}
 			protected void after(Context context, Channel channel) {				
-				ChannelView.this.setChannel(channel);
-				ChannelView.this.setIdle();
+				ChannelView.this.onChannelUpdated(channel);				
 			}			
 			protected void handleError(Context context, Exception e) {
 				Toast.makeText(context, "Cannot load the feed: " + e.getMessage(), 5).show();
@@ -103,17 +103,34 @@ public class ChannelView extends LinearLayout {
 		};		
 		task.setCallable(new BetterAsyncTaskCallable<Channel, Void, Channel>() {
 			public Channel call(BetterAsyncTask<Channel, Void, Channel> task) throws Exception {
-				return Channel.create(ChannelView.this.channel);				
+				ChannelView.this.channel.update();
+				return ChannelView.this.channel;
 			}    			
 		});
 		task.disableDialog();
 		task.execute();		       
 	}
 	
-	public void setChannel(Channel channel) {
+	public void onChannelUpdated(Channel channel) {
 		this.channel = channel;
 		channelName.setText(channel.getTitle());
-		itemListView.setItems(channel.getItems());
+		this.setIdle();
+	}
+	
+	public void setChannel(Channel channel) {
+		if (this.channel != channel) {
+			this.channel = channel;
+			channelName.setText(channel.getTitle());							
+			itemListView.setItems(channel.getItems());			
+			if (channel.isUpdating()) {
+				this.setBusy();
+			} else {
+				this.setIdle();
+			}
+			if (channel.isEmpty()) {
+	    		refreshChannel();
+	    	}			
+		}
 		showChannel();
 	}
 	

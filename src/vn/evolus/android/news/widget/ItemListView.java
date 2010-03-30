@@ -1,24 +1,30 @@
 package vn.evolus.android.news.widget;
 
-import java.util.List;
-
 import vn.evolus.android.news.R;
 import vn.evolus.android.news.adapter.ItemListViewAdapter;
 import vn.evolus.android.news.rss.Item;
+import vn.evolus.android.news.util.ActiveList;
 import android.content.Context;
 import android.widget.ListView;
 
 public class ItemListView extends ListView {
-	
+	private ItemListViewAdapter adapter;
 	public ItemListView(Context context) {
 		super(context);
-				
-		this.setBackgroundColor(getResources().getColor(R.color.newsItemBackground));
-		this.setCacheColorHint(getResources().getColor(R.color.newsItemBackground));
+		adapter = new ItemListViewAdapter(context);
+		this.setAdapter(adapter);
+		
+		this.setBackgroundColor(getResources().getColor(R.color.itemBackground));
+		this.setCacheColorHint(getResources().getColor(R.color.itemBackground));
 		this.setDivider(getResources().getDrawable(android.R.drawable.divider_horizontal_bright));
-	}		
+	}
 	
-	public void setItems(List<Item> items) {		                  
-        this.setAdapter(new ItemListViewAdapter(getContext(), items));
-	}		
+	public void setItems(ActiveList<Item> items) {
+		this.setSelection(0);
+		adapter.setItems(items);
+	}
+
+	public void refresh() {
+		adapter.notifyDataSetChanged();
+	}
 }
