@@ -22,5 +22,9 @@ public class ItemListView extends ListView {
 	public void setItems(ActiveList<Item> items) {
 		this.setSelection(-1);
 		adapter.setItems(items);
+	}
+
+	public void refresh() {
+		adapter.notifyDataSetChanged();
 	}	
 }

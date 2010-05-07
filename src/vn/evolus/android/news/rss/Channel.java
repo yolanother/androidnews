@@ -9,6 +9,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Observable;
+import java.util.UUID;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -19,25 +21,33 @@ import org.xml.sax.XMLReader;
 import vn.evolus.android.news.util.ActiveList;
 import android.util.Log;
 
-public class Channel implements Serializable {	
-	private static final long serialVersionUID = 6204335219893986724L;
+public class Channel extends Observable implements Serializable {	
+	private static final long serialVersionUID = 6204335219893986724L;	
+	private static SAXParserFactory factory = SAXParserFactory.newInstance();
 	private Object synRoot = new Object();
 	
+	protected String id;
 	private String url;
 	private String title;
 	private String link;
 	private String description;	
-	private ActiveList<Item> items = new ActiveList<Item>();
-	private boolean updating = false; 
-	
-	public Channel() {	
+	private transient ActiveList<Item> items = new ActiveList<Item>();
+	private boolean updating = false;
+		
+	public Channel() {
+		id = UUID.randomUUID().toString();
 	}	
-	public Channel(String url) {
+	public Channel(String url) {	
+		this();
 		this.url = url;
 	}	
 	public Channel(String title, String url) {
+		this();
 		this.title = title;
 		this.url = url;
+	}	
+	public String getId() {
+		return id;
 	}
 	public String getUrl() {
 		return url;
@@ -64,36 +74,42 @@ public class Channel implements Serializable {
 		this.description = description;
 	}		
 	public ActiveList<Item> getItems() {
-		return items;
+		synchronized (items) {
+			if (items == null) {
+				 items = new ActiveList<Item>();
+			}
+			return items;
+		}		
 	}	
 	public void clearItems() {
-		items.clear();
+		getItems().clear();
 	}	
 	public boolean existItem(Item item) {
-		return this.items.indexOf(item) >= 0;
+		return this.getItems().indexOf(item) >= 0;
 	}
 	public void addItem(Item item) {
 		synchronized (synRoot) {
-			if (this.items.indexOf(item) < 0) {
+			ActiveList<Item> items = this.getItems();
+			if (items.indexOf(item) < 0) {
 				// find insert location
 				int position = 0;
 				for (Item currentItem : this.items) {
 					if (currentItem.getPubDate().before(item.getPubDate())) {
-						this.items.add(position, item);
+						items.add(position, item);
 						return;
 					}
 					position++;
 				}
-				this.items.add(item);
+				items.add(item);
 			}
 		}
 	}
 	public boolean isEmpty() {
-		return this.items.size() == 0;
+		return this.getItems().size() == 0;
 	}	
 	public int countUnreadItems() {
 		int total = 0;
-		for (Item item : this.items) {
+		for (Item item : this.getItems()) {
 			if (!item.getRead()) {
 				total += 1;
 			}
@@ -123,18 +139,22 @@ public class Channel implements Serializable {
 		}
 	}
 	public void update() {
+		synchronized (synRoot) {
+			if (updating) return;			
+			updating = true;
+			this.setChanged();
+			this.notifyObservers(updating);
+		}
+		
 		InputStream istream = null;
-		try {
-			synchronized (synRoot) {
-				if (updating) return;
-				updating = true;
-			}
+		try {			
 			// setup the URL
 			URL url = new URL(this.getUrl());
 			URLConnection connection = url.openConnection();
+			connection.setConnectTimeout(5000);
+			//connection.setUseCaches(false);
+			//connection.setDefaultUseCaches(false);
 			connection.setRequestProperty("User-Agent", "Mozilla/5.0(Windows; U; Windows NT 5.2; rv:1.9.2) Gecko/20100101 Firefox/3.6");
-			// create the factory
-			SAXParserFactory factory = SAXParserFactory.newInstance();
 			// create a parser
 			SAXParser parser = factory.newSAXParser();
 			// create the reader (scanner)
@@ -143,25 +163,29 @@ public class Channel implements Serializable {
 			RssHandler rssHandler = new RssHandler(this);
 			// assign our handler
 			xmlReader.setContentHandler(rssHandler);
-			// get our data via the Url class
-			istream = connection.getInputStream();
-			InputSource is = new InputSource(connection.getInputStream());
+			// get our data via the Url class			
+			istream = connection.getInputStream();			
 			// perform the synchronous parse    			
-			xmlReader.parse(is);						
-    	} catch (Exception e) {
+			xmlReader.parse(new InputSource(istream));
+    	} catch (Throwable e) {
     		e.printStackTrace();
     		Log.e("ERROR", e.getMessage());
-    	} finally {
+    	}
+    	finally {    		
     		if (istream != null) {
     			try {
-					istream.close();
+					istream.close();					
 				} catch (IOException e) {
+					Log.e("ERROR", "Error on closing connection to " + this.getUrl() + ": " + e.getMessage());
 					e.printStackTrace();
 				}
-    		}
-    		synchronized (synRoot) {
-				updating = false;
-			}
+    		}    		
     	}
-    }	
+    	
+    	synchronized (synRoot) {
+			updating = false;				
+			this.setChanged();
+			this.notifyObservers(updating);
+		}
+    }
 }

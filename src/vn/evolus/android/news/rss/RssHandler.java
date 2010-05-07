@@ -14,7 +14,8 @@ import org.xml.sax.helpers.DefaultHandler;
 public class RssHandler extends DefaultHandler {
 	private static Pattern imagePattern = Pattern.compile("<img[^>]*src=[\"']([^\"']*)", Pattern.CASE_INSENSITIVE);
 	private static Pattern blackListImagePattern = Pattern.compile(
-			"(api\\.tweetmeme\\.com)|(www\\.engadget\\.com/media/post_label)|(feedads)|(feedburner)|((feeds|stats)\\.wordpress\\.com)|(cdn\\.stumble-upon\\.com)|(vietnamnet\\.gif)|(images\\.pheedo\\.com/images/mm)");
+			"(api\\.tweetmeme\\.com)|(www\\.engadget\\.com/media/post_label)|(feedads)|(feedburner)|((feeds|stats)\\.wordpress\\.com)|(cdn\\.stumble-upon\\.com)|(vietnamnet\\.gif)|(images\\.pheedo\\.com/images/mm)" +
+			"|(creatives\\.commindo-media\\.de)");
 	private static DateFormat dateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
 	private static String feedBurnerUri = "http://purl.org/rss/1.0/modules/content/";	
 
@@ -51,8 +52,7 @@ public class RssHandler extends DefaultHandler {
 	
 	@Override
 	public void startElement(String uri, String localName, String name, Attributes attributes) 
-		throws SAXException {			
-				
+		throws SAXException {
 		currentTextValue = new StringBuffer();		
 		if (uri != null && uri.length() != 0 && !feedBurnerUri.equals(uri)) {
 			return;
@@ -153,7 +153,9 @@ public class RssHandler extends DefaultHandler {
 		}
 		if (localName.equals("description")) {
 			if (currentState == RSS_ITEM_DESCRIPTION) {
-				item.setDescription(cleanUpText(currentTextValue));
+				if (item.getDescription() == null) { 
+					item.setDescription(cleanUpText(currentTextValue));
+				}
 				currentState = RSS_ITEM;
 			} else if (currentState == RSS_CHANNEL_DESCRIPTION) {
 				channel.setDescription(cleanUpText(currentTextValue));				
@@ -193,7 +195,8 @@ public class RssHandler extends DefaultHandler {
         	.replace("&quot;", "\"")
         	.replace("&apos;", "'")
         	.replace("&nbsp;", " ")
-        	.replace("&amp;", "&");
+        	.replace("&amp;", "&")
+        	.replace("&mdash;", "—");
 	}
 	
 	private String cleanUpText(StringBuffer text) {

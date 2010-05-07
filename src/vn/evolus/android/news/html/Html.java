@@ -1,19 +1,27 @@
 package vn.evolus.android.news.html;
 
+import org.htmlcleaner.CleanerProperties;
+import org.htmlcleaner.CompactXmlSerializer;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
 
 public class Html {		
-	private static HtmlCleaner cleaner = new HtmlCleaner();
-	//private static CompactXmlSerializer serializer = new CompactXmlSerializer(new CleanerProperties());
+	private static HtmlCleaner cleaner;
+	private static CompactXmlSerializer xmlSerializer;
+	static {
+		cleaner = new HtmlCleaner();
+		CleanerProperties props = cleaner.getProperties();
+		props.setOmitComments(true);		
+		props.setUseCdataForScriptAndStyle(false);
+		props.setOmitXmlDeclaration(true);
+		xmlSerializer = new CompactXmlSerializer(props);
+	}
 	
 	public static String toXhtml(String dirtyHtml) {
 		try {
 			TagNode node = cleaner.clean(dirtyHtml);			
-			return cleaner.getInnerHtml(node);
-			//return serializer.getXmlAsString(node);			
+			return xmlSerializer.getXmlAsString(node);			
 		} catch (Exception e) {
-			//Log.e("ERROR", e.getMessage());
 			return null;
 		}
 	}

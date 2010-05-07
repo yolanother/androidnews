@@ -1,9 +1,9 @@
 TODO:
 * Save channel to disk
 * Allow add new channels
-* Enhance title bar
 
 DONE:
+* Enhance title bar
 * Unread count
 * Read/Unread item styles
 * Progressive loading items into list view

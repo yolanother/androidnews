@@ -4,10 +4,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import vn.evolus.android.news.rss.Channel;
+import vn.evolus.android.news.util.ActiveList;
 import vn.evolus.android.news.widget.ChannelListView;
 import vn.evolus.android.news.widget.ChannelView;
 import vn.evolus.android.news.widget.ChannelViewEventListener;
@@ -21,7 +20,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
@@ -36,7 +34,7 @@ public class AndroidNews extends BetterDefaultActivity {
 	private final int MENU_BACK = 0;
 	private final int MENU_REFRESH = 1;
 	
-	private List<Channel> channels;
+	private ActiveList<Channel> channels = null;
 	private ViewSwitcher switcher;
 	private ChannelListView channelListView;
 	private ChannelView channelView;
@@ -44,19 +42,41 @@ public class AndroidNews extends BetterDefaultActivity {
 	Animation slideLeftIn;
 	Animation slideLeftOut;
 	Animation slideRightIn;
-	Animation slideRightOut;		
+	Animation slideRightOut;
+	
+	public AndroidNews() {
+		Log.d("DEBUG", "New instance created!");
+	}
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);        
-        requestWindowFeature(Window.FEATURE_NO_TITLE);  
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,   
-                                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        super.onCreate(savedInstanceState);
+        Log.d("DEBUG", "onCreate");
         
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         initViews();
-        loadData();
-    }
-    
+        loadData(savedInstanceState);
+    }	
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);		
+		Log.d("DEBUG", "onSaveInstanceState");
+		//outState.putSerializable("Channels", (Serializable) channels);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Log.d("DEBUG", "onPause");
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		Log.d("DEBUG", "onDestroy");
+	}
+	
     @Override
 	public boolean onKeyDown(int keyCode, KeyEvent event)  {    	
 	    if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
@@ -97,7 +117,7 @@ public class AndroidNews extends BetterDefaultActivity {
 		try {
 			final FileInputStream fis = this.openFileInput("channels");			
 			final ObjectInputStream ois = new ObjectInputStream(fis);
-			channels = (ArrayList<Channel>)ois.readObject();
+			channels = (ActiveList<Channel>)ois.readObject();
 			fis.close();
 			Log.d("DEBUG", "Successful loading channels from disk!");
 		} catch (final Exception ex) {
@@ -107,8 +127,8 @@ public class AndroidNews extends BetterDefaultActivity {
 	}
 
 	private void createDefaultChannels() {
-		channels = new ArrayList<Channel>();
-		channels.add(new Channel("Engadget", "http://feeds.feedburner.com/androidnews/engadget"));
+		channels = new ActiveList<Channel>();
+		channels.add(new Channel("Engadget", "http://feeds.feedburner.com/androidnews/engadget"));		
 		channels.add(new Channel("Gizmodo", "http://feeds.feedburner.com/androidnews/gizmodo"));
 		channels.add(new Channel("TechCrunch", "http://feeds.feedburner.com/TechCrunch"));
 		channels.add(new Channel("Lifehacker", "http://feeds.feedburner.com/androidnews/lifehacker"));
@@ -117,6 +137,16 @@ public class AndroidNews extends BetterDefaultActivity {
 		channels.add(new Channel("Ars Technica", "http://feeds.arstechnica.com/arstechnica/everything"));
 		channels.add(new Channel("Boy Genius Report", "http://feeds.feedburner.com/TheBoyGeniusReport"));
 		channels.add(new Channel("ReadWriteWeb", "http://feeds.feedburner.com/readwriteweb"));
+		channels.add(new Channel("The Design Blog", "http://feeds.feedburner.com/thedesignblog/ntLw"));
+		channels.add(new Channel("Smashing Magazine", "http://feeds.feedburner.com/androidnews/smashingmagazine"));
+		
+		channels.add(new Channel("Android and Me", "http://feeds.feedburner.com/androidandme"));		
+		channels.add(new Channel("AndroidGuys", "http://feeds.feedburner.com/androidguyscom"));
+		channels.add(new Channel("Android Phone Fans", "http://feeds2.feedburner.com/AndroidPhoneFans"));
+		channels.add(new Channel("Android Community", "http://feeds2.feedburner.com/AndroidCommunity"));
+		channels.add(new Channel("AndroidSpin", "http://feeds.feedburner.com/androidspin"));
+		channels.add(new Channel("Android Central", "http://feeds2.feedburner.com/androidcentral"));
+		channels.add(new Channel("Google Android Blog", "http://feeds.feedburner.com/androinica"));
 		
 		channels.add(new Channel("Số Hóa - Điện thoại", "http://feeds.feedburner.com/androidnews/sohoa/dienthoai"));
 		channels.add(new Channel("Số Hóa - Máy tính", "http://feeds.feedburner.com/androidnews/sohoa/maytinh"));
@@ -155,15 +185,7 @@ public class AndroidNews extends BetterDefaultActivity {
 		channels.add(new Channel("VietNamNet - Giáo dục", "http://feeds.feedburner.com/androidnews/vietnamnet/giaoduc"));
 				
 		channels.add(new Channel("Vietstock", "http://feeds.feedburner.com/androidnews/vietstock/chungkhoan"));
-		channels.add(new Channel("CafeF", "http://feeds.feedburner.com/androidnews/cafef/chungkhoan"));				
-		
-		channels.add(new Channel("Android and Me", "http://feeds.feedburner.com/androidandme"));		
-		channels.add(new Channel("AndroidGuys", "http://feeds.feedburner.com/androidguyscom"));
-		channels.add(new Channel("Android Phone Fans", "http://feeds2.feedburner.com/AndroidPhoneFans"));
-		channels.add(new Channel("Android Community", "http://feeds2.feedburner.com/AndroidCommunity"));
-		channels.add(new Channel("AndroidSpin", "http://feeds.feedburner.com/androidspin"));
-		channels.add(new Channel("Android Central", "http://feeds2.feedburner.com/androidcentral"));
-		channels.add(new Channel("Google Android Blog", "http://feeds.feedburner.com/androinica"));
+		channels.add(new Channel("CafeF", "http://feeds.feedburner.com/androidnews/cafef/chungkhoan"));								
 	}
 	
 	@SuppressWarnings("unused")
@@ -178,7 +200,7 @@ public class AndroidNews extends BetterDefaultActivity {
 		}
 	}
 	    
-    private void initViews() {    	
+    private void initViews() {
         switcher = new ViewSwitcher(this);
         setContentView(switcher);
         
@@ -206,7 +228,16 @@ public class AndroidNews extends BetterDefaultActivity {
         switcher.addView(channelView);	 		
     }
     
-    private void loadData() {
+    @SuppressWarnings("unchecked")
+	private void loadData(Bundle savedInstanceState) {   
+    	if (savedInstanceState != null && channels == null) {
+    		channels = (ActiveList<Channel>)savedInstanceState.getSerializable("Channels");
+    	}
+    	if (channels != null) {
+    		channelListView.setChannels(channels);
+    		return;
+    	}
+    	
     	createDefaultChannels();
     	channelListView.setChannels(channels);
     	
@@ -241,7 +272,7 @@ public class AndroidNews extends BetterDefaultActivity {
     	channelListView.refesh();
     	switcher.setInAnimation(slideRightIn);
 		switcher.setOutAnimation(slideRightOut);		
-    	switcher.showPrevious();    	
+    	switcher.showPrevious();
     }
     
     public void showChannel(Channel channel) {

@@ -53,7 +53,7 @@ import com.google.common.collect.MapMaker;
  * @author Matthias Kaeppler
  */
 public class ImageCache implements Map<String, Bitmap> {
-
+	
     private int cachedImageQuality = 75;
 
     // private int firstLevelCacheSize = 10;
@@ -68,7 +68,7 @@ public class ImageCache implements Map<String, Bitmap> {
         this.cache = new MapMaker().initialCapacity(initialCapacity).concurrencyLevel(
             concurrencyLevel).weakValues().makeMap();
         this.secondLevelCacheDir = context.getApplicationContext().getCacheDir()
-                + "/droidfu/imagecache";
+                + "/imagecache";
         new File(secondLevelCacheDir).mkdirs();
     }
 
@@ -118,7 +118,10 @@ public class ImageCache implements Map<String, Bitmap> {
         File imageFile = getImageFile(imageUrl);
         if (imageFile.exists()) {
             // 2nd level cache hit (disk)
-            bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+        	try {
+        		bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+        	} catch (Throwable e) {}
+        	
             if (bitmap == null) {
                 // treat decoding errors as a cache miss
                 return null;
@@ -135,13 +138,9 @@ public class ImageCache implements Map<String, Bitmap> {
         File imageFile = getImageFile(imageUrl);
         try {
             imageFile.createNewFile();
-
             FileOutputStream ostream = new FileOutputStream(imageFile);
-
             image.compress(compressedImageFormat, cachedImageQuality, ostream);
-
             ostream.close();
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
