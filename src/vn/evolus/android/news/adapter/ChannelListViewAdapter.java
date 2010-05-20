@@ -1,9 +1,8 @@
 package vn.evolus.android.news.adapter;
 
-import java.util.List;
-
 import vn.evolus.android.news.R;
 import vn.evolus.android.news.rss.Channel;
+import vn.evolus.android.news.util.ActiveList;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,10 +17,10 @@ public class ChannelListViewAdapter extends BaseAdapter {
 		TextView unreadCount;
 	}
 	
-	private List<Channel> channels;
+	private ActiveList<Channel> channels;
 	private Context context;
 
-	public ChannelListViewAdapter(Context context, List<Channel> channels) {
+	public ChannelListViewAdapter(Context context, ActiveList<Channel> channels) {
 		this.context = context;
 		this.channels = channels;
 	}

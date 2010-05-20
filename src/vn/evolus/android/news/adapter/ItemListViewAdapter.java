@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class ItemListViewAdapter extends BaseAdapter {
+	private static final int REFRESH_MESSAGE = 1;
 	static class ViewHolder {
 		ImageView image;
 		TextView title;
@@ -27,27 +28,34 @@ public class ItemListViewAdapter extends BaseAdapter {
 	private int itemTitleColor = 0;
 	private ActiveList<Item> items = new ActiveList<Item>();
 	private Context context;
-	Handler handler = new Handler();
+	Handler handler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			super.handleMessage(msg);
+			if (msg.what == REFRESH_MESSAGE) {
+				ItemListViewAdapter.this.notifyDataSetChanged();
+			}						
+		}
+	};
 	
 	private  ActiveList.ActiveListListener<Item> activeListListener = 
 		new ActiveList.ActiveListListener<Item>() {
 		public void onAdd(Item item) {				
-			handler.post(new Runnable() {
-				public void run() {
-					ItemListViewAdapter.this.notifyDataSetChanged();
-				}
-			});
+			refresh();
 		}
 		public void onInsert(final int location, final Item item) {			
-			handler.post(new Runnable() {
-				public void run() {					
-					ItemListViewAdapter.this.notifyDataSetChanged();
-				}
-			});
+			refresh();
 		}
-		public void onClear() {			
+		public void onClear() {
+			refresh();		
 		}
 	};
+	
+	private void refresh() {	
+		Message message = handler.obtainMessage();
+		message.what = REFRESH_MESSAGE;
+		handler.sendMessage(message);		
+	}
 
 	public ItemListViewAdapter(Context context) {
 		this.context = context;
@@ -64,11 +72,11 @@ public class ItemListViewAdapter extends BaseAdapter {
 	public long getItemId(int position) {
 		return position;
 	}
-	public void setItems(ActiveList<Item> items) {		
+	public synchronized void setItems(ActiveList<Item> items) {		
 		if (this.items != null) {
 			this.items.removeListener(activeListListener);
 		}
-		this.items = items;		
+		this.items = items;
 		this.items.addListener(activeListListener);	
 		this.notifyDataSetInvalidated();
 	}				

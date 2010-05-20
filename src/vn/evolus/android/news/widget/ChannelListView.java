@@ -1,10 +1,9 @@
 package vn.evolus.android.news.widget;
 
-import java.util.List;
-
 import vn.evolus.android.news.R;
 import vn.evolus.android.news.adapter.ChannelListViewAdapter;
 import vn.evolus.android.news.rss.Channel;
+import vn.evolus.android.news.util.ActiveList;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ListView;
@@ -27,7 +26,7 @@ public class ChannelListView extends ListView {
 		super(context, attrs, defStyle);			
 	}
 	
-	public void setChannels(List<Channel> channels) {		   
+	public void setChannels(ActiveList<Channel> channels) {		   
 		adapter = new ChannelListViewAdapter(getContext(), channels);
         this.setAdapter(adapter);
 	}	

@@ -107,7 +107,7 @@ public class ChannelView extends LinearLayout implements Observer {
 			}
 			if (channel.isEmpty()) {
 	    		refreshChannel();
-	    	}			
+	    	}
 		}
 		showChannel();
 	}
