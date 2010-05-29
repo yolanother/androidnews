@@ -1,4 +1,4 @@
-package vn.evolus.android.news.util;
+package vn.evolus.news.util;
 
 import java.io.Serializable;
 import java.util.ArrayList;

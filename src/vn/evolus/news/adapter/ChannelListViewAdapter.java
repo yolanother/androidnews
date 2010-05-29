@@ -1,8 +1,8 @@
-package vn.evolus.android.news.adapter;
+package vn.evolus.news.adapter;
 
 import vn.evolus.android.news.R;
-import vn.evolus.android.news.rss.Channel;
-import vn.evolus.android.news.util.ActiveList;
+import vn.evolus.news.rss.Channel;
+import vn.evolus.news.util.ActiveList;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;

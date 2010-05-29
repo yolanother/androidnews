@@ -1,9 +1,9 @@
-package vn.evolus.android.news.widget;
+package vn.evolus.news.widget;
 
 import vn.evolus.android.news.R;
-import vn.evolus.android.news.adapter.ItemListViewAdapter;
-import vn.evolus.android.news.rss.Item;
-import vn.evolus.android.news.util.ActiveList;
+import vn.evolus.news.adapter.ItemListViewAdapter;
+import vn.evolus.news.rss.Item;
+import vn.evolus.news.util.ActiveList;
 import android.content.Context;
 import android.widget.ListView;
 

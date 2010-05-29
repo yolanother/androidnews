@@ -1,10 +1,10 @@
-package vn.evolus.android.news.adapter;
+package vn.evolus.news.adapter;
 
 import vn.evolus.android.news.R;
-import vn.evolus.android.news.rss.Item;
-import vn.evolus.android.news.util.ActiveList;
-import vn.evolus.android.news.util.ImageLoader;
-import vn.evolus.android.news.util.ImageLoaderHandler;
+import vn.evolus.news.rss.Item;
+import vn.evolus.news.util.ActiveList;
+import vn.evolus.news.util.ImageLoader;
+import vn.evolus.news.util.ImageLoaderHandler;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;

@@ -1,4 +1,4 @@
-package vn.evolus.android.news.rss;
+package vn.evolus.news.rss;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,7 +18,7 @@ import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
-import vn.evolus.android.news.util.ActiveList;
+import vn.evolus.news.util.ActiveList;
 import android.util.Log;
 
 public class Channel extends Observable implements Serializable {	

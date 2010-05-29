@@ -1,4 +1,4 @@
-package vn.evolus.android.news.widget;
+package vn.evolus.news.widget;
 
 public interface ChannelViewEventListener {
 	void onExit();

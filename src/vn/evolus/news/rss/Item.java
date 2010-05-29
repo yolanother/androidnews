@@ -1,4 +1,4 @@
-package vn.evolus.android.news.rss;
+package vn.evolus.news.rss;
 
 import java.io.Serializable;
 import java.util.Date;

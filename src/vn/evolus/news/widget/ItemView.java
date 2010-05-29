@@ -1,10 +1,10 @@
-package vn.evolus.android.news.widget;
+package vn.evolus.news.widget;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import vn.evolus.android.news.html.Html;
-import vn.evolus.android.news.rss.Item;
+import vn.evolus.html.Html;
+import vn.evolus.news.rss.Item;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;

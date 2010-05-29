@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package vn.evolus.android.news.util;
+package vn.evolus.news.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;

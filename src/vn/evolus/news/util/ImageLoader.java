@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package vn.evolus.android.news.util;
+package vn.evolus.news.util;
 
 import java.net.URL;
 import java.util.concurrent.Executors;

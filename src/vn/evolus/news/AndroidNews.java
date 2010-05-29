@@ -1,15 +1,16 @@
-package vn.evolus.android.news;
+package vn.evolus.news;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import vn.evolus.android.news.rss.Channel;
-import vn.evolus.android.news.util.ActiveList;
-import vn.evolus.android.news.widget.ChannelListView;
-import vn.evolus.android.news.widget.ChannelView;
-import vn.evolus.android.news.widget.ChannelViewEventListener;
+import vn.evolus.android.news.R;
+import vn.evolus.news.rss.Channel;
+import vn.evolus.news.util.ActiveList;
+import vn.evolus.news.widget.ChannelListView;
+import vn.evolus.news.widget.ChannelView;
+import vn.evolus.news.widget.ChannelViewEventListener;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;

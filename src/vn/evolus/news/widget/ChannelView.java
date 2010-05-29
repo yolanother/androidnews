@@ -1,11 +1,11 @@
-package vn.evolus.android.news.widget;
+package vn.evolus.news.widget;
 
 import java.util.Observable;
 import java.util.Observer;
 
 import vn.evolus.android.news.R;
-import vn.evolus.android.news.rss.Channel;
-import vn.evolus.android.news.rss.Item;
+import vn.evolus.news.rss.Channel;
+import vn.evolus.news.rss.Item;
 import android.content.Context;
 import android.os.Handler;
 import android.view.LayoutInflater;

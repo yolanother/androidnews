@@ -1,4 +1,4 @@
-package vn.evolus.android.news;
+package vn.evolus.news;
 
 import com.github.droidfu.DroidFuApplication;
 
