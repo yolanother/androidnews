@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import vn.evolus.android.news.R;
 import vn.evolus.news.rss.Channel;
 import vn.evolus.news.util.ActiveList;
 import vn.evolus.news.widget.ChannelListView;
@@ -149,6 +148,7 @@ public class AndroidNews extends BetterDefaultActivity {
 		channels.add(new Channel("Android Central", "http://feeds2.feedburner.com/androidcentral"));
 		channels.add(new Channel("Google Android Blog", "http://feeds.feedburner.com/androinica"));
 		
+		channels.add(new Channel("Tinh tế", "http://feeds.feedburner.com/androidnews/tinhte"));		
 		channels.add(new Channel("Số Hóa - Điện thoại", "http://feeds.feedburner.com/androidnews/sohoa/dienthoai"));
 		channels.add(new Channel("Số Hóa - Máy tính", "http://feeds.feedburner.com/androidnews/sohoa/maytinh"));
 		channels.add(new Channel("Số Hóa - Camera", "http://feeds.feedburner.com/androidnews/sohoa/camera"));
@@ -186,7 +186,7 @@ public class AndroidNews extends BetterDefaultActivity {
 		channels.add(new Channel("VietNamNet - Giáo dục", "http://feeds.feedburner.com/androidnews/vietnamnet/giaoduc"));
 				
 		channels.add(new Channel("Vietstock", "http://feeds.feedburner.com/androidnews/vietstock/chungkhoan"));
-		channels.add(new Channel("CafeF", "http://feeds.feedburner.com/androidnews/cafef/chungkhoan"));								
+		channels.add(new Channel("CafeF", "http://feeds.feedburner.com/androidnews/cafef/chungkhoan"));						
 	}
 	
 	@SuppressWarnings("unused")
@@ -280,7 +280,7 @@ public class AndroidNews extends BetterDefaultActivity {
     	channelView.setChannel(channel);
     	switcher.setInAnimation(slideLeftIn);
 		switcher.setOutAnimation(slideLeftOut);
-    	switcher.showNext();    	
+    	switcher.showNext();
     }
     
     private void confirmExit() {

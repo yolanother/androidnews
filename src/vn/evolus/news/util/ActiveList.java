@@ -19,6 +19,14 @@ public class ActiveList<T> extends ArrayList<T> implements Serializable {
 		fireChangedEvent();
 	}
 	
+	public synchronized int size() {
+		return super.size();
+	}
+	
+	public synchronized T get(int index) {
+		return super.get(index);
+	}
+	
 	public synchronized boolean add(T item) {
 		boolean success = super.add(item);
 		if (success) {

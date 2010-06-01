@@ -3,10 +3,12 @@ package vn.evolus.news.widget;
 import java.util.Observable;
 import java.util.Observer;
 
-import vn.evolus.android.news.R;
+import vn.evolus.news.ItemActivity;
+import vn.evolus.news.R;
 import vn.evolus.news.rss.Channel;
 import vn.evolus.news.rss.Item;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -66,7 +68,7 @@ public class ChannelView extends LinearLayout implements Observer {
                                 
         itemListView = new ItemListView(context);
         switcher.addView(itemListView);
-        itemView = new ItemView(context, this);
+        itemView = new ItemView(context);
         switcher.addView(itemView);
                 
         slideLeftIn = AnimationUtils.loadAnimation(context, R.anim.slide_left_in);
@@ -155,11 +157,18 @@ public class ChannelView extends LinearLayout implements Observer {
 		this.setIdle();
 	}
 
-	private void showItem(Item item) {
+	private void showItem(Item item) { 
+		Intent intent = new Intent(getContext(), ItemActivity.class);
+		intent.putExtra("CurrentItem", item);
+		intent.putExtra("Items", this.channel.getItems());
+		intent.putExtra("ChannelName", this.channel.getTitle());
+		getContext().startActivity(intent);
+		/*
 		itemView.setItem(item);
 		switcher.setInAnimation(slideLeftIn);
 		switcher.setOutAnimation(slideLeftOut);
 		switcher.showNext();
+		*/
 	}
 	
 	private void showChannel() {

@@ -9,7 +9,7 @@
         android:paddingTop="10px"
         android:paddingBottom="10px"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content">        
         <Button
             android:id="@+id/back"
             android:text="Back"                 

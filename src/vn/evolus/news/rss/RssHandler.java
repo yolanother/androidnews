@@ -12,6 +12,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class RssHandler extends DefaultHandler {
+	private static final int MAX_ITEMS = 20;
 	private static Pattern imagePattern = Pattern.compile("<img[^>]*src=[\"']([^\"']*)", Pattern.CASE_INSENSITIVE);
 	private static Pattern blackListImagePattern = Pattern.compile(
 			"(api\\.tweetmeme\\.com)|(www\\.engadget\\.com/media/post_label)|(feedads)|(feedburner)|((feeds|stats)\\.wordpress\\.com)|(cdn\\.stumble-upon\\.com)|(vietnamnet\\.gif)|(images\\.pheedo\\.com/images/mm)" +
@@ -126,7 +127,10 @@ public class RssHandler extends DefaultHandler {
 		}
 		if (localName.equals("item")) {
 			postProcessItem(item);
-			channel.addItem(item);			
+			channel.addItem(item);
+			if (channel.getItems().size() == MAX_ITEMS) {
+				throw new SAXException("Reaching maximum items. Stop parsing.");
+			}
 			currentState = RSS_CHANNEL;
 		}		
 		if (localName.equals("title")) {

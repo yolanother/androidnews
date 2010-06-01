@@ -1,6 +1,6 @@
 package vn.evolus.news.adapter;
 
-import vn.evolus.android.news.R;
+import vn.evolus.news.R;
 import vn.evolus.news.rss.Channel;
 import vn.evolus.news.util.ActiveList;
 import android.content.Context;

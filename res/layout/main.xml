@@ -14,7 +14,7 @@
         android:layout_gravity="center"
         android:gravity="center"
     />
-    <vn.evolus.android.news.widget.ChannelListView
+    <vn.evolus.news.widget.ChannelListView
         android:id="@+id/channelListView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"

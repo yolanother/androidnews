@@ -1,6 +1,6 @@
 package vn.evolus.news.adapter;
 
-import vn.evolus.android.news.R;
+import vn.evolus.news.R;
 import vn.evolus.news.rss.Item;
 import vn.evolus.news.util.ActiveList;
 import vn.evolus.news.util.ImageLoader;

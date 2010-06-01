@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="vn.evolus.android.news"
+      package="vn.evolus.news"
       android:versionCode="1"
       android:versionName="1.0">
     <application 
@@ -13,7 +13,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ItemActivity" />
     </application>
-    <uses-sdk android:minSdkVersion="3" />
+    <uses-sdk android:minSdkVersion="4" />
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
 </manifest> 
