@@ -76,7 +76,7 @@ public class ScrollView extends ViewGroup {
         mCurrentScreen = 0;
 
         final ViewConfiguration configuration = ViewConfiguration.get(getContext());
-        mTouchSlop = configuration.getScaledTouchSlop() * 4;        
+        mTouchSlop = configuration.getScaledTouchSlop() * 5;        
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
     }   
     

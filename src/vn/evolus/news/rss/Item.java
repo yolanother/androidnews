@@ -3,6 +3,9 @@ package vn.evolus.news.rss;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class Item implements Serializable {	
 	private static final long serialVersionUID = 1783666956248831428L;
 	
@@ -16,8 +19,12 @@ public class Item implements Serializable {
 	public Item() {		
 		this.read = false;
 		this.pubDate = new Date(System.currentTimeMillis());
+	}	
+	public Item(String link) {
+		this();
+		this.link = link;
 	}
-
+	
 	public String getTitle() {
 		return title;
 	}
@@ -75,4 +82,26 @@ public class Item implements Serializable {
 			return false;
 		return true;
 	}	
+	
+	public JSONObject toJSON() throws JSONException {
+		JSONObject json = new JSONObject();
+		json.put("Title", this.title);
+		json.put("Description", this.description);
+		json.put("PubDate", this.pubDate.getTime());
+		json.put("Link", this.link);
+		json.put("ImageUrl", this.imageUrl);
+		json.put("Read", this.read);
+		return json;
+	}
+	
+	public static Item fromJSON(JSONObject json) throws JSONException {
+		Item item = new Item();
+		item.setTitle(json.getString("Title"));
+		item.setDescription(json.getString("Description"));
+		item.setPubDate(new Date(json.getLong("PubDate")));
+		item.setLink(json.getString("Link"));
+		item.setImageUrl(json.optString("ImageUrl", ""));
+		item.setRead(json.getBoolean("Read"));		
+		return item;
+	}
 }

@@ -87,7 +87,7 @@ public class ImageLoader implements Runnable {
             executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(DEFAULT_POOL_SIZE);
         }
         if (imageCache == null) {
-            imageCache = new ImageCache(context, 40, 5);
+            imageCache = ImageCache.createInstance(context, 40, 5);
         }
     }
 
@@ -177,6 +177,8 @@ public class ImageLoader implements Runnable {
     }
 
     public void notifyImageLoaded(Bitmap bitmap) {
+    	if (handler == null) return;
+    	
         Message message = new Message();
         message.what = HANDLER_MESSAGE_ID;
         Bundle data = new Bundle();

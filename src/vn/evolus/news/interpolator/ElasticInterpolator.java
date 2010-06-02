@@ -32,7 +32,6 @@ package vn.evolus.news.interpolator;
  */
 
 import vn.evolus.news.interpolator.EasingType.Type;
-
 import android.view.animation.Interpolator;
 
 

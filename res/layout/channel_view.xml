@@ -25,7 +25,7 @@
         />
         <TextView 
             android:id="@+id/channelName"
-            android:textSize="22px"
+            android:textSize="22sp"
             android:textColor="@color/channelName"
             android:textStyle="bold"
             android:text=""
@@ -61,9 +61,8 @@
             />                            
         </ViewSwitcher>        
     </LinearLayout>
-    <ViewSwitcher
-	    android:id="@+id/switcher"
-	    android:background="@color/itemBackground"    	   
+    <vn.evolus.news.widget.ItemListView
+	    android:id="@+id/itemListView"
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent"               
     />

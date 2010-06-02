@@ -27,6 +27,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
+import android.os.Environment;
 
 import com.google.common.collect.MapMaker;
 
@@ -54,6 +55,8 @@ import com.google.common.collect.MapMaker;
  */
 public class ImageCache implements Map<String, Bitmap> {
 	
+	private static ImageCache instance;
+	
     private int cachedImageQuality = 75;
 
     // private int firstLevelCacheSize = 10;
@@ -64,12 +67,21 @@ public class ImageCache implements Map<String, Bitmap> {
 
     private CompressFormat compressedImageFormat = CompressFormat.JPEG;
 
-    public ImageCache(Context context, int initialCapacity, int concurrencyLevel) {
+    private ImageCache(Context context, int initialCapacity, int concurrencyLevel) {
         this.cache = new MapMaker().initialCapacity(initialCapacity).concurrencyLevel(
             concurrencyLevel).weakValues().makeMap();
-        this.secondLevelCacheDir = context.getApplicationContext().getCacheDir()
-                + "/imagecache";
+        this.secondLevelCacheDir = Environment.getExternalStorageDirectory().getAbsolutePath() //context.getApplicationContext().getCacheDir()
+                + "/droidnews/imagecache";
         new File(secondLevelCacheDir).mkdirs();
+    }
+    
+    public static synchronized ImageCache createInstance(Context context, int initialCapacity, int concurrencyLevel) {
+    	instance = new ImageCache(context, initialCapacity, concurrencyLevel);
+    	return instance;
+    }
+    
+    public static synchronized ImageCache getInstance() {
+    	return instance;
     }
 
     // /**
@@ -191,8 +203,11 @@ public class ImageCache implements Map<String, Bitmap> {
     }
 
     private File getImageFile(String imageUrl) {
-        String fileName = Integer.toHexString(imageUrl.hashCode()) + "."
-                + compressedImageFormat.name();
-        return new File(secondLevelCacheDir + "/" + fileName);
+        return new File(getCacheFileName(imageUrl));
+    }
+    
+    public static String getCacheFileName(String imageUrl) {
+    	return instance.secondLevelCacheDir + "/" + Integer.toHexString(imageUrl.hashCode()) + "."
+        	+ instance.compressedImageFormat.name();
     }
 }

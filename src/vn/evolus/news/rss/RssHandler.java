@@ -4,6 +4,8 @@ import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,8 +13,11 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class RssHandler extends DefaultHandler {
-	private static final int MAX_ITEMS = 20;
+import vn.evolus.news.provider.ImageContentProvider;
+import vn.evolus.news.util.ImageCache;
+import android.util.Log;
+
+public class RssHandler extends DefaultHandler {	
 	private static Pattern imagePattern = Pattern.compile("<img[^>]*src=[\"']([^\"']*)", Pattern.CASE_INSENSITIVE);
 	private static Pattern blackListImagePattern = Pattern.compile(
 			"(api\\.tweetmeme\\.com)|(www\\.engadget\\.com/media/post_label)|(feedads)|(feedburner)|((feeds|stats)\\.wordpress\\.com)|(cdn\\.stumble-upon\\.com)|(vietnamnet\\.gif)|(images\\.pheedo\\.com/images/mm)" +
@@ -36,15 +41,27 @@ public class RssHandler extends DefaultHandler {
 	int currentState = RSS_CHANNEL;
 	private Item item;
 	private StringBuffer currentTextValue;	
+	private Set<String> images;
+	private ItemProcessor itemProcessor;
 	
-	public RssHandler(Channel channel) {
+	public RssHandler(Channel channel, boolean processImages) {
 		this.channel = channel;
+		images = new HashSet<String>();
+		if (processImages) {
+			itemProcessor = new ImageProcessor();
+		} else {
+			itemProcessor = new NormalProcessor();
+		}
 	}
 	
 	public Channel getChannel() {
 		return channel;
 	}
 	
+	public Set<String> getImages() {
+		return images;
+	}
+
 	@Override
 	public void startDocument() throws SAXException {
 		item = new Item();
@@ -54,7 +71,7 @@ public class RssHandler extends DefaultHandler {
 	@Override
 	public void startElement(String uri, String localName, String name, Attributes attributes) 
 		throws SAXException {
-		currentTextValue = new StringBuffer();		
+		currentTextValue = new StringBuffer();
 		if (uri != null && uri.length() != 0 && !feedBurnerUri.equals(uri)) {
 			return;
 		}
@@ -125,13 +142,13 @@ public class RssHandler extends DefaultHandler {
 			}
 			return;
 		}
-		if (localName.equals("item")) {
-			postProcessItem(item);
+		if (localName.equals("item")) {						
+			itemProcessor.processItem(item);
 			channel.addItem(item);
-			if (channel.getItems().size() == MAX_ITEMS) {
-				throw new SAXException("Reaching maximum items. Stop parsing.");
-			}
 			currentState = RSS_CHANNEL;
+			if (channel.getItems().size() == Channel.MAX_ITEMS) {
+				throw new SAXException("Reaching maximum items. Stop parsing.");
+			}			
 		}		
 		if (localName.equals("title")) {
 			if (currentState == RSS_ITEM_TITLE) {
@@ -206,24 +223,50 @@ public class RssHandler extends DefaultHandler {
 	private String cleanUpText(StringBuffer text) {
 		if (text == null) return null;
 		return text.toString().replace("\r", "").replace("\t", "").trim();		
+	}		
+	
+	private interface ItemProcessor {
+		void processItem(Item item);
 	}
 	
-	private void postProcessItem(Item item) {		
-		extractItemImageFromDescription(item);
-	}
-	
-	private void extractItemImageFromDescription(Item item) {
-		Matcher matcher = imagePattern.matcher(item.getDescription());
-		while (matcher.find()) {
-			String imageUrl = matcher.group(1);			
-			if (!blackListImagePattern.matcher(imageUrl).find()) {
-				//Log.d("DEBUG", "Found image URL: " + imageUrl);				
-				item.setImageUrl("http://feeds.demo.evolus.vn/resizer/?width=60&height=60&url=" +
-						URLEncoder.encode(imageUrl));		
-				return;
-			} else {
-				//Log.d("DEBUG", "MATCH BLACK LIST : " + imageUrl);
-			}
+	private class NormalProcessor implements ItemProcessor {
+		public void processItem(Item item) {
+			Matcher matcher = imagePattern.matcher(item.getDescription());
+			while (matcher.find()) {
+				String imageUrl = matcher.group(1);
+				if (!blackListImagePattern.matcher(imageUrl).find()) {					
+					item.setImageUrl("http://feeds.demo.evolus.vn/resizer/?width=60&height=60&url=" +
+							URLEncoder.encode(imageUrl));
+					return;				
+				} else {					
+				}
+			}		
 		}		
-	}	
+	}
+	
+	private class ImageProcessor implements ItemProcessor {
+		@Override
+		public void processItem(Item item) {
+			String itemDescription = item.getDescription(); 	
+			Matcher matcher = imagePattern.matcher(itemDescription);
+			boolean found = false;		
+			while (matcher.find()) {
+				String imageUrl = matcher.group(1);
+				String cachedImageUrl = "http://image-resize.appspot.com/?width=300&height=300&url=" + URLEncoder.encode(imageUrl);
+				if (!images.contains(cachedImageUrl)) {								
+					images.add(cachedImageUrl);
+					Log.d("DEBUG", "Replace " + imageUrl + " by " + cachedImageUrl);
+					itemDescription = itemDescription.replace(imageUrl, 
+							ImageContentProvider.constructUri(ImageCache.getCacheFileName(cachedImageUrl)));
+				}
+				if (!found && !blackListImagePattern.matcher(imageUrl).find()) {
+					item.setImageUrl("http://feeds.demo.evolus.vn/resizer/?width=60&height=60&url=" +
+							URLEncoder.encode(imageUrl));
+					found = true;				
+				} else {
+				}
+			}		
+			item.setDescription(itemDescription);
+		}		
+	}
 }
