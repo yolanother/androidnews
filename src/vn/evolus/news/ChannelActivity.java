@@ -1,17 +1,14 @@
 package vn.evolus.news;
 
-import java.util.Observable;
-import java.util.Observer;
-
 import vn.evolus.news.rss.Channel;
 import vn.evolus.news.rss.Item;
 import vn.evolus.news.util.ImageLoader;
 import vn.evolus.news.widget.ItemListView;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,7 +25,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import com.github.droidfu.concurrent.BetterAsyncTask;
 import com.github.droidfu.concurrent.BetterAsyncTaskCallable;
 
-public class ChannelActivity extends Activity implements Observer {		
+public class ChannelActivity extends Activity {		
 	private final int MENU_BACK = 0;
 	private final int MENU_REFRESH = 1;
 	
@@ -37,18 +34,14 @@ public class ChannelActivity extends Activity implements Observer {
 	TextView channelName;	
 	ItemListView itemListView;	
 	ViewSwitcher refreshOrProgress;
-	
-	private Handler handler;
-	
+		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		ImageLoader.initialize(this);
 		
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.channel_view);		
-		
-		this.handler = new Handler();
+		setContentView(R.layout.channel_view);
 		
 		Button back = (Button)findViewById(R.id.back);
 		back.setOnClickListener(new OnClickListener() {
@@ -74,9 +67,9 @@ public class ChannelActivity extends Activity implements Observer {
 			}
         });
         
-        String channelUrl = getIntent().getStringExtra("ChannelUrl");
-        String channelTitle = getIntent().getStringExtra("ChannelTitle");
-        showChannel(new Channel(channelTitle, channelUrl));
+        long channelId = getIntent().getLongExtra("ChannelId", 0);   
+        channelName.setText(getIntent().getStringExtra("ChannelTitle"));
+        showChannel(channelId);
 	}		
 	
 	@Override
@@ -104,36 +97,25 @@ public class ChannelActivity extends Activity implements Observer {
 		refreshOrProgress.setDisplayedChild(0);
 	}	
 	
-	private void showChannel(Channel channel) {
-		if (this.channel != channel) {
-			if (this.channel != null) {
-				this.channel.deleteObserver(this);
-			}
-			
-			this.channel = channel;
-			this.channel.addObserver(this);
-			channelName.setText(channel.getTitle());
-			//itemListView.setItems(channel.getItems());
-			load();			
-		}
-	}
-	
-	private void load() {
+	private void showChannel(final long channelId) {
 		this.setBusy();
 		
 		BetterAsyncTask<Channel, Void, Channel> task = new BetterAsyncTask<Channel, Void, Channel>(this) {			
-			protected void after(Context context, Channel channel) {
+			protected void after(Context context, Channel channel) {				
 				itemListView.setItems(channel.getItems());
-				onChannelUpdated(channel);				
+				onChannelUpdated(channel);
 			}			
 			protected void handleError(Context context, Exception e) {
+				e.printStackTrace();
 				Toast.makeText(context, "Cannot load the feed: " + e.getMessage(), 5).show();
 				setIdle();
 			}
 		};
 		task.setCallable(new BetterAsyncTaskCallable<Channel, Void, Channel>() {
 			public Channel call(BetterAsyncTask<Channel, Void, Channel> task) throws Exception {
-				channel.load();				
+				ContentResolver cr = getContentResolver();
+				channel = Channel.load(channelId, cr);
+				channel.loadItems(cr);
 				return channel;
 			}    			
 		});
@@ -144,19 +126,19 @@ public class ChannelActivity extends Activity implements Observer {
 	private void refresh() {
 		this.setBusy();
 		
-		BetterAsyncTask<Channel, Void, Channel> task = new BetterAsyncTask<Channel, Void, Channel>(this) {			
-			protected void after(Context context, Channel channel) {				
-				ChannelActivity.this.onChannelUpdated(channel);				
+		BetterAsyncTask<Void, Void, Void> task = new BetterAsyncTask<Void, Void, Void>(this) {			
+			protected void after(Context context, Void args) {				
+				onChannelUpdated(channel);				
 			}			
 			protected void handleError(Context context, Exception e) {
 				Toast.makeText(context, "Cannot load the feed: " + e.getMessage(), 5).show();
-				ChannelActivity.this.setIdle();
+				setIdle();
 			}			
 		};
-		task.setCallable(new BetterAsyncTaskCallable<Channel, Void, Channel>() {
-			public Channel call(BetterAsyncTask<Channel, Void, Channel> task) throws Exception {
-				ChannelActivity.this.channel.update();
-				return ChannelActivity.this.channel;
+		task.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
+			public Void call(BetterAsyncTask<Void, Void, Void> task) throws Exception {
+				channel.update(getContentResolver());
+				return null;
 			}    			
 		});
 		task.disableDialog();
@@ -171,22 +153,8 @@ public class ChannelActivity extends Activity implements Observer {
 
 	private void showItem(Item item) { 
 		Intent intent = new Intent(this, ItemActivity.class);		
-		intent.putExtra("ItemLink", item.getLink());
-		intent.putExtra("ChannelUrl", this.channel.getUrl());		
+		intent.putExtra("ItemId", item.getId());
+		intent.putExtra("ChannelId", this.channel.getId());		
 		startActivity(intent);		
-	}		
-
-	@Override
-	public void update(Observable observable, Object data) {
-		if (observable instanceof Channel) {
-			Boolean updated = !(Boolean)data;
-			if (updated) {
-				this.handler.post(new Runnable() {
-					public void run() {
-						ChannelActivity.this.setIdle();			
-					}					
-				});			
-			}
-		}
-	}
+	}	
 }

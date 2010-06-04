@@ -5,10 +5,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Set;
 
@@ -16,17 +16,21 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import vn.evolus.news.providers.ContentsProvider;
 import vn.evolus.news.util.ActiveList;
 import vn.evolus.news.util.ImageLoader;
 import vn.evolus.news.util.StreamUtils;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Environment;
+import android.provider.BaseColumns;
 import android.util.Log;
 
 public class Channel extends Observable implements Serializable {	
@@ -36,13 +40,17 @@ public class Channel extends Observable implements Serializable {
 	private static SAXParserFactory factory = SAXParserFactory.newInstance();
 	private Object synRoot = new Object();
 	
+	private long id = 0;
 	private String url;
 	private String title;
 	private String link;
-	private String description;	
+	private String description;
+	private String imageUrl;
 	private transient ActiveList<Item> items = new ActiveList<Item>();
 	private boolean updating = false;	
-			
+	
+	private Channel() {		
+	}
 	public Channel(String url) {			
 		this("", url);
 	}	
@@ -50,11 +58,9 @@ public class Channel extends Observable implements Serializable {
 		this.title = title;
 		this.url = url;
 	}	
-	public Channel(String url, boolean autoLoad) {
-		this(url);
-		if (autoLoad) {
-			load();
-		}
+		
+	public long getId() {
+		return id;
 	}
 	public String getUrl() {
 		return url;
@@ -79,7 +85,13 @@ public class Channel extends Observable implements Serializable {
 	}
 	public void setDescription(String description) {
 		this.description = description;
-	}		
+	}	
+	public String getImageUrl() {
+		return imageUrl;
+	}
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
 	public ActiveList<Item> getItems() {
 		synchronized (items) {
 			if (items == null) {
@@ -91,7 +103,7 @@ public class Channel extends Observable implements Serializable {
 	public void clearItems() {
 		getItems().clear();
 	}	
-	public boolean existItem(Item item) {
+	public boolean existItem(Item item) {		
 		return this.getItems().indexOf(item) >= 0;
 	}
 	public void addItem(Item item) {
@@ -122,25 +134,78 @@ public class Channel extends Observable implements Serializable {
 			}
 		}
 		return total;
-	}		
+	}	
 	public boolean isUpdating() {
 		synchronized (synRoot) {
 			return updating;
 		}
 	}
 	
-	public JSONObject toJSON() throws JSONException {
-		JSONObject json = new JSONObject();
-		json.put("Title", this.title);
-		json.put("Url", this.url);		
-		return json;
+	public void save(ContentResolver cr) {
+		Log.d("DEBUG", "Saving " + this.title + " channel to database.");
+		ContentValues values = new ContentValues();
+		values.put(Channels.TITLE, this.title);
+		values.put(Channels.URL, this.url);
+		values.put(Channels.DESCRIPTION, this.description);
+		values.put(Channels.LINK, this.link);
+		values.put(Channels.IMAGE_URL, this.imageUrl);
+		if (this.id == 0) {
+			Uri contentUri = cr.insert(Channels.CONTENT_URI, values);
+			this.id = ContentUris.parseId(contentUri);
+		} else {
+			cr.update(Channels.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
+					new String[] { String.valueOf(this.id) });
+		}		
+		//saveItems(cr);
 	}
 	
-	public static Channel fromJSON(JSONObject json) throws JSONException {
-		return new Channel(json.getString("Title"), json.getString("Url"));		
-	}		
+	private void load(ContentResolver cr) {
+		Cursor cursor = cr.query(Channels.CONTENT_URI, 
+				new String[] {
+					Channels.ID,
+					Channels.TITLE,
+					Channels.URL,
+					Channels.DESCRIPTION,
+					Channels.LINK,
+					Channels.IMAGE_URL
+				}, 
+				ContentsProvider.WHERE_ID, 
+				new String[] { String.valueOf(this.id) }, null);
+		if (cursor.moveToFirst()) {
+			load(cursor);
+		}
+	}
 	
-	public void update() {		
+	public static Channel load(long id, ContentResolver cr) {
+		Log.d("DEBUG", "Loading channel from database: " + id);
+		Channel channel = new Channel();
+		channel.id = id;
+		channel.load(cr);
+		return channel;
+	}
+	
+	public static ArrayList<Channel> loadAllChannels(ContentResolver cr) {
+		Log.d("DEBUG", "Loading channels from database...");
+		Cursor cursor = cr.query(Channels.CONTENT_URI, 
+				new String[] {
+					Channels.ID,
+					Channels.TITLE,
+					Channels.URL,
+					Channels.DESCRIPTION,
+					Channels.LINK,
+					Channels.IMAGE_URL
+				}, 
+				null, null, null);
+		ArrayList<Channel> channels = new ActiveList<Channel>();
+		while (cursor.moveToNext()) {
+			Channel channel = new Channel();
+			channel.load(cursor);
+			channels.add(channel);
+		}
+		return channels;
+	}
+	
+	public void update(ContentResolver cr) {
 		synchronized (synRoot) {
 			if (updating) return;			
 			updating = true;
@@ -155,9 +220,9 @@ public class Channel extends Observable implements Serializable {
 			URLConnection connection = url.openConnection();
 			connection.setConnectTimeout(5000);
 			// get our data via the Url class	
-			save(connection.getInputStream());
-			// load & parse
-			load(true);
+			is = saveStream(connection.getInputStream());
+			// parse
+			parse(is);			
     	} catch (Throwable e) {    		
     		e.printStackTrace();    		
     		Log.e("ERROR", "Error on parsing " + this.getUrl() + ": " +  e.getMessage());
@@ -170,19 +235,23 @@ public class Channel extends Observable implements Serializable {
 				}
 				is = null;
 			}
+    		
+    		deleteStream();
+    		
+    		saveItems(cr);
     	}
     	
     	synchronized (synRoot) {
-			updating = false;				
+			updating = false;
 			this.setChanged();
 			this.notifyObservers(updating);
 		}
     }
 	
-	private void parse(InputStream is, boolean processImages) {
+	private void parse(InputStream is) {
 		long lastTicks = System.currentTimeMillis();	
 		// instantiate our handler
-		RssHandler rssHandler = new RssHandler(this, processImages);
+		RssHandler rssHandler = new RssHandler(this, true);
 		try {
 			// create a parser
 			SAXParser parser = factory.newSAXParser();
@@ -208,32 +277,28 @@ public class Channel extends Observable implements Serializable {
 		}
 	}
 	
-	public void load() {
-		load(false);
-	}
-	
-	private void load(boolean processImages) {
-		long lastTicks = System.currentTimeMillis();
-		File file = new File(getFileName());
-		FileInputStream fis = null;
-		try {
-			fis = new FileInputStream(file);
-			parse(fis, processImages);					
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+	private void saveItems(ContentResolver cr) {
+		if (items != null) {
+			for (Item item : items) {
+				item.save(cr);
 			}
-			Log.d("DEBUG", "Loading " + this.title + " in " + (System.currentTimeMillis() - lastTicks) + "ms");
 		}
 	}
 	
-	private void save(InputStream is) throws Exception {
+	public void loadItems(ContentResolver cr) {
+		Item.loadAllItemsOfChannel(cr, this);
+	}
+	
+	private void load(Cursor cursor) {
+		this.id = cursor.getLong(0);//cursor.getColumnIndex(Channels.ID));
+		this.title = cursor.getString(1);//cursor.getColumnIndex(Channels.TITLE));
+		this.url = cursor.getString(2);//cursor.getColumnIndex(Channels.URL));
+		this.description = cursor.getString(3);//cursor.getColumnIndex(Channels.DESCRIPTION));
+		this.link = cursor.getString(4);//cursor.getColumnIndex(Channels.LINK));
+		this.imageUrl = cursor.getString(5);//cursor.getColumnIndex(Channels.IMAGE_URL));
+	}
+	
+	private InputStream saveStream(InputStream is) throws Exception {
 		long lastTicks = System.currentTimeMillis();
 		File file = new File(getFileName());
 		if (!file.exists()) {
@@ -242,32 +307,33 @@ public class Channel extends Observable implements Serializable {
 		FileOutputStream fos = new FileOutputStream(file, false);
 		StreamUtils.writeStream(is, fos);
 		fos.flush();
-		fos.close();
+		fos.close();				
 		Log.d("DEBUG", "Saving " + this.title + " in " + (System.currentTimeMillis() - lastTicks) + "ms");
+		return new FileInputStream(file);
 	}
 	
-	protected void saveJSON() throws Exception {
-		long lastTicks = System.currentTimeMillis();
+	private void deleteStream() {
 		File file = new File(getFileName());
-		if (!file.exists()) {
-			file.createNewFile();
-		}
-		FileOutputStream fos = new FileOutputStream(file, false);
-		JSONArray itemArray = new JSONArray();
-		int numberOfItems = 0;
-		for (Item item : items) {
-			itemArray.put(item.toJSON());
-			if (++numberOfItems == MAX_ITEMS) break;
-		}
-		OutputStreamWriter writer = new OutputStreamWriter(fos);
-		writer.write(itemArray.toString());
-		writer.flush();
-		fos.close();
-		Log.d("DEBUG", "Saving " + this.title + " in " + (System.currentTimeMillis() - lastTicks) + "ms");
-	}		
-	
+		file.delete();
+	}
+					
 	private String getFileName() {		
 		return Environment.getExternalStorageDirectory().getAbsolutePath() + "/droidnews/" 
 			+ this.url.replace("http://", "").replaceAll("[\\./\\?&#;\\+]", "_") + ".xml";
+	}
+	
+	public static final class Channels implements BaseColumns {
+		public static final Uri CONTENT_URI = Uri.parse("content://" + ContentsProvider.AUTHORITY + "/channels");
+		public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.evolus.droidnews.channels";
+		
+		public static final String ID = "ID";
+		public static final String TITLE = "TITLE";
+		public static final String URL = "URL";
+		public static final String LINK = "LINK";
+		public static final String DESCRIPTION = "DESCRIPTION";
+		public static final String IMAGE_URL = "IMAGE_URL";				
+		
+		private Channels() {			
+		}
 	}
 }

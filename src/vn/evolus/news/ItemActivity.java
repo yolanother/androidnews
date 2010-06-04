@@ -9,6 +9,7 @@ import vn.evolus.news.widget.ItemView;
 import vn.evolus.news.widget.ScrollView;
 import vn.evolus.news.widget.ScrollView.OnItemSelectedListener;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,15 +33,20 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 		scrollView = (ScrollView)findViewById(R.id.scrollView);	
 		scrollView.setOnItemSelectedListener(this);		
 					
-		String currentItemLink = null;
+		long currentItemId = 0;
 		if (savedInstanceState != null) {
-			currentItemLink = savedInstanceState.getString("ItemLink");
+			currentItemId = savedInstanceState.getLong("ItemId");
 		} else {
-			currentItemLink = getIntent().getStringExtra("ItemLink");
+			currentItemId = getIntent().getLongExtra("ItemId", 0);
 		}
-		Channel channel = new Channel(getIntent().getStringExtra("ChannelUrl"), true);		
-		items = channel.getItems();		
-		int index = items.indexOf(new Item(currentItemLink));
+		Log.d("DEBUG", "Current item: #" + currentItemId);
+		
+		ContentResolver cr = getContentResolver();
+		Channel channel = Channel.load(getIntent().getLongExtra("ChannelId", 0), cr);
+		channel.loadItems(cr);
+		items = channel.getItems();
+		int index = items.indexOf(new Item(currentItemId));
+		Log.d("DEBUG", "Index of current item #" + index);
 		currentItem  = items.get(index);
 		setTitle(channel.getTitle());
 		
@@ -56,7 +62,7 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putString("ItemLink", currentItem.getLink());
+		outState.putLong("ItemId", currentItem.getId());
 		super.onSaveInstanceState(outState);
 	}
 	

@@ -1,4 +1,4 @@
-package vn.evolus.news.provider;
+package vn.evolus.news.providers;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,7 +9,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
-public class ImageContentProvider extends ContentProvider {
+public class ImagesProvider extends ContentProvider {
 	private static final String URI_PREFIX = "content://vn.evolus.news.images";
 	
 	public static String constructUri(String url) {

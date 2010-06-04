@@ -1,9 +1,10 @@
 package vn.evolus.news.widget;
 
+import java.util.ArrayList;
+
 import vn.evolus.news.R;
 import vn.evolus.news.adapter.ChannelListViewAdapter;
 import vn.evolus.news.rss.Channel;
-import vn.evolus.news.util.ActiveList;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
@@ -43,7 +44,7 @@ public class ChannelListView extends ListView {
 		this.setDivider(getResources().getDrawable(android.R.drawable.divider_horizontal_bright));
 	}
 	
-	public void setChannels(ActiveList<Channel> channels) {		   
+	public void setChannels(ArrayList<Channel> channels) {		   
 		adapter = new ChannelListViewAdapter(getContext(), channels);
         this.setAdapter(adapter);
 	}	

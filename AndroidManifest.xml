@@ -16,8 +16,10 @@
         <activity android:name=".ChannelActivity" />
         <activity android:name=".ItemActivity" />
         
-        <provider android:name=".provider.ImageContentProvider"
+        <provider android:name=".providers.ImagesProvider"
            android:authorities="vn.evolus.news.images" />
+        <provider android:name=".providers.ContentsProvider"
+           android:authorities="vn.evolus.news.contents" />           
     </application>
     <uses-sdk android:minSdkVersion="4" />
     

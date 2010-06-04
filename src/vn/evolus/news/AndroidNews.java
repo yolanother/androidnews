@@ -1,22 +1,15 @@
 package vn.evolus.news;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.util.ArrayList;
 
 import vn.evolus.news.rss.Channel;
 import vn.evolus.news.util.ActiveList;
 import vn.evolus.news.util.ImageLoader;
-import vn.evolus.news.util.StreamUtils;
 import vn.evolus.news.widget.ChannelListView;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,7 +26,7 @@ public class AndroidNews extends BetterDefaultActivity {
 	private final int MENU_REFRESH = 0;
 	private final int MENU_SETTINGS = 1;
 	
-	private ActiveList<Channel> channels = null;
+	private ArrayList<Channel> channels = null;
 	private ChannelListView channelListView;
 		
 	public AndroidNews() {
@@ -54,8 +47,7 @@ public class AndroidNews extends BetterDefaultActivity {
 				AndroidNews.this.showChannel(channel);
 			}
         });
-        
-        initData();        
+                
         loadData();
     }	
 	    
@@ -77,20 +69,8 @@ public class AndroidNews extends BetterDefaultActivity {
 	}
     
 	private void loadChannels() {
-		try {
-			FileInputStream fis = this.openFileInput("channels");
-			JSONArray channelArray = new JSONArray(StreamUtils.readAllText(fis));
-			fis.close();
-			channels = new ActiveList<Channel>();
-			for (int i = 0; i < channelArray.length(); i++) {
-				JSONObject channel = channelArray.getJSONObject(i);
-				channels.add(Channel.fromJSON(channel));
-			}			
-			Log.d("DEBUG", "Successful loading channels from disk!");
-		} catch (Exception ex) {
-			Log.d("ERROR", ex.getMessage());
-			// initialize channels
-			ex.printStackTrace();
+		channels = Channel.loadAllChannels(getContentResolver());
+		if (channels == null || channels.isEmpty()) {
 			createDefaultChannels();
 		}
 	}
@@ -155,62 +135,52 @@ public class AndroidNews extends BetterDefaultActivity {
 		channels.add(new Channel("VietNamNet - Giáo dục", "http://feeds.feedburner.com/androidnews/vietnamnet/giaoduc"));
 				
 		channels.add(new Channel("Vietstock", "http://feeds.feedburner.com/androidnews/vietstock/chungkhoan"));
-		channels.add(new Channel("CafeF", "http://feeds.feedburner.com/androidnews/cafef/chungkhoan"));						
+		channels.add(new Channel("CafeF", "http://feeds.feedburner.com/androidnews/cafef/chungkhoan"));
+		
+		saveChannels();
 	}
 		
 	private void saveChannels() {
 		try {
-			FileOutputStream fos = this.openFileOutput("channels", Context.MODE_PRIVATE);
-			JSONArray channelArray = new JSONArray();
+			ContentResolver cr = getContentResolver();
 			for (Channel channel : this.channels) {
-				channelArray.put(channel.toJSON());
+				channel.save(cr);
 			}
-			OutputStreamWriter writer = new OutputStreamWriter(fos);
-			writer.write(channelArray.toString());
-			writer.flush();			
-			fos.close();
 			Log.d("DEBUG", "Successful saving channels to disk!");
 		} catch (Exception e) {		
 			e.printStackTrace();
 		}
 	}	        
         
-    private void initData() {
-    	// check if /sdcard/droidnews directory exists
-    	File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/droidnews");
-    	if (!file.exists()) {
-    		file.mkdir();
-    	}
-    }
-    
 	private void loadData() {   
     	loadChannels();    	
-    	channelListView.setChannels(channels);
+    	channelListView.setChannels(channels);    	
+    	refresh();
     	
-    	BetterAsyncTask<Void, Void, Void> loadingTask = new BetterAsyncTask<Void, Void, Void>(this) {
-			@Override
-			protected void after(Context arg0, Void arg1) {				
-				refresh();
-			}
-			@Override
-			protected void handleError(Context arg0, Exception arg1) {
-			}    		
-    	};
-    	loadingTask.disableDialog();
-    	loadingTask.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
-			public Void call(BetterAsyncTask<Void, Void, Void> arg0) throws Exception {
-				for (Channel channel : channels) {
-					try {
-						channel.load();
-						channelListView.refresh();
-					} catch (Exception e) {
-						Log.e("ERROR", e.getMessage());
-					}
-				}				
-				return null;
-			}    		
-    	});    	
-    	loadingTask.execute();    	    	
+//    	BetterAsyncTask<Void, Void, Void> loadingTask = new BetterAsyncTask<Void, Void, Void>(this) {
+//			@Override
+//			protected void after(Context arg0, Void arg1) {				
+//				refresh();
+//			}
+//			@Override
+//			protected void handleError(Context arg0, Exception arg1) {
+//			}    		
+//    	};
+//    	loadingTask.disableDialog();
+//    	loadingTask.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
+//			public Void call(BetterAsyncTask<Void, Void, Void> arg0) throws Exception {
+//				for (Channel channel : channels) {
+//					try {
+//						//channel.load(getContentResolver());
+//						channelListView.refresh();
+//					} catch (Exception e) {
+//						Log.e("ERROR", e.getMessage());
+//					}
+//				}				
+//				return null;
+//			}    		
+//    	});    	
+//    	loadingTask.execute();    	    	
     }
 	
 	private void refresh() {
@@ -226,9 +196,11 @@ public class AndroidNews extends BetterDefaultActivity {
     	refreshTask.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
 			public Void call(BetterAsyncTask<Void, Void, Void> arg0)
 					throws Exception {
+				ContentResolver cr = getContentResolver();
 				for (Channel channel : channels) {
 					try {						
-						channel.update();
+						channel.update(cr);
+						channelListView.refresh();
 					} catch (Exception e) {
 						Log.e("ERROR", e.getMessage());
 					}
@@ -239,16 +211,16 @@ public class AndroidNews extends BetterDefaultActivity {
     	refreshTask.execute();
 	}        
     
-    public void showChannel(Channel channel) {
+    private void showChannel(Channel channel) {
     	Intent intent = new Intent(this, ChannelActivity.class);
-    	intent.putExtra("ChannelUrl", channel.getUrl());
+    	intent.putExtra("ChannelId", channel.getId());
     	intent.putExtra("ChannelTitle", channel.getTitle());
     	startActivity(intent);
     }
     
     @Override
     public void finish() {
-    	saveChannels();
+    	//saveChannels();
     	super.finish();
     }
         

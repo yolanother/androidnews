@@ -13,12 +13,12 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import vn.evolus.news.provider.ImageContentProvider;
+import vn.evolus.news.providers.ImagesProvider;
 import vn.evolus.news.util.ImageCache;
 import android.util.Log;
 
 public class RssHandler extends DefaultHandler {	
-	private static Pattern imagePattern = Pattern.compile("<img[^>]*src=[\"']([^\"']*)", Pattern.CASE_INSENSITIVE);
+	private static Pattern imagePattern = Pattern.compile("<img[^>]*src=[\"']([^\"']*)[^>]*>", Pattern.CASE_INSENSITIVE);
 	private static Pattern blackListImagePattern = Pattern.compile(
 			"(api\\.tweetmeme\\.com)|(www\\.engadget\\.com/media/post_label)|(feedads)|(feedburner)|((feeds|stats)\\.wordpress\\.com)|(cdn\\.stumble-upon\\.com)|(vietnamnet\\.gif)|(images\\.pheedo\\.com/images/mm)" +
 			"|(creatives\\.commindo-media\\.de)");
@@ -82,6 +82,7 @@ public class RssHandler extends DefaultHandler {
 		}
 		if (localName.equals("item")) {
 			item = new Item();
+			item.setChannel(this.channel);
 			currentState = RSS_ITEM;
 			return;
 		}
@@ -252,18 +253,23 @@ public class RssHandler extends DefaultHandler {
 			boolean found = false;		
 			while (matcher.find()) {
 				String imageUrl = matcher.group(1);
-				String cachedImageUrl = "http://image-resize.appspot.com/?width=300&height=300&url=" + URLEncoder.encode(imageUrl);
-				if (!images.contains(cachedImageUrl)) {								
-					images.add(cachedImageUrl);
-					Log.d("DEBUG", "Replace " + imageUrl + " by " + cachedImageUrl);
-					itemDescription = itemDescription.replace(imageUrl, 
-							ImageContentProvider.constructUri(ImageCache.getCacheFileName(cachedImageUrl)));
-				}
-				if (!found && !blackListImagePattern.matcher(imageUrl).find()) {
-					item.setImageUrl("http://feeds.demo.evolus.vn/resizer/?width=60&height=60&url=" +
-							URLEncoder.encode(imageUrl));
-					found = true;				
+				String foundImageTag = matcher.group();
+				if (!blackListImagePattern.matcher(imageUrl).find()) {
+					String cachedImageUrl = "http://image-resize.appspot.com/?width=300&height=300&url=" + URLEncoder.encode(imageUrl);
+					if (!images.contains(cachedImageUrl)) {
+						images.add(cachedImageUrl);
+						Log.d("DEBUG", "Replace " + imageUrl + " by " + cachedImageUrl);
+						itemDescription = itemDescription.replace(foundImageTag,
+								"<img src=\"" + ImagesProvider.constructUri(ImageCache.getCacheFileName(cachedImageUrl)) + "\" />");
+					}
+					if (!found) {
+						item.setImageUrl("http://feeds.demo.evolus.vn/resizer/?width=60&height=60&url=" +
+								URLEncoder.encode(imageUrl));
+						images.add(item.getImageUrl());
+						found = true;
+					}
 				} else {
+					itemDescription = itemDescription.replace(foundImageTag, "");
 				}
 			}		
 			item.setDescription(itemDescription);
