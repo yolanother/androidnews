@@ -47,7 +47,7 @@ public class ChannelActivity extends Activity {
 		back.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				finish();
-			}			
+			}
 		});
 		
 		refreshOrProgress = (ViewSwitcher)findViewById(R.id.refreshOrProgress);
@@ -115,7 +115,7 @@ public class ChannelActivity extends Activity {
 			public Channel call(BetterAsyncTask<Channel, Void, Channel> task) throws Exception {
 				ContentResolver cr = getContentResolver();
 				channel = Channel.load(channelId, cr);
-				channel.loadItems(cr);
+				channel.loadLightweightItems(cr);
 				return channel;
 			}    			
 		});

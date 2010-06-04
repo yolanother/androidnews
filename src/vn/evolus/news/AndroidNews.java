@@ -1,8 +1,10 @@
 package vn.evolus.news;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import vn.evolus.news.rss.Channel;
+import vn.evolus.news.services.ContentsService;
 import vn.evolus.news.util.ActiveList;
 import vn.evolus.news.util.ImageLoader;
 import vn.evolus.news.widget.ChannelListView;
@@ -22,7 +24,9 @@ import com.github.droidfu.activities.BetterDefaultActivity;
 import com.github.droidfu.concurrent.BetterAsyncTask;
 import com.github.droidfu.concurrent.BetterAsyncTaskCallable;
 
-public class AndroidNews extends BetterDefaultActivity {		
+public class AndroidNews extends BetterDefaultActivity {
+	private static final String TAG = "DEBUG";
+	
 	private final int MENU_REFRESH = 0;
 	private final int MENU_SETTINGS = 1;
 	
@@ -34,9 +38,9 @@ public class AndroidNews extends BetterDefaultActivity {
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
-		ImageLoader.initialize(this);
+		ImageLoader.initialize(this);				
 		
-        super.onCreate(savedInstanceState);        
+        super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
         
@@ -49,6 +53,9 @@ public class AndroidNews extends BetterDefaultActivity {
         });
                 
         loadData();
+                
+        Intent service = new Intent(this, ContentsService.class);
+		startService(service);
     }	
 	    
     @Override
@@ -69,10 +76,13 @@ public class AndroidNews extends BetterDefaultActivity {
 	}
     
 	private void loadChannels() {
+		long lastTicks = System.currentTimeMillis();
 		channels = Channel.loadAllChannels(getContentResolver());
+		Log.d(TAG, "Loading channels data from database in " + (System.currentTimeMillis() - lastTicks) + "ms");
 		if (channels == null || channels.isEmpty()) {
 			createDefaultChannels();
 		}
+		refreshUnreadCounts();
 	}
 
 	private void createDefaultChannels() {
@@ -152,36 +162,46 @@ public class AndroidNews extends BetterDefaultActivity {
 		}
 	}	        
         
-	private void loadData() {   
+	private void loadData() {
+		long lastTicks = System.currentTimeMillis();
     	loadChannels();    	
     	channelListView.setChannels(channels);    	
-    	refresh();
-    	
-//    	BetterAsyncTask<Void, Void, Void> loadingTask = new BetterAsyncTask<Void, Void, Void>(this) {
-//			@Override
-//			protected void after(Context arg0, Void arg1) {				
-//				refresh();
-//			}
-//			@Override
-//			protected void handleError(Context arg0, Exception arg1) {
-//			}    		
-//    	};
-//    	loadingTask.disableDialog();
-//    	loadingTask.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
-//			public Void call(BetterAsyncTask<Void, Void, Void> arg0) throws Exception {
-//				for (Channel channel : channels) {
-//					try {
-//						//channel.load(getContentResolver());
-//						channelListView.refresh();
-//					} catch (Exception e) {
-//						Log.e("ERROR", e.getMessage());
-//					}
-//				}				
-//				return null;
-//			}    		
-//    	});    	
-//    	loadingTask.execute();    	    	
+    	Log.d(TAG, "Loading channels data in " + (System.currentTimeMillis() - lastTicks) + "ms");
+    	// refresh();
     }
+	
+	private void refreshUnreadCounts() {
+		Log.d(TAG, "Refresing unread count...");
+		BetterAsyncTask<Void, Void, Void> refreshTask = new BetterAsyncTask<Void, Void, Void>(this) {
+			@Override
+			protected void after(Context arg0, Void arg1) {
+				channelListView.refresh();
+			}
+			@Override
+			protected void handleError(Context arg0, Exception arg1) {
+			}    		
+    	};
+    	refreshTask.disableDialog();
+    	refreshTask.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
+			public Void call(BetterAsyncTask<Void, Void, Void> arg0)
+					throws Exception {
+				ContentResolver cr = getContentResolver();
+				Map<Long, Integer> unreadCounts = Channel.countUnreadItems(cr);
+				for (Channel channel : channels) {
+					try {				
+						if (unreadCounts.containsKey(channel.getId())) {							
+							channel.setUnreadItems(unreadCounts.get(channel.getId()));
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+						Log.e("ERROR", e.getMessage());
+					}
+				}
+				return null;
+			}    		
+    	});
+    	refreshTask.execute();
+	}      
 	
 	private void refresh() {
 		BetterAsyncTask<Void, Void, Void> refreshTask = new BetterAsyncTask<Void, Void, Void>(this) {
@@ -196,7 +216,7 @@ public class AndroidNews extends BetterDefaultActivity {
     	refreshTask.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
 			public Void call(BetterAsyncTask<Void, Void, Void> arg0)
 					throws Exception {
-				ContentResolver cr = getContentResolver();
+				ContentResolver cr = getContentResolver();				
 				for (Channel channel : channels) {
 					try {						
 						channel.update(cr);
@@ -209,7 +229,7 @@ public class AndroidNews extends BetterDefaultActivity {
 			}    		
     	});
     	refreshTask.execute();
-	}        
+	}
     
     private void showChannel(Channel channel) {
     	Intent intent = new Intent(this, ChannelActivity.class);
@@ -220,7 +240,6 @@ public class AndroidNews extends BetterDefaultActivity {
     
     @Override
     public void finish() {
-    	//saveChannels();
     	super.finish();
     }
         

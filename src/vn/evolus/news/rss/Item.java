@@ -14,6 +14,9 @@ import android.provider.BaseColumns;
 
 public class Item implements Serializable {	
 	private static final long serialVersionUID = 1783666956248831428L;
+
+	private static final ItemLoader FULL_ITEM_LOADER = new FullItemLoader();
+	private static final ItemLoader LIGHTWEIGHT_ITEM_LOADER = new LightweightItemLoader();
 	
 	private long id;
 	private String title;
@@ -23,7 +26,7 @@ public class Item implements Serializable {
 	private String imageUrl;	
 	private boolean read;
 	private Channel channel;
-	
+		
 	public Item() {
 		this.id = 0;
 		this.read = false;
@@ -106,7 +109,7 @@ public class Item implements Serializable {
 	public void save(ContentResolver cr) {
 		ContentValues values = new ContentValues();
 		if (this.id == 0) {
-			if (hasExist(cr, this.title)) return;
+			if (hasExist(cr, this)) return;
 			
 			values.put(Items.TITLE, this.title);
 			values.put(Items.DESCRIPTION, this.description);
@@ -124,27 +127,22 @@ public class Item implements Serializable {
 		}
 	}	
 	
-	public static boolean hasExist(ContentResolver cr, String title) {
+	public static boolean hasExist(ContentResolver cr, Item item) {
 		Cursor cursor = cr.query(Items.CONTENT_URI, 
 				new String[] {
 					Items.ID
 				}, 
-				Items.TITLE + "=?",
-				new String[] { title },
+				Items.LINK + "=?",
+				new String[] { item.getLink() },
 				null);
-		return cursor.moveToFirst();
+		boolean result = cursor.moveToFirst();
+		cursor.close();
+		return result;
 	}
-	public static void loadAllItemsOfChannel(ContentResolver cr, Channel channel) {
-		Cursor cursor = cr.query(Items.CONTENT_URI, 
-				new String[] {
-					Items.ID,
-					Items.TITLE,
-					Items.DESCRIPTION,
-					Items.PUB_DATE,
-					Items.LINK,
-					Items.IMAGE_URL,
-					Items.READ
-				}, 
+	public static void loadAllItemsOfChannel(ContentResolver cr, Channel channel, boolean lightweight) {
+		ItemLoader loader = lightweight ? LIGHTWEIGHT_ITEM_LOADER : FULL_ITEM_LOADER;
+		Cursor cursor = cr.query(Items.CONTENT_URI,
+				loader.getProjection(),
 				Items.CHANNEL_ID + "=?", 
 				new String[] { String.valueOf(channel.getId()) }, 
 				Items.PUB_DATE + " DESC");
@@ -153,25 +151,66 @@ public class Item implements Serializable {
 		while (cursor.moveToNext()) {						
 			Item item = new Item();
 			item.setChannel(channel);
-			item.load(cursor);
+			loader.load(cursor, item);
 			items.add(item);			
+		}
+		cursor.close();
+	}		
+	
+	public interface ItemLoader {
+		String[] getProjection();
+		void load(Cursor cursor, Item item);
+	}
+	
+	public static final class FullItemLoader implements ItemLoader {
+		public String[] getProjection() {
+			return new String[] {
+					Items.ID,
+					Items.TITLE,
+					Items.DESCRIPTION,
+					Items.PUB_DATE,
+					Items.LINK,
+					Items.IMAGE_URL,
+					Items.READ
+				};
+		}
+		public void load(Cursor cursor, Item item) {	
+			// using magic numbers !!!
+			item.id = cursor.getLong(0);//cursor.getColumnIndex(Items.ID));
+			item.title = cursor.getString(1);//cursor.getColumnIndex(Items.TITLE));
+			item.description = cursor.getString(2);//cursor.getColumnIndex(Items.DESCRIPTION));		
+			item.pubDate = new Date(cursor.getLong(3));//cursor.getColumnIndex(Items.DESCRIPTION));
+			item.link = cursor.getString(4);//cursor.getColumnIndex(Items.DESCRIPTION));
+			item.imageUrl = cursor.getString(5);//cursor.getColumnIndex(Items.DESCRIPTION));
+			item.read = cursor.getInt(6) > 0;//cursor.getColumnIndex(Items.DESCRIPTION));
 		}
 	}
 
-	private void load(Cursor cursor) {	
-		// using magic numbers !!!
-		this.id = cursor.getLong(0);//cursor.getColumnIndex(Items.ID));
-		this.title = cursor.getString(1);//cursor.getColumnIndex(Items.TITLE));
-		this.description = cursor.getString(2);//cursor.getColumnIndex(Items.DESCRIPTION));		
-		this.pubDate = new Date(cursor.getLong(3));//cursor.getColumnIndex(Items.DESCRIPTION));
-		this.link = cursor.getString(4);//cursor.getColumnIndex(Items.DESCRIPTION));
-		this.imageUrl = cursor.getString(5);//cursor.getColumnIndex(Items.DESCRIPTION));
-		this.read = cursor.getInt(6) > 0;//cursor.getColumnIndex(Items.DESCRIPTION));
-	}	
+	public static final class LightweightItemLoader implements ItemLoader {
+		public String[] getProjection() {
+			return new String[] {
+					Items.ID,
+					Items.TITLE,
+					Items.PUB_DATE,					
+					Items.IMAGE_URL,
+					Items.READ
+				};
+		}
+		public void load(Cursor cursor, Item item) {	
+			// using magic numbers !!!
+			item.id = cursor.getLong(0);//cursor.getColumnIndex(Items.ID));
+			item.title = cursor.getString(1);//cursor.getColumnIndex(Items.TITLE));
+			item.pubDate = new Date(cursor.getLong(2));//cursor.getColumnIndex(Items.DESCRIPTION));
+			item.imageUrl = cursor.getString(3);//cursor.getColumnIndex(Items.DESCRIPTION));
+			item.read = cursor.getInt(4) > 0;//cursor.getColumnIndex(Items.DESCRIPTION));
+		}
+	}
 	
 	public static final class Items implements BaseColumns {
 		public static final Uri CONTENT_URI = Uri.parse("content://" 
 				+ ContentsProvider.AUTHORITY + "/items");
+		public static final Uri UNREAD_COUNT_URI = Uri.parse("content://" 
+				+ ContentsProvider.AUTHORITY + "/items/unread");
 		public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.evolus.droidnews.items";
 		
 		public static final String ID = "ID";
@@ -182,6 +221,7 @@ public class Item implements Serializable {
 		public static final String IMAGE_URL = "IMAGE_URL";
 		public static final String READ = "READ";
 		public static final String CHANNEL_ID = "CHANNEL_ID";
+		public static final String UNREAD_COUNT = "UNREAD";
 		
 		private Items() {
 		}

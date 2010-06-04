@@ -1,14 +1,11 @@
 package vn.evolus.news.rss;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Set;
 
@@ -16,20 +13,23 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import vn.evolus.news.providers.ContentsProvider;
+import vn.evolus.news.rss.Item.Items;
 import vn.evolus.news.util.ActiveList;
 import vn.evolus.news.util.ImageLoader;
-import vn.evolus.news.util.StreamUtils;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.BaseColumns;
 import android.util.Log;
 
@@ -46,6 +46,7 @@ public class Channel extends Observable implements Serializable {
 	private String link;
 	private String description;
 	private String imageUrl;
+	private int unread;
 	private transient ActiveList<Item> items = new ActiveList<Item>();
 	private boolean updating = false;	
 	
@@ -127,14 +128,11 @@ public class Channel extends Observable implements Serializable {
 		return this.getItems().size() == 0;
 	}	
 	public int countUnreadItems() {
-		int total = 0;
-		for (Item item : this.getItems()) {
-			if (!item.getRead()) {
-				total += 1;
-			}
-		}
-		return total;
+		return this.unread;
 	}	
+	public void setUnreadItems(int unread) {
+		this.unread = unread;
+	}
 	public boolean isUpdating() {
 		synchronized (synRoot) {
 			return updating;
@@ -142,7 +140,6 @@ public class Channel extends Observable implements Serializable {
 	}
 	
 	public void save(ContentResolver cr) {
-		Log.d("DEBUG", "Saving " + this.title + " channel to database.");
 		ContentValues values = new ContentValues();
 		values.put(Channels.TITLE, this.title);
 		values.put(Channels.URL, this.url);
@@ -167,17 +164,18 @@ public class Channel extends Observable implements Serializable {
 					Channels.URL,
 					Channels.DESCRIPTION,
 					Channels.LINK,
-					Channels.IMAGE_URL
+					Channels.IMAGE_URL,
+					Channels.UNREAD
 				}, 
 				ContentsProvider.WHERE_ID, 
 				new String[] { String.valueOf(this.id) }, null);
 		if (cursor.moveToFirst()) {
 			load(cursor);
 		}
+		cursor.close();
 	}
 	
-	public static Channel load(long id, ContentResolver cr) {
-		Log.d("DEBUG", "Loading channel from database: " + id);
+	public static Channel load(long id, ContentResolver cr) {		
 		Channel channel = new Channel();
 		channel.id = id;
 		channel.load(cr);
@@ -185,7 +183,6 @@ public class Channel extends Observable implements Serializable {
 	}
 	
 	public static ArrayList<Channel> loadAllChannels(ContentResolver cr) {
-		Log.d("DEBUG", "Loading channels from database...");
 		Cursor cursor = cr.query(Channels.CONTENT_URI, 
 				new String[] {
 					Channels.ID,
@@ -193,7 +190,8 @@ public class Channel extends Observable implements Serializable {
 					Channels.URL,
 					Channels.DESCRIPTION,
 					Channels.LINK,
-					Channels.IMAGE_URL
+					Channels.IMAGE_URL//,
+					//Channels.UNREAD
 				}, 
 				null, null, null);
 		ArrayList<Channel> channels = new ActiveList<Channel>();
@@ -202,7 +200,20 @@ public class Channel extends Observable implements Serializable {
 			channel.load(cursor);
 			channels.add(channel);
 		}
+		cursor.close();
 		return channels;
+	}
+	
+	public static Map<Long, Integer> countUnreadItems(ContentResolver cr) {
+		Cursor cursor = cr.query(Items.UNREAD_COUNT_URI, 
+				new String[] { Items.CHANNEL_ID, Items.UNREAD_COUNT }, 
+				null, null, null);		
+		Map<Long, Integer> unreadCounts = new HashMap<Long, Integer>();
+		while (cursor.moveToNext()) {					
+			unreadCounts.put(cursor.getLong(0), cursor.getInt(1));
+		}
+		cursor.close();
+		return unreadCounts;
 	}
 	
 	public void update(ContentResolver cr) {
@@ -215,14 +226,19 @@ public class Channel extends Observable implements Serializable {
 		
 		InputStream is = null;
 		try {			
-			// setup the URL
-			URL url = new URL(this.getUrl());
-			URLConnection connection = url.openConnection();
-			connection.setConnectTimeout(5000);
+			// setup the URL			
+			//URL url = new URL(this.getUrl());
+			//URLConnection connection = url.openConnection();
+			//connection.setConnectTimeout(5000);			
 			// get our data via the Url class	
-			is = saveStream(connection.getInputStream());
+			//is = saveStream(connection.getInputStream());
+			//is = connection.getInputStream();
 			// parse
-			parse(is);			
+			HttpClient client = new DefaultHttpClient();
+			HttpGet get = new HttpGet(this.url);			
+			HttpResponse response = client.execute(get);
+			is = response.getEntity().getContent();
+			parse(is, cr);			
     	} catch (Throwable e) {    		
     		e.printStackTrace();    		
     		Log.e("ERROR", "Error on parsing " + this.getUrl() + ": " +  e.getMessage());
@@ -236,7 +252,7 @@ public class Channel extends Observable implements Serializable {
 				is = null;
 			}
     		
-    		deleteStream();
+    		//deleteStream();
     		
     		saveItems(cr);
     	}
@@ -248,16 +264,15 @@ public class Channel extends Observable implements Serializable {
 		}
     }
 	
-	private void parse(InputStream is) {
-		long lastTicks = System.currentTimeMillis();	
+	private void parse(InputStream is, ContentResolver cr) {
+		long lastTicks = System.currentTimeMillis();
 		// instantiate our handler
-		RssHandler rssHandler = new RssHandler(this, true);
+		RssHandler rssHandler = new RssHandler(this, cr);
 		try {
 			// create a parser
 			SAXParser parser = factory.newSAXParser();
 			// create the reader (scanner)
-			XMLReader xmlReader = parser.getXMLReader();
-			
+			XMLReader xmlReader = parser.getXMLReader();			
 			// assign our handler
 			xmlReader.setContentHandler(rssHandler);
 			// perform the synchronous parse
@@ -285,8 +300,12 @@ public class Channel extends Observable implements Serializable {
 		}
 	}
 	
-	public void loadItems(ContentResolver cr) {
-		Item.loadAllItemsOfChannel(cr, this);
+	public void loadLightweightItems(ContentResolver cr) {
+		Item.loadAllItemsOfChannel(cr, this, true);
+	}
+	
+	public void loadFullItems(ContentResolver cr) {
+		Item.loadAllItemsOfChannel(cr, this, false);
 	}
 	
 	private void load(Cursor cursor) {
@@ -296,32 +315,9 @@ public class Channel extends Observable implements Serializable {
 		this.description = cursor.getString(3);//cursor.getColumnIndex(Channels.DESCRIPTION));
 		this.link = cursor.getString(4);//cursor.getColumnIndex(Channels.LINK));
 		this.imageUrl = cursor.getString(5);//cursor.getColumnIndex(Channels.IMAGE_URL));
-	}
-	
-	private InputStream saveStream(InputStream is) throws Exception {
-		long lastTicks = System.currentTimeMillis();
-		File file = new File(getFileName());
-		if (!file.exists()) {
-			file.createNewFile();
-		}
-		FileOutputStream fos = new FileOutputStream(file, false);
-		StreamUtils.writeStream(is, fos);
-		fos.flush();
-		fos.close();				
-		Log.d("DEBUG", "Saving " + this.title + " in " + (System.currentTimeMillis() - lastTicks) + "ms");
-		return new FileInputStream(file);
-	}
-	
-	private void deleteStream() {
-		File file = new File(getFileName());
-		file.delete();
-	}
-					
-	private String getFileName() {		
-		return Environment.getExternalStorageDirectory().getAbsolutePath() + "/droidnews/" 
-			+ this.url.replace("http://", "").replaceAll("[\\./\\?&#;\\+]", "_") + ".xml";
-	}
-	
+		//this.unread = cursor.getInt(6);//cursor.getColumnIndex(Channels.UNREAD));
+	}	
+						
 	public static final class Channels implements BaseColumns {
 		public static final Uri CONTENT_URI = Uri.parse("content://" + ContentsProvider.AUTHORITY + "/channels");
 		public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.evolus.droidnews.channels";
@@ -331,7 +327,8 @@ public class Channel extends Observable implements Serializable {
 		public static final String URL = "URL";
 		public static final String LINK = "LINK";
 		public static final String DESCRIPTION = "DESCRIPTION";
-		public static final String IMAGE_URL = "IMAGE_URL";				
+		public static final String IMAGE_URL = "IMAGE_URL";
+		public static final String UNREAD = "UNREAD";
 		
 		private Channels() {			
 		}

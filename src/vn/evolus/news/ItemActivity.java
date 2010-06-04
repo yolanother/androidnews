@@ -12,7 +12,6 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebView;
@@ -39,21 +38,20 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 		} else {
 			currentItemId = getIntent().getLongExtra("ItemId", 0);
 		}
-		Log.d("DEBUG", "Current item: #" + currentItemId);
 		
 		ContentResolver cr = getContentResolver();
 		Channel channel = Channel.load(getIntent().getLongExtra("ChannelId", 0), cr);
-		channel.loadItems(cr);
+		channel.loadFullItems(cr);
 		items = channel.getItems();
-		int index = items.indexOf(new Item(currentItemId));
-		Log.d("DEBUG", "Index of current item #" + index);
-		currentItem  = items.get(index);
+		int index = items.indexOf(new Item(currentItemId));		
+		if (index >= 0) {
+			currentItem  = items.get(index);
+		}
 		setTitle(channel.getTitle());
 		
 		client = new WebViewClient() {
 			@Override
 			public void onLoadResource(WebView view, String url) {
-				Log.d("DEBUG", "Loading resource " + url);
 				super.onLoadResource(view, url);
 			}
 		};

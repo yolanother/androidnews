@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 public class StreamUtils {
-	private static final int BUFFER_SIZE = 8192;
+	public static final int BUFFER_SIZE = 8192;
 	public static String readAllText(InputStream inputStream) {
 		return readAllText(inputStream, "UTF-8");
 	}

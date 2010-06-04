@@ -19,7 +19,7 @@ import android.net.Uri;
 public class ContentsProvider extends ContentProvider {
 	public static final String AUTHORITY = "vn.evolus.news.contents";
 	private static final String DATABASE_NAME = "droidnews.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     
 	public static final String CHANNELS_TABLE_NAME = "channels";
 	public static final String ITEMS_TABLE_NAME = "items";
@@ -27,6 +27,7 @@ public class ContentsProvider extends ContentProvider {
 	private static final UriMatcher uriMatcher;
     private static final int CHANNELS = 1;
     private static final int ITEMS = 2;
+    private static final int ITEMS_UNREAD_COUNT = 3;
     
     public static final String WHERE_ID = "ID=?";
     
@@ -70,7 +71,7 @@ public class ContentsProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
-    	int matchedUri = uriMatcher.match(uri); 
+    	int matchedUri = uriMatcher.match(uri);
         if (matchedUri != CHANNELS && matchedUri != ITEMS) { throw new IllegalArgumentException("Unknown URI " + uri); }
 
         ContentValues values;
@@ -113,7 +114,7 @@ public class ContentsProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-
+        String group = null, having = null, limit = null;        
         switch (uriMatcher.match(uri)) {
 	        case CHANNELS:
 	            qb.setTables(CHANNELS_TABLE_NAME);
@@ -122,14 +123,20 @@ public class ContentsProvider extends ContentProvider {
             case ITEMS:
                 qb.setTables(ITEMS_TABLE_NAME);
                 qb.setProjectionMap(itemsProjectionMap);
+                limit = "20";
                 break;
-
+            case ITEMS_UNREAD_COUNT:            	
+                qb.setTables(ITEMS_TABLE_NAME);
+                //projection = new String[] { Items.CHANNEL_ID, Items.UNREAD_COUNT};
+                qb.setProjectionMap(itemsProjectionMap);
+                group = Items.CHANNEL_ID;
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
+        Cursor c = qb.query(db, projection, selection, selectionArgs, group, having, sortOrder, limit);
 
         c.setNotificationUri(getContext().getContentResolver(), uri);
         return c;
@@ -181,10 +188,20 @@ public class ContentsProvider extends ContentProvider {
 	                    + Items.READ + " INTEGER,"
 	                    + Items.CHANNEL_ID + " INTEGER"
 	                    + ");");
+        	
+        	db.execSQL("CREATE INDEX IF NOT EXISTS " + ITEMS_TABLE_NAME
+                    + "LinkIndex ON " +  ITEMS_TABLE_NAME +" (" + Items.LINK + ");");
+        	db.execSQL("CREATE INDEX IF NOT EXISTS " + ITEMS_TABLE_NAME
+                    + "ChannelIdIndex ON " +  ITEMS_TABLE_NAME +" (" + Items.CHANNEL_ID + ");");
+        	db.execSQL("CREATE INDEX IF NOT EXISTS " + ITEMS_TABLE_NAME
+                    + "ReadIndex ON " +  ITEMS_TABLE_NAME +" (" + Items.READ + ");");
         }
 
         @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {    
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        	db.execSQL("DROP INDEX IF EXISTS " + ITEMS_TABLE_NAME + "ReadIndex");
+        	db.execSQL("DROP INDEX IF EXISTS " + ITEMS_TABLE_NAME + "ChannelIdIndex");
+        	db.execSQL("DROP INDEX IF EXISTS " + ITEMS_TABLE_NAME + "ReadIndex");
         	db.execSQL("DROP TABLE IF EXISTS " + ITEMS_TABLE_NAME);
         	db.execSQL("DROP TABLE IF EXISTS " + CHANNELS_TABLE_NAME);
         	onCreate(db);
@@ -200,6 +217,7 @@ public class ContentsProvider extends ContentProvider {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(AUTHORITY, CHANNELS_TABLE_NAME, CHANNELS);
         uriMatcher.addURI(AUTHORITY, ITEMS_TABLE_NAME, ITEMS);
+        uriMatcher.addURI(AUTHORITY, ITEMS_TABLE_NAME + "/unread", ITEMS_UNREAD_COUNT);
 
         channelsProjectionMap = new HashMap<String, String>();
         channelsProjectionMap.put(Channels.ID, Channels.ID);
@@ -207,7 +225,11 @@ public class ContentsProvider extends ContentProvider {
         channelsProjectionMap.put(Channels.URL, Channels.URL);
         channelsProjectionMap.put(Channels.DESCRIPTION, Channels.DESCRIPTION);        
         channelsProjectionMap.put(Channels.LINK, Channels.LINK);
-        channelsProjectionMap.put(Channels.IMAGE_URL, Channels.IMAGE_URL);        
+        channelsProjectionMap.put(Channels.IMAGE_URL, Channels.IMAGE_URL);
+        channelsProjectionMap.put(Channels.UNREAD, 
+        		"(SELECT COUNT(*) FROM " + ITEMS_TABLE_NAME
+        		+ " WHERE " + ITEMS_TABLE_NAME + ".CHANNEL_ID = "
+        		+ CHANNELS_TABLE_NAME + ".ID AND " + ITEMS_TABLE_NAME + ".READ = 0) AS UNREAD");
         
         itemsProjectionMap = new HashMap<String, String>();
         itemsProjectionMap.put(Items.ID, Items.ID);
@@ -218,5 +240,6 @@ public class ContentsProvider extends ContentProvider {
         itemsProjectionMap.put(Items.IMAGE_URL, Items.IMAGE_URL);
         itemsProjectionMap.put(Items.READ, Items.READ);
         itemsProjectionMap.put(Items.CHANNEL_ID, Items.CHANNEL_ID);
+        itemsProjectionMap.put(Items.UNREAD_COUNT, "COUNT(*) AS UNREAD");
     }
 }

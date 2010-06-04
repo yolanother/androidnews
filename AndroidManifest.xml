@@ -15,12 +15,13 @@
         </activity>
         <activity android:name=".ChannelActivity" />
         <activity android:name=".ItemActivity" />
+        <service android:name=".services.ContentsService" />
         
         <provider android:name=".providers.ImagesProvider"
            android:authorities="vn.evolus.news.images" />
         <provider android:name=".providers.ContentsProvider"
            android:authorities="vn.evolus.news.contents" />           
-    </application>
+    </application>    
     <uses-sdk android:minSdkVersion="4" />
     
     <uses-permission android:name="android.permission.INTERNET" />
