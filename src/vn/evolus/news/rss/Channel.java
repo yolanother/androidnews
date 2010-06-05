@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Set;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -18,7 +17,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 import vn.evolus.news.providers.ContentsProvider;
@@ -216,31 +214,22 @@ public class Channel extends Observable implements Serializable {
 		return unreadCounts;
 	}
 	
-	public void update(ContentResolver cr) {
+	public int update(ContentResolver cr) {
 		synchronized (synRoot) {
-			if (updating) return;			
+			if (updating) return 0;			
 			updating = true;
 			this.setChanged();
 			this.notifyObservers(updating);
 		}
-		
+		int newItems = 0;
 		InputStream is = null;
-		try {			
-			// setup the URL			
-			//URL url = new URL(this.getUrl());
-			//URLConnection connection = url.openConnection();
-			//connection.setConnectTimeout(5000);			
-			// get our data via the Url class	
-			//is = saveStream(connection.getInputStream());
-			//is = connection.getInputStream();
-			// parse
+		try {
 			HttpClient client = new DefaultHttpClient();
 			HttpGet get = new HttpGet(this.url);			
 			HttpResponse response = client.execute(get);
 			is = response.getEntity().getContent();
-			parse(is, cr);			
-    	} catch (Throwable e) {    		
-    		e.printStackTrace();    		
+			newItems = parse(is, cr);			
+    	} catch (Throwable e) {
     		Log.e("ERROR", "Error on parsing " + this.getUrl() + ": " +  e.getMessage());
     	} finally {
     		if (is != null) {
@@ -262,9 +251,11 @@ public class Channel extends Observable implements Serializable {
 			this.setChanged();
 			this.notifyObservers(updating);
 		}
+    	
+    	return newItems;
     }
 	
-	private void parse(InputStream is, ContentResolver cr) {
+	private int parse(InputStream is, ContentResolver cr) {
 		long lastTicks = System.currentTimeMillis();
 		// instantiate our handler
 		RssHandler rssHandler = new RssHandler(this, cr);
@@ -277,19 +268,16 @@ public class Channel extends Observable implements Serializable {
 			xmlReader.setContentHandler(rssHandler);
 			// perform the synchronous parse
 			xmlReader.parse(new InputSource(is));
-		} catch (ParserConfigurationException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {			
-			Log.d("DEBUG", "Parsing " + this.title + " in " + (System.currentTimeMillis() - lastTicks) + "ms");
-		}
+		}			
+		Log.d("DEBUG", "Parsing " + this.title + " in " + (System.currentTimeMillis() - lastTicks) + "ms: " + rssHandler.getNewItems() + " new items");
+		
 		Set<String> images = rssHandler.getImages();
 		for (String imageUrl : images) {
 			ImageLoader.start(imageUrl, null);
 		}
+		return rssHandler.getNewItems();
 	}
 	
 	private void saveItems(ContentResolver cr) {

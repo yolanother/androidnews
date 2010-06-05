@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import vn.evolus.news.rss.Channel;
-import vn.evolus.news.services.ContentsService;
+import vn.evolus.news.services.ContentsUpdatingService;
 import vn.evolus.news.util.ActiveList;
 import vn.evolus.news.util.ImageLoader;
 import vn.evolus.news.widget.ChannelListView;
@@ -53,10 +53,18 @@ public class AndroidNews extends BetterDefaultActivity {
         });
                 
         loadData();
-                
-        Intent service = new Intent(this, ContentsService.class);
-		startService(service);
+        
+        if (ConnectivityReceiver.hasGoodEnoughNetworkConnection(this)) {
+        	Intent service = new Intent(this, ContentsUpdatingService.class);
+        	startService(service);
+        }
     }	
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		refreshUnreadCounts();
+	}	
 	    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {    	    	
@@ -81,8 +89,7 @@ public class AndroidNews extends BetterDefaultActivity {
 		Log.d(TAG, "Loading channels data from database in " + (System.currentTimeMillis() - lastTicks) + "ms");
 		if (channels == null || channels.isEmpty()) {
 			createDefaultChannels();
-		}
-		refreshUnreadCounts();
+		}		
 	}
 
 	private void createDefaultChannels() {
@@ -167,7 +174,6 @@ public class AndroidNews extends BetterDefaultActivity {
     	loadChannels();    	
     	channelListView.setChannels(channels);    	
     	Log.d(TAG, "Loading channels data in " + (System.currentTimeMillis() - lastTicks) + "ms");
-    	// refresh();
     }
 	
 	private void refreshUnreadCounts() {

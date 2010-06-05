@@ -19,6 +19,7 @@ import android.content.ContentResolver;
 
 public class RssHandler extends DefaultHandler {	
 	private static Pattern imagePattern = Pattern.compile("<img[^>]*src=[\"']([^\"']*)[^>]*>", Pattern.CASE_INSENSITIVE);	
+	private static Pattern iframePattern = Pattern.compile("<iframe[^>]*>", Pattern.CASE_INSENSITIVE);
 	private static Pattern blackListImagePattern;
 	//= Pattern.compile(
 	//		"(api\\.tweetmeme\\.com)|(www\\.engadget\\.com/media/post_label)|(feedads)|(feedburner)|((feeds|stats)\\.wordpress\\.com)|(cdn\\.stumble-upon\\.com)|(vietnamnet\\.gif)|(images\\.pheedo\\.com/images/mm)" +
@@ -44,6 +45,7 @@ public class RssHandler extends DefaultHandler {
 	private Item item;
 	private StringBuffer currentTextValue;	
 	private Set<String> images;	
+	private int newItems = 0;
 	
 	static {
 		String[] blackList = new String[] {
@@ -73,7 +75,8 @@ public class RssHandler extends DefaultHandler {
 	public RssHandler(Channel channel, ContentResolver cr) {
 		this.channel = channel;
 		this.cr = cr;
-		images = new HashSet<String>();
+		this.images = new HashSet<String>();
+		this.newItems = 0;
 	}
 	
 	public Channel getChannel() {
@@ -83,6 +86,12 @@ public class RssHandler extends DefaultHandler {
 	public Set<String> getImages() {
 		return images;
 	}
+
+	public int getNewItems() {
+		return newItems;
+	}
+
+
 
 	@Override
 	public void startDocument() throws SAXException {
@@ -168,6 +177,7 @@ public class RssHandler extends DefaultHandler {
 		if (localName.equals("item")) {						
 			processItem(item);
 			channel.addItem(item);
+			newItems++;
 			currentState = RSS_CHANNEL;
 			if (channel.getItems().size() == Channel.MAX_ITEMS) {
 				throw new SAXException("Reaching maximum items. Stop parsing.");
@@ -186,8 +196,7 @@ public class RssHandler extends DefaultHandler {
 			if (currentState == RSS_ITEM_PUB_DATE) {				
 				try {
 					item.setPubDate(dateFormat.parse(cleanUpText(currentTextValue)));
-				} catch (Throwable e) {
-					e.printStackTrace();
+				} catch (Throwable e) {					
 					item.setPubDate(new Date(System.currentTimeMillis()));
 				}				
 				currentState = RSS_ITEM;
@@ -273,6 +282,7 @@ public class RssHandler extends DefaultHandler {
 				itemDescription = itemDescription.replace(foundImageTag, "");
 			}
 		}		
-		item.setDescription(itemDescription);
+		itemDescription = iframePattern.matcher(itemDescription).replaceAll("");
+		item.setDescription(itemDescription);		
 	}		
 }
