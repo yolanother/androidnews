@@ -1,8 +1,13 @@
 TODO:
-* Save channel to disk
-* Allow add new channels
+* Allow add/edit/delete channels
+* Queued images for download
+* Mark item as read when user flings on item view
+* Settings: maximum items/channel, update interval
+* Parse YouTube video code
+* Clean up images cache folder
 
 DONE:
+* Save channel to disk
 * Enhance title bar
 * Unread count
 * Read/Unread item styles

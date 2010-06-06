@@ -33,8 +33,7 @@ public class ItemView extends WebView {
 		if (item.equals(currentItem)) {
 			return;
 		}		
-		this.setTag(item);
-		item.setRead(true);
+		this.setTag(item);		
 		StringBuffer sb = new StringBuffer();
 		sb.append("<html><head><style type=\"text/css\">img{max-width:300px;border:0}</style></head><body>");
 		sb.append("<h3>");

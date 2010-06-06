@@ -5,10 +5,14 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import vn.evolus.news.AndroidNews;
 import vn.evolus.news.ConnectivityReceiver;
+import vn.evolus.news.R;
 import vn.evolus.news.rss.Channel;
 import vn.evolus.news.util.ImageLoader;
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
@@ -19,11 +23,13 @@ import android.util.Log;
 
 public class ContentsUpdatingService extends Service {
 	private static final String TAG = "ContentsService";
+	private static final int NOTIFICATION_ID = 0;
 	
 	private static final int UPDATE_INTERVAL = 1000 * 60 * 5;
 	private Object synRoot = new Object();
 	private boolean updating = false;
 	private Timer timer = new Timer();
+	private ContentResolver cr;
 		
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -33,6 +39,7 @@ public class ContentsUpdatingService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();		
+		cr = getContentResolver();
 	}
 	
 	@Override
@@ -71,8 +78,8 @@ public class ContentsUpdatingService extends Service {
 		
 		Log.d(TAG, "Start updating feeds at " + new Date());
 		
+		int totalNewItems = 0;
 		if (ConnectivityReceiver.hasGoodEnoughNetworkConnection(this)) {
-			ContentResolver cr = getContentResolver();			
 			ArrayList<Channel> channels = Channel.loadAllChannels(cr);
 			for (Channel channel : channels) {
 				synchronized (synRoot) {
@@ -80,7 +87,7 @@ public class ContentsUpdatingService extends Service {
 				}
 								
 				try {
-					channel.update(cr);
+					totalNewItems += channel.update(cr);
 					channel.getItems().clear();
 					Thread.sleep(100);
 				} catch (Exception ex) {
@@ -98,9 +105,26 @@ public class ContentsUpdatingService extends Service {
 		
 		scheduleNextUpdate();
 		
+		notifyNewItems(totalNewItems);
+		
 		stopSelf();
 	}	
 	
+	private void notifyNewItems(int totalNewItems) {		
+		if (totalNewItems == 0) return;
+		
+		NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		
+        Intent notifyIntent = new Intent(this, AndroidNews.class);
+        PendingIntent intent = PendingIntent.getActivity(this, 0, notifyIntent, android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+        
+        String ticker = getString(R.string.new_items_notification).replace("{total}", String.valueOf(totalNewItems));
+        Notification notification = new Notification(R.drawable.icon, ticker, System.currentTimeMillis());
+        notification.setLatestEventInfo(this, getString(R.string.applicationName), ticker, intent);
+        
+		notificationManager.notify(NOTIFICATION_ID, notification);
+	}
+
 	private void scheduleNextUpdate() {
 		AlarmManager am = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 		Intent intent = new Intent(this, ContentsUpdatingService.class);

@@ -109,7 +109,7 @@ public class Item implements Serializable {
 	public void save(ContentResolver cr) {
 		ContentValues values = new ContentValues();
 		if (this.id == 0) {
-			if (hasExist(cr, this)) return;
+			if (exists(cr, this)) return;
 			
 			values.put(Items.TITLE, this.title);
 			values.put(Items.DESCRIPTION, this.description);
@@ -127,7 +127,7 @@ public class Item implements Serializable {
 		}
 	}	
 	
-	public static boolean hasExist(ContentResolver cr, Item item) {
+	public static boolean exists(ContentResolver cr, Item item) {
 		Cursor cursor = cr.query(Items.CONTENT_URI, 
 				new String[] {
 					Items.ID
@@ -180,9 +180,9 @@ public class Item implements Serializable {
 			item.title = cursor.getString(1);//cursor.getColumnIndex(Items.TITLE));
 			item.description = cursor.getString(2);//cursor.getColumnIndex(Items.DESCRIPTION));		
 			item.pubDate = new Date(cursor.getLong(3));//cursor.getColumnIndex(Items.DESCRIPTION));
-			item.link = cursor.getString(4);//cursor.getColumnIndex(Items.DESCRIPTION));
-			item.imageUrl = cursor.getString(5);//cursor.getColumnIndex(Items.DESCRIPTION));
-			item.read = cursor.getInt(6) > 0;//cursor.getColumnIndex(Items.DESCRIPTION));
+			item.link = cursor.getString(4);//cursor.getColumnIndex(Items.PUB_DATE));
+			item.imageUrl = cursor.getString(5);//cursor.getColumnIndex(Items.IMAGE_URL));			
+			item.read = cursor.getInt(6) != 0;//cursor.getColumnIndex(Items.READ));			
 		}
 	}
 
@@ -200,9 +200,9 @@ public class Item implements Serializable {
 			// using magic numbers !!!
 			item.id = cursor.getLong(0);//cursor.getColumnIndex(Items.ID));
 			item.title = cursor.getString(1);//cursor.getColumnIndex(Items.TITLE));
-			item.pubDate = new Date(cursor.getLong(2));//cursor.getColumnIndex(Items.DESCRIPTION));
-			item.imageUrl = cursor.getString(3);//cursor.getColumnIndex(Items.DESCRIPTION));
-			item.read = cursor.getInt(4) > 0;//cursor.getColumnIndex(Items.DESCRIPTION));
+			item.pubDate = new Date(cursor.getLong(2));//cursor.getColumnIndex(Items.PUB_DATE));
+			item.imageUrl = cursor.getString(3);//cursor.getColumnIndex(Items.IMAGE_URL));
+			item.read = cursor.getInt(4) != 0;//cursor.getColumnIndex(Items.READ));
 		}
 	}
 	

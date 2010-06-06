@@ -150,8 +150,13 @@ public class Channel extends Observable implements Serializable {
 		} else {
 			cr.update(Channels.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
 					new String[] { String.valueOf(this.id) });
-		}		
-		//saveItems(cr);
+		}
+	}
+	
+	public void delete(ContentResolver cr) {
+		cr.delete(Items.CONTENT_URI, Items.CHANNEL_ID + "=?", new String[] { String.valueOf(this.id) });
+		cr.delete(Channels.CONTENT_URI, ContentsProvider.WHERE_ID, new String[] { String.valueOf(this.id) });
+		this.id = 0;
 	}
 	
 	private void load(ContentResolver cr) {
@@ -180,6 +185,19 @@ public class Channel extends Observable implements Serializable {
 		return channel;
 	}
 	
+	public static boolean exists(ContentResolver cr, Channel channel) {
+		Cursor cursor = cr.query(Channels.CONTENT_URI, 
+				new String[] {
+					Channels.ID
+				}, 
+				Channels.URL + "=?",
+				new String[] { channel.getUrl() },
+				null);
+		boolean result = cursor.moveToFirst();
+		cursor.close();
+		return result;
+	}
+	
 	public static ArrayList<Channel> loadAllChannels(ContentResolver cr) {
 		Cursor cursor = cr.query(Channels.CONTENT_URI, 
 				new String[] {
@@ -205,7 +223,7 @@ public class Channel extends Observable implements Serializable {
 	public static Map<Long, Integer> countUnreadItems(ContentResolver cr) {
 		Cursor cursor = cr.query(Items.UNREAD_COUNT_URI, 
 				new String[] { Items.CHANNEL_ID, Items.UNREAD_COUNT }, 
-				null, null, null);		
+				Items.READ + "=?", new String[] { "0" }, null);		
 		Map<Long, Integer> unreadCounts = new HashMap<Long, Integer>();
 		while (cursor.moveToNext()) {					
 			unreadCounts.put(cursor.getLong(0), cursor.getInt(1));
@@ -225,7 +243,8 @@ public class Channel extends Observable implements Serializable {
 		InputStream is = null;
 		try {
 			HttpClient client = new DefaultHttpClient();
-			HttpGet get = new HttpGet(this.url);			
+			HttpGet get = new HttpGet(this.url);
+			get.setHeader("User-Agent", "DroidNews");
 			HttpResponse response = client.execute(get);
 			is = response.getEntity().getContent();
 			newItems = parse(is, cr);			
@@ -320,5 +339,5 @@ public class Channel extends Observable implements Serializable {
 		
 		private Channels() {			
 		}
-	}
+	}	
 }

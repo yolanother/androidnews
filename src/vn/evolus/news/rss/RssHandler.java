@@ -21,9 +21,6 @@ public class RssHandler extends DefaultHandler {
 	private static Pattern imagePattern = Pattern.compile("<img[^>]*src=[\"']([^\"']*)[^>]*>", Pattern.CASE_INSENSITIVE);	
 	private static Pattern iframePattern = Pattern.compile("<iframe[^>]*>", Pattern.CASE_INSENSITIVE);
 	private static Pattern blackListImagePattern;
-	//= Pattern.compile(
-	//		"(api\\.tweetmeme\\.com)|(www\\.engadget\\.com/media/post_label)|(feedads)|(feedburner)|((feeds|stats)\\.wordpress\\.com)|(cdn\\.stumble-upon\\.com)|(vietnamnet\\.gif)|(images\\.pheedo\\.com/images/mm)" +
-	//		"|(creatives\\.commindo-media\\.de)|(ads\\.pheedo\\.com)");
 	private static DateFormat dateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
 	private static String feedBurnerUri = "http://purl.org/rss/1.0/modules/content/";	
 
@@ -224,7 +221,7 @@ public class RssHandler extends DefaultHandler {
 		if (localName.equals("link")) {
 			if (currentState == RSS_ITEM_LINK) {
 				item.setLink(cleanUpText(currentTextValue));
-				if (Item.hasExist(cr, item)) {
+				if (Item.exists(cr, item)) {
 					throw new SAXException("Found existing item. Stop parsing.");
 				}
 				currentState = RSS_ITEM;
@@ -268,7 +265,6 @@ public class RssHandler extends DefaultHandler {
 				String cachedImageUrl = "http://image-resize.appspot.com/?width=300&height=300&url=" + URLEncoder.encode(imageUrl);
 				if (!images.contains(cachedImageUrl)) {
 					images.add(cachedImageUrl);
-					//Log.d("DEBUG", "Replace " + imageUrl + " by " + cachedImageUrl);
 					itemDescription = itemDescription.replace(foundImageTag,
 							"<img src=\"" + ImagesProvider.constructUri(ImageCache.getCacheFileName(cachedImageUrl)) + "\" />");
 				}

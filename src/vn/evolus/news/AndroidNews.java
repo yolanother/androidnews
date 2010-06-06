@@ -8,8 +8,11 @@ import vn.evolus.news.services.ContentsUpdatingService;
 import vn.evolus.news.util.ActiveList;
 import vn.evolus.news.util.ImageLoader;
 import vn.evolus.news.widget.ChannelListView;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,7 +21,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.github.droidfu.activities.BetterDefaultActivity;
 import com.github.droidfu.concurrent.BetterAsyncTask;
@@ -28,10 +34,12 @@ public class AndroidNews extends BetterDefaultActivity {
 	private static final String TAG = "DEBUG";
 	
 	private final int MENU_REFRESH = 0;
-	private final int MENU_SETTINGS = 1;
+	private final int MENU_ADD_CHANNEL = 1;
+	private final int MENU_SETTINGS = 2;
 	
 	private ArrayList<Channel> channels = null;
 	private ChannelListView channelListView;
+	private ContentResolver cr;
 		
 	public AndroidNews() {
 	}
@@ -39,6 +47,7 @@ public class AndroidNews extends BetterDefaultActivity {
 	@Override
     public void onCreate(Bundle savedInstanceState) {
 		ImageLoader.initialize(this);				
+		cr = getContentResolver();
 		
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -47,9 +56,17 @@ public class AndroidNews extends BetterDefaultActivity {
         channelListView = (ChannelListView)findViewById(R.id.channelListView);               
         channelListView.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-				Channel channel = (Channel)adapterView.getItemAtPosition(position);				
+				Channel channel = (Channel)adapterView.getItemAtPosition(position);
 				AndroidNews.this.showChannel(channel);
 			}
+        });        
+        channelListView.setOnItemLongClickListener(new OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
+				Channel channel = (Channel)adapterView.getItemAtPosition(position);
+				showChannelOptions(channel);
+				return true;
+			}        	
         });
                 
         loadData();
@@ -69,6 +86,7 @@ public class AndroidNews extends BetterDefaultActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {    	    	
     	menu.add(0, MENU_REFRESH, 1,  getString(R.string.refresh)).setIcon(R.drawable.ic_menu_refresh);
+    	menu.add(0, MENU_ADD_CHANNEL, 1,  getString(R.string.add_channel)).setIcon(android.R.drawable.ic_menu_add);
     	menu.add(0, MENU_SETTINGS, 1,  getString(R.string.settings)).setIcon(android.R.drawable.ic_menu_preferences);
     	return super.onCreateOptionsMenu(menu);
     }        
@@ -79,13 +97,15 @@ public class AndroidNews extends BetterDefaultActivity {
     		//finish();
     	} else if (item.getItemId() == MENU_REFRESH){
     		refresh();
+    	} else if (item.getItemId() == MENU_ADD_CHANNEL){
+    		addChannel();
     	}
 		return true;
 	}
     
 	private void loadChannels() {
 		long lastTicks = System.currentTimeMillis();
-		channels = Channel.loadAllChannels(getContentResolver());
+		channels = Channel.loadAllChannels(cr);
 		Log.d(TAG, "Loading channels data from database in " + (System.currentTimeMillis() - lastTicks) + "ms");
 		if (channels == null || channels.isEmpty()) {
 			createDefaultChannels();
@@ -159,7 +179,6 @@ public class AndroidNews extends BetterDefaultActivity {
 		
 	private void saveChannels() {
 		try {
-			ContentResolver cr = getContentResolver();
 			for (Channel channel : this.channels) {
 				channel.save(cr);
 			}
@@ -170,10 +189,8 @@ public class AndroidNews extends BetterDefaultActivity {
 	}	        
         
 	private void loadData() {
-		long lastTicks = System.currentTimeMillis();
     	loadChannels();    	
-    	channelListView.setChannels(channels);    	
-    	Log.d(TAG, "Loading channels data in " + (System.currentTimeMillis() - lastTicks) + "ms");
+    	channelListView.setChannels(channels);
     }
 	
 	private void refreshUnreadCounts() {
@@ -191,12 +208,13 @@ public class AndroidNews extends BetterDefaultActivity {
     	refreshTask.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
 			public Void call(BetterAsyncTask<Void, Void, Void> arg0)
 					throws Exception {
-				ContentResolver cr = getContentResolver();
 				Map<Long, Integer> unreadCounts = Channel.countUnreadItems(cr);
 				for (Channel channel : channels) {
 					try {				
 						if (unreadCounts.containsKey(channel.getId())) {							
 							channel.setUnreadItems(unreadCounts.get(channel.getId()));
+						} else {
+							channel.setUnreadItems(0);
 						}
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -222,7 +240,6 @@ public class AndroidNews extends BetterDefaultActivity {
     	refreshTask.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
 			public Void call(BetterAsyncTask<Void, Void, Void> arg0)
 					throws Exception {
-				ContentResolver cr = getContentResolver();				
 				for (Channel channel : channels) {
 					try {						
 						channel.update(cr);
@@ -242,6 +259,101 @@ public class AndroidNews extends BetterDefaultActivity {
     	intent.putExtra("ChannelId", channel.getId());
     	intent.putExtra("ChannelTitle", channel.getTitle());
     	startActivity(intent);
+    }
+    
+    private void showChannelOptions(final Channel channel) {
+    	AlertDialog dialog = new AlertDialog.Builder(this)
+    		.setTitle(channel.getTitle())
+    		.setItems(new String[] {"Edit", "Delete"}, 
+    			new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						switch (which) {
+							case 0: 
+								dialog.dismiss();
+								//editChannel(channel);
+								break;
+							case 1:
+								dialog.dismiss();
+								deleteChannel(channel);							
+								break;
+						}
+					}    			
+    			}
+    		).create();
+    	dialog.show();
+	}
+    
+    private void deleteChannel(Channel channel) {
+    	channel.delete(cr);
+    	loadData();
+    	refreshUnreadCounts();
+    }
+    
+    private void addChannel() {
+    	final EditText url = new EditText(this);
+    	url.setHint(R.string.enter_your_rss_url_hint);
+    	url.setText("http://");
+    	url.setPadding(5, 0, 0, 5);
+    	AlertDialog dialog = new AlertDialog.Builder(this)
+    		.setTitle("Enter your RSS feed URL")
+    		.setView(url)
+    		.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {					
+					startAddChannel(url.getText().toString());
+					dialog.dismiss();
+				}    			
+    		})
+    		.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}    			
+    		})
+    		.create();
+    	dialog.show();
+    }
+    
+    private void startAddChannel(String url) {    	
+    	final Channel channel = new Channel(url);
+    	if (Channel.exists(cr, channel)) {
+    		String message = getString(R.string.channel_already_exists).replace("{url}", channel.getUrl());
+			Toast.makeText(this, message, 1000).show();
+    		return;
+    	}
+    	channel.save(cr);
+    	
+    	final ProgressDialog progressDialog = new ProgressDialog(this);
+    	progressDialog.setMessage(getString(R.string.adding_channel));
+    	BetterAsyncTask<Void, Void, Void> addChannelTask = new BetterAsyncTask<Void, Void, Void>(this) {
+			@Override
+			protected void after(Context context, Void arg1) {
+				progressDialog.dismiss();
+				if (channel.getItems().size() > 0) {
+					channel.save(cr);
+					String message = context.getString(R.string.add_channel_successfully).replace("{channel}", channel.getTitle());
+					Toast.makeText(context, message, 1000).show();
+					loadData();
+				} else {
+					channel.delete(cr);
+					String message = context.getString(R.string.add_channel_failed).replace("{url}", channel.getUrl());
+					Toast.makeText(context, message, 1000).show();					
+				}				
+			}
+			@Override
+			protected void handleError(Context arg0, Exception arg1) {
+			}    		
+    	};
+    	addChannelTask.disableDialog();
+    	addChannelTask.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
+			public Void call(BetterAsyncTask<Void, Void, Void> arg0) throws Exception {
+				channel.update(cr);
+				return null;
+			}    		
+    	});
+    	progressDialog.show();
+    	addChannelTask.execute();    	
     }
     
     @Override

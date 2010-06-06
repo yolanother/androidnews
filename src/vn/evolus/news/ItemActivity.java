@@ -22,10 +22,12 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 	private ArrayList<Item> items;
 	private Item currentItem;
 	private WebViewClient client;
+	private ContentResolver cr;
 		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		ImageLoader.initialize(this);
+		cr = getContentResolver();
 		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.item_view);				
@@ -38,8 +40,7 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 		} else {
 			currentItemId = getIntent().getLongExtra("ItemId", 0);
 		}
-		
-		ContentResolver cr = getContentResolver();
+				
 		Channel channel = Channel.load(getIntent().getLongExtra("ChannelId", 0), cr);
 		channel.loadFullItems(cr);
 		items = channel.getItems();
@@ -104,6 +105,11 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 	@Override
 	public void onSelected(int selectedIndex) {
 		currentItem = showItem(selectedIndex);
+		if (!currentItem.getRead()) {			
+			currentItem.setRead(true);
+			currentItem.save(cr);
+		}
+		
 		if (selectedIndex > 0) {
 			showItem(selectedIndex - 1);
 		}
