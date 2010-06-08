@@ -13,6 +13,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import vn.evolus.news.model.Image;
 import vn.evolus.news.providers.ImagesProvider;
 import vn.evolus.news.util.ImageCache;
 import android.content.ContentResolver;
@@ -41,7 +42,6 @@ public class RssHandler extends DefaultHandler {
 	private int currentState = RSS_CHANNEL;
 	private Item item;
 	private StringBuffer currentTextValue;	
-	private Set<String> images;	
 	private int newItems = 0;
 	
 	static {
@@ -56,7 +56,8 @@ public class RssHandler extends DefaultHandler {
 			"ads.pheedo.com",
 			"images.pheedo.com/images/mm",
 			"cdn.stumble-upon.com",
-			"vietnamnet.gif"
+			"vietnamnet.gif",
+			"digg-badge-custom-1.gif"
 		};
 		
 		//
@@ -71,24 +72,16 @@ public class RssHandler extends DefaultHandler {
 	
 	public RssHandler(Channel channel, ContentResolver cr) {
 		this.channel = channel;
-		this.cr = cr;
-		this.images = new HashSet<String>();
+		this.cr = cr;		
 		this.newItems = 0;
 	}
 	
 	public Channel getChannel() {
 		return channel;
-	}
-	
-	public Set<String> getImages() {
-		return images;
-	}
-
+	}	
 	public int getNewItems() {
 		return newItems;
 	}
-
-
 
 	@Override
 	public void startDocument() throws SAXException {
@@ -257,14 +250,16 @@ public class RssHandler extends DefaultHandler {
 	public void processItem(Item item) {
 		String itemDescription = item.getDescription(); 	
 		Matcher matcher = imagePattern.matcher(itemDescription);
-		boolean found = false;		
+		boolean found = false;
+		Set<String> images = new HashSet<String>();
 		while (matcher.find()) {
 			String imageUrl = matcher.group(1);
 			String foundImageTag = matcher.group();
-			if (!blackListImagePattern.matcher(imageUrl).find()) {
-				String cachedImageUrl = "http://image-resize.appspot.com/?width=300&height=300&url=" + URLEncoder.encode(imageUrl);
-				if (!images.contains(cachedImageUrl)) {
+			if (!blackListImagePattern.matcher(imageUrl).find()) {				
+				String cachedImageUrl = "http://image-resize.appspot.com/?width=300&height=300&url=" + URLEncoder.encode(imageUrl);				
+				if (!images.contains(cachedImageUrl)) {					
 					images.add(cachedImageUrl);
+					Image.queue(cachedImageUrl, cr);
 					itemDescription = itemDescription.replace(foundImageTag,
 							"<img src=\"" + ImagesProvider.constructUri(ImageCache.getCacheFileName(cachedImageUrl)) + "\" />");
 				}
@@ -272,6 +267,7 @@ public class RssHandler extends DefaultHandler {
 					item.setImageUrl("http://feeds.demo.evolus.vn/resizer/?width=60&height=60&url=" +
 							URLEncoder.encode(imageUrl));
 					images.add(item.getImageUrl());
+					Image.queue(item.getImageUrl(), cr);
 					found = true;
 				}
 			} else {

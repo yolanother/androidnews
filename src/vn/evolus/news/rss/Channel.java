@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
-import java.util.Set;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -22,7 +21,6 @@ import org.xml.sax.XMLReader;
 import vn.evolus.news.providers.ContentsProvider;
 import vn.evolus.news.rss.Item.Items;
 import vn.evolus.news.util.ActiveList;
-import vn.evolus.news.util.ImageLoader;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -153,6 +151,30 @@ public class Channel extends Observable implements Serializable {
 		}
 	}
 	
+	public void markAllAsRead(ContentResolver cr) {
+		ContentValues values = new ContentValues();
+		values.put(Items.READ, true);
+		cr.update(Items.CONTENT_URI, values, Items.CHANNEL_ID + "=?", 
+				new String[] { String.valueOf(this.id) });
+	}
+	
+	public void clean(ContentResolver cr, int keepMaxItems) {
+		// delete old items
+		Cursor cursor = cr.query(Items.limitAndStartAt(1, keepMaxItems - 1),
+				new String[] { Items.PUB_DATE },
+				Items.CHANNEL_ID + "=?", 
+				new String[] { String.valueOf(this.id) },
+				Items.PUB_DATE + " DESC");		
+		while (cursor.moveToNext()) {
+			long lastPubDate = cursor.getLong(0);						
+			cr.delete(Items.CONTENT_URI, Items.CHANNEL_ID + "=? AND " + Items.PUB_DATE + " < ?",					
+					new String[] {
+						String.valueOf(this.id),
+						String.valueOf(lastPubDate) });
+		}		
+		cursor.close();
+	}
+	
 	public void delete(ContentResolver cr) {
 		cr.delete(Items.CONTENT_URI, Items.CHANNEL_ID + "=?", new String[] { String.valueOf(this.id) });
 		cr.delete(Channels.CONTENT_URI, ContentsProvider.WHERE_ID, new String[] { String.valueOf(this.id) });
@@ -206,8 +228,7 @@ public class Channel extends Observable implements Serializable {
 					Channels.URL,
 					Channels.DESCRIPTION,
 					Channels.LINK,
-					Channels.IMAGE_URL//,
-					//Channels.UNREAD
+					Channels.IMAGE_URL
 				}, 
 				null, null, null);
 		ArrayList<Channel> channels = new ActiveList<Channel>();
@@ -221,7 +242,7 @@ public class Channel extends Observable implements Serializable {
 	}
 	
 	public static Map<Long, Integer> countUnreadItems(ContentResolver cr) {
-		Cursor cursor = cr.query(Items.UNREAD_COUNT_URI, 
+		Cursor cursor = cr.query(Items.countUnread(), 
 				new String[] { Items.CHANNEL_ID, Items.UNREAD_COUNT }, 
 				Items.READ + "=?", new String[] { "0" }, null);		
 		Map<Long, Integer> unreadCounts = new HashMap<Long, Integer>();
@@ -275,7 +296,7 @@ public class Channel extends Observable implements Serializable {
     }
 	
 	private int parse(InputStream is, ContentResolver cr) {
-		long lastTicks = System.currentTimeMillis();
+		//long lastTicks = System.currentTimeMillis();
 		// instantiate our handler
 		RssHandler rssHandler = new RssHandler(this, cr);
 		try {
@@ -290,12 +311,7 @@ public class Channel extends Observable implements Serializable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}			
-		Log.d("DEBUG", "Parsing " + this.title + " in " + (System.currentTimeMillis() - lastTicks) + "ms: " + rssHandler.getNewItems() + " new items");
-		
-		Set<String> images = rssHandler.getImages();
-		for (String imageUrl : images) {
-			ImageLoader.start(imageUrl, null);
-		}
+		//Log.d("DEBUG", "Parsing " + this.title + " in " + (System.currentTimeMillis() - lastTicks) + "ms: " + rssHandler.getNewItems() + " new items");				
 		return rssHandler.getNewItems();
 	}
 	

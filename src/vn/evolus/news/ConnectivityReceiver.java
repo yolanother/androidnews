@@ -1,6 +1,7 @@
 package vn.evolus.news;
 
 import vn.evolus.news.services.ContentsUpdatingService;
+import vn.evolus.news.services.ImagesDownloadingService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,16 +13,19 @@ import android.util.Log;
 public class ConnectivityReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Intent service = new Intent(context, ContentsUpdatingService.class);
+		Intent updatingService = new Intent(context, ContentsUpdatingService.class);
+		Intent downloadingService = new Intent(context, ImagesDownloadingService.class);
 		
 		NetworkInfo info = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
 		if (hasGoodEnoughNetworkConnection(info, context)) {
 			// should start background service to update
 			Log.d("DEBUG", "Have WIFI or 3G connection, start updating feeds.");
-			context.startService(service);
+			context.startService(updatingService);
+			context.startService(downloadingService);
 		} else {
 			Log.d("DEBUG", "No WIFI or 3G connection, stop updating feeds.");
-			context.stopService(service);
+			context.stopService(updatingService);
+			context.stopService(downloadingService);
 		}
 	}
 	

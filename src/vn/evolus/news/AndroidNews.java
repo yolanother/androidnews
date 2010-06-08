@@ -5,6 +5,7 @@ import java.util.Map;
 
 import vn.evolus.news.rss.Channel;
 import vn.evolus.news.services.ContentsUpdatingService;
+import vn.evolus.news.services.ImagesDownloadingService;
 import vn.evolus.news.util.ActiveList;
 import vn.evolus.news.util.ImageLoader;
 import vn.evolus.news.widget.ChannelListView;
@@ -74,6 +75,9 @@ public class AndroidNews extends BetterDefaultActivity {
         if (ConnectivityReceiver.hasGoodEnoughNetworkConnection(this)) {
         	Intent service = new Intent(this, ContentsUpdatingService.class);
         	startService(service);
+        	
+        	Intent downloadService = new Intent(this, ImagesDownloadingService.class);
+        	startService(downloadService);
         }
     }	
 	
@@ -94,7 +98,7 @@ public class AndroidNews extends BetterDefaultActivity {
     @Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == MENU_SETTINGS) {
-    		//finish();
+    		showSettings();
     	} else if (item.getItemId() == MENU_REFRESH){
     		refresh();
     	} else if (item.getItemId() == MENU_ADD_CHANNEL){
@@ -103,6 +107,9 @@ public class AndroidNews extends BetterDefaultActivity {
 		return true;
 	}
     
+	private void showSettings() {		
+	}
+
 	private void loadChannels() {
 		long lastTicks = System.currentTimeMillis();
 		channels = Channel.loadAllChannels(cr);

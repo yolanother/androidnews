@@ -209,8 +209,6 @@ public class Item implements Serializable {
 	public static final class Items implements BaseColumns {
 		public static final Uri CONTENT_URI = Uri.parse("content://" 
 				+ ContentsProvider.AUTHORITY + "/items");
-		public static final Uri UNREAD_COUNT_URI = Uri.parse("content://" 
-				+ ContentsProvider.AUTHORITY + "/items/unread");
 		public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.evolus.droidnews.items";
 		
 		public static final String ID = "ID";
@@ -222,6 +220,20 @@ public class Item implements Serializable {
 		public static final String READ = "READ";
 		public static final String CHANNEL_ID = "CHANNEL_ID";
 		public static final String UNREAD_COUNT = "UNREAD";
+		
+		public static final Uri countUnread() {
+			return Uri.parse("content://" 
+					+ ContentsProvider.AUTHORITY + "/items/unread");
+		}
+		public static final Uri limit(int limit) {
+			return Uri.parse("content://" 
+					+ ContentsProvider.AUTHORITY + "/items/" + limit);
+		}
+		
+		public static final Uri limitAndStartAt(int limit, int offset) {
+			return Uri.parse("content://" 
+					+ ContentsProvider.AUTHORITY + "/items/" + limit + "/" + offset);
+		}
 		
 		private Items() {
 		}

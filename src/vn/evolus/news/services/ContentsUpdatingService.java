@@ -27,7 +27,7 @@ public class ContentsUpdatingService extends Service {
 	
 	private static final int UPDATE_INTERVAL = 1000 * 60 * 5;
 	private Object synRoot = new Object();
-	private boolean updating = false;
+	private boolean updating = false;	
 	private Timer timer = new Timer();
 	private ContentResolver cr;
 		
@@ -50,7 +50,7 @@ public class ContentsUpdatingService extends Service {
 			public void run() {
 				updateFeeds();
 			}
-		}, 100);
+		}, 100);	
 	}
 	
 	@Override
@@ -62,7 +62,7 @@ public class ContentsUpdatingService extends Service {
 	private void stopUpdatingFeeds() {
 		Log.d(TAG, "Stop updating feeds at " + new Date());
 		synchronized (synRoot) {
-			updating = false;
+			updating = false;			
 		}
 		if (timer != null) {
 			timer.cancel();
@@ -87,7 +87,11 @@ public class ContentsUpdatingService extends Service {
 				}
 								
 				try {
-					totalNewItems += channel.update(cr);
+					int newItems = channel.update(cr);
+					if (newItems > 0) {
+						channel.clean(cr, Channel.MAX_ITEMS);
+					}
+					totalNewItems += newItems;
 					channel.getItems().clear();
 					Thread.sleep(100);
 				} catch (Exception ex) {
@@ -132,4 +136,5 @@ public class ContentsUpdatingService extends Service {
 		long firstWake = System.currentTimeMillis() + UPDATE_INTERVAL;
 		am.setRepeating(AlarmManager.RTC, firstWake, UPDATE_INTERVAL, pendingIntent);
 	}
+
 }

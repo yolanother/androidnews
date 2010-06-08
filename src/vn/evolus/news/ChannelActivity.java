@@ -28,7 +28,9 @@ import com.github.droidfu.concurrent.BetterAsyncTaskCallable;
 public class ChannelActivity extends Activity {		
 	private final int MENU_BACK = 0;
 	private final int MENU_REFRESH = 1;
+	private final int MENU_MARK_ALL_AS_READ = 2;
 	
+	private ContentResolver cr;
 	private Channel channel;
 	
 	TextView channelName;	
@@ -38,6 +40,7 @@ public class ChannelActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		ImageLoader.initialize(this);
+		this.cr = getContentResolver();
 		
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -76,6 +79,7 @@ public class ChannelActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		menu.add(0, MENU_BACK, 0, getString(R.string.back)).setIcon(R.drawable.ic_menu_back);
     	menu.add(0, MENU_REFRESH, 1,  getString(R.string.refresh)).setIcon(R.drawable.ic_menu_refresh);
+    	menu.add(0, MENU_MARK_ALL_AS_READ, 1,  getString(R.string.mark_all_as_read)).setIcon(android.R.drawable.ic_menu_view);
 		return super.onCreateOptionsMenu(menu);
 	}	
 	
@@ -85,7 +89,10 @@ public class ChannelActivity extends Activity {
     		finish();
     	} else if (item.getItemId() == MENU_REFRESH){
     		refresh();
+    	} else if (item.getItemId() == MENU_MARK_ALL_AS_READ){
+    		markAllAsRead();
     	}
+		
 		return true;
 	}
 	
@@ -121,6 +128,17 @@ public class ChannelActivity extends Activity {
 		});
 		task.disableDialog();
 		task.execute();		       
+	}
+	
+	private void markAllAsRead() {
+		if (this.channel != null) {
+			this.channel.markAllAsRead(cr);
+			// TRICK: do we need to reload from database?
+			for (Item item : this.channel.getItems()) {
+				item.setRead(true);
+			}
+			this.itemListView.refresh();
+		}
 	}
 	
 	private void refresh() {

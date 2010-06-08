@@ -26,7 +26,7 @@ public class ImageLoaderHandler extends Handler {
 
     @Override
     public void handleMessage(Message msg) {
-        if (msg.what == ImageLoader.HANDLER_MESSAGE_ID) {
+        if (msg.what == ImageLoader.BITMAP_DOWNLOADED_SUCCESS) {
             Bundle data = msg.getData();
             this.image = data.getParcelable(ImageLoader.BITMAP_EXTRA);            
         }

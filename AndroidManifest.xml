@@ -16,6 +16,7 @@
         <activity android:name=".ChannelActivity" />
         <activity android:name=".ItemActivity" />
         <service android:name=".services.ContentsUpdatingService" />
+        <service android:name=".services.ImagesDownloadingService" />
         
         <provider android:name=".providers.ImagesProvider"
            android:authorities="vn.evolus.news.images" />

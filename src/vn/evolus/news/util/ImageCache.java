@@ -19,10 +19,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import vn.evolus.news.model.Image;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -66,6 +70,8 @@ public class ImageCache implements Map<String, Bitmap> {
     private Map<String, Bitmap> cache;
 
     private CompressFormat compressedImageFormat = CompressFormat.JPEG;
+    
+    private ContentResolver cr;
 
     private ImageCache(Context context, int initialCapacity, int concurrencyLevel) {
         this.cache = new MapMaker().initialCapacity(initialCapacity).concurrencyLevel(
@@ -73,6 +79,8 @@ public class ImageCache implements Map<String, Bitmap> {
         this.secondLevelCacheDir = Environment.getExternalStorageDirectory().getAbsolutePath() //context.getApplicationContext().getCacheDir()
                 + "/droidnews/imagecache";
         new File(secondLevelCacheDir).mkdirs();
+        
+        this.cr = context.getContentResolver();
     }
     
     public static synchronized ImageCache createInstance(Context context, int initialCapacity, int concurrencyLevel) {
@@ -206,8 +214,19 @@ public class ImageCache implements Map<String, Bitmap> {
         return new File(getCacheFileName(imageUrl));
     }
     
+    public static void downloadImage(String imageUrl) throws IOException {
+    	URL url = new URL(imageUrl);
+        InputStream is = url.openStream();
+        // save to cache folder
+    	File imageFile = new File(getCacheFileName(imageUrl));
+        imageFile.createNewFile();
+        FileOutputStream os = new FileOutputStream(imageFile);	                
+        StreamUtils.writeStream(is, os);
+        os.close();
+    }
+    
     public static String getCacheFileName(String imageUrl) {
-    	return instance.secondLevelCacheDir + "/" + Integer.toHexString(imageUrl.hashCode()) + "."
-        	+ instance.compressedImageFormat.name();
+    	Image image = Image.load(imageUrl, instance.cr);
+    	return instance.secondLevelCacheDir + "/" + (image != null ? image.getId() : "0");
     }
 }

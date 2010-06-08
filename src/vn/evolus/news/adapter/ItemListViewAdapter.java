@@ -134,8 +134,10 @@ public class ItemListViewAdapter extends BaseAdapter {
 		}
 		public void handleMessage(Message msg) {
 	        super.handleMessage(msg);
-	        if (imageUrl.equals((String)imageView.getTag())) {
-	        	imageView.setImageBitmap(super.getImage());
+	        if (msg.what == ImageLoader.BITMAP_DOWNLOADED_SUCCESS) {
+		        if (imageUrl.equals((String)imageView.getTag())) {
+		        	imageView.setImageBitmap(super.getImage());
+		        }
 	        }
 	    }
 	}

@@ -2,8 +2,12 @@ package vn.evolus.news.providers;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
+import vn.evolus.news.model.Image;
+import vn.evolus.news.util.ImageCache;
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
@@ -21,9 +25,21 @@ public class ImagesProvider extends ContentProvider {
 	public ParcelFileDescriptor openFile(Uri uri, String mode)		
 			throws FileNotFoundException {		
 		File file = new File(uri.getPath());
+		if (!file.exists()) {
+			long id = ContentUris.parseId(uri);
+			Image image = Image.load(id, getContext().getContentResolver());
+			if (image != null) {
+				try {
+					ImageCache.downloadImage(image.getUrl());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 		ParcelFileDescriptor parcel = ParcelFileDescriptor.open(file, 
 				ParcelFileDescriptor.MODE_READ_ONLY);		
-		return parcel;
+		return parcel;		
 	}
 
 	@Override

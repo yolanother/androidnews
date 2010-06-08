@@ -13,4 +13,5 @@
     <string name="enter_your_rss_url_hint">enter your RSS feed link</string>
     <string name="new_items_notification">{total} new items</string>
     <string name="adding_channel">Adding channel, please wait...</string>
+    <string name="mark_all_as_read">Mark all as read</string>
 </resources>

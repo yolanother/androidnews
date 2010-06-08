@@ -47,7 +47,8 @@ public class ImageLoader implements Runnable {
 
     private static final int DEFAULT_POOL_SIZE = 2;
 
-    static final int HANDLER_MESSAGE_ID = 0;
+    public static final int BITMAP_DOWNLOADED_FAILED = 0;
+    public static final int BITMAP_DOWNLOADED_SUCCESS = 1;
 
     static final String BITMAP_EXTRA = "droidfu:extra_bitmap";
 
@@ -147,8 +148,13 @@ public class ImageLoader implements Runnable {
         }
     }
 
-    public void run() {
-        Bitmap bitmap = null;
+    public void run() {               
+    	Bitmap bitmap = downloadImage(imageUrl);
+        notifyImageLoaded(bitmap);           
+    }
+    
+    private Bitmap downloadImage(String imageUrl) {
+    	Bitmap bitmap = null;
         int timesTried = 1;
 
         while (timesTried <= numAttempts) {
@@ -170,20 +176,19 @@ public class ImageLoader implements Runnable {
                 timesTried++;
             }
         }
-
-        if (bitmap != null) {
-            notifyImageLoaded(bitmap);
-        }
+        return bitmap;
     }
 
     public void notifyImageLoaded(Bitmap bitmap) {
     	if (handler == null) return;
-    	
+    	    	
         Message message = new Message();
-        message.what = HANDLER_MESSAGE_ID;
-        Bundle data = new Bundle();
-        data.putParcelable(BITMAP_EXTRA, bitmap);
-        message.setData(data);
+        message.what = bitmap != null ? BITMAP_DOWNLOADED_SUCCESS : BITMAP_DOWNLOADED_FAILED;
+        if (bitmap != null) {
+	        Bundle data = new Bundle();
+	        data.putParcelable(BITMAP_EXTRA, bitmap);
+	        message.setData(data);
+        }
 
         handler.sendMessage(message);
     }

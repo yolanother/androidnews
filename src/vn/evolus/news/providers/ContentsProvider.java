@@ -2,6 +2,7 @@ package vn.evolus.news.providers;
 
 import java.util.HashMap;
 
+import vn.evolus.news.model.Image.Images;
 import vn.evolus.news.rss.Channel.Channels;
 import vn.evolus.news.rss.Item.Items;
 import android.content.ContentProvider;
@@ -16,18 +17,22 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
-public class ContentsProvider extends ContentProvider {
+public class ContentsProvider extends ContentProvider {	
 	public static final String AUTHORITY = "vn.evolus.news.contents";
 	private static final String DATABASE_NAME = "droidnews.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 1;
     
 	public static final String CHANNELS_TABLE_NAME = "channels";
 	public static final String ITEMS_TABLE_NAME = "items";
+	public static final String IMAGES_TABLE_NAME = "images";
 				
 	private static final UriMatcher uriMatcher;
     private static final int CHANNELS = 1;
     private static final int ITEMS = 2;
-    private static final int ITEMS_UNREAD_COUNT = 3;
+    private static final int IMAGES = 3;
+    private static final int ITEMS_UNREAD_COUNT = 4;
+    private static final int ITEMS_LIMIT = 5;
+    private static final int ITEMS_LIMIT_OFFSET = 6;
     
     public static final String WHERE_ID = "ID=?";
     
@@ -35,6 +40,7 @@ public class ContentsProvider extends ContentProvider {
 
     private static HashMap<String, String> channelsProjectionMap;
     private static HashMap<String, String> itemsProjectionMap;
+    private static HashMap<String, String> imagesProjectionMap;        
 		
     @Override
     public int delete(Uri uri, String where, String[] whereArgs) {
@@ -47,7 +53,9 @@ public class ContentsProvider extends ContentProvider {
             case ITEMS:
                 count = db.delete(ITEMS_TABLE_NAME, where, whereArgs);
                 break;
-
+            case IMAGES:
+                count = db.delete(IMAGES_TABLE_NAME, where, whereArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -63,7 +71,8 @@ public class ContentsProvider extends ContentProvider {
 	            return Channels.CONTENT_TYPE;
             case ITEMS:
                 return Items.CONTENT_TYPE;
-
+            case IMAGES:
+                return Images.CONTENT_TYPE;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -72,7 +81,9 @@ public class ContentsProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues initialValues) {
     	int matchedUri = uriMatcher.match(uri);
-        if (matchedUri != CHANNELS && matchedUri != ITEMS) { throw new IllegalArgumentException("Unknown URI " + uri); }
+        if (matchedUri != CHANNELS && matchedUri != ITEMS && matchedUri != IMAGES) { 
+        	throw new IllegalArgumentException("Unknown URI " + uri); 
+        }
 
         ContentValues values;
         if (initialValues != null) {
@@ -92,6 +103,10 @@ public class ContentsProvider extends ContentProvider {
 			case ITEMS:
 				rowId = db.insert(ITEMS_TABLE_NAME, Items.DESCRIPTION, values);
 				contentUri = Channels.CONTENT_URI;
+				break;
+			case IMAGES:
+				rowId = db.insert(IMAGES_TABLE_NAME, Images.URL, values);
+				contentUri = Images.CONTENT_URI;
 				break;
 			default:
 				break;
@@ -123,13 +138,26 @@ public class ContentsProvider extends ContentProvider {
             case ITEMS:
                 qb.setTables(ITEMS_TABLE_NAME);
                 qb.setProjectionMap(itemsProjectionMap);
-                limit = "20";
+                break;
+            case ITEMS_LIMIT:
+                qb.setTables(ITEMS_TABLE_NAME);
+                qb.setProjectionMap(itemsProjectionMap);
+                limit = uri.getLastPathSegment();                
+                break;
+            case ITEMS_LIMIT_OFFSET:
+                qb.setTables(ITEMS_TABLE_NAME);
+                qb.setProjectionMap(itemsProjectionMap);                
+                limit = uri.getLastPathSegment() + ", " + uri.getPathSegments().get(1);                
                 break;
             case ITEMS_UNREAD_COUNT:            	
                 qb.setTables(ITEMS_TABLE_NAME);
-                //projection = new String[] { Items.CHANNEL_ID, Items.UNREAD_COUNT};
                 qb.setProjectionMap(itemsProjectionMap);
                 group = Items.CHANNEL_ID;
+                break;
+            case IMAGES:
+                qb.setTables(IMAGES_TABLE_NAME);
+                qb.setProjectionMap(imagesProjectionMap);
+                limit = "50";
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
@@ -153,6 +181,9 @@ public class ContentsProvider extends ContentProvider {
             case ITEMS:
                 count = db.update(ITEMS_TABLE_NAME, values, where, whereArgs);
                 break;
+            case IMAGES:
+                count = db.update(IMAGES_TABLE_NAME, values, where, whereArgs);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -164,11 +195,10 @@ public class ContentsProvider extends ContentProvider {
 	private class DatabaseHelper extends SQLiteOpenHelper {
         DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        }
+        }        
 
         @Override
-        public void onCreate(SQLiteDatabase db) {
-        	
+        public void onCreate(SQLiteDatabase db) {        	
         	db.execSQL("CREATE TABLE " + CHANNELS_TABLE_NAME + " (" + Channels.ID
 	                    + " INTEGER PRIMARY KEY AUTOINCREMENT," 
 	                    + Channels.TITLE + " VARCHAR(255),"
@@ -189,34 +219,56 @@ public class ContentsProvider extends ContentProvider {
 	                    + Items.CHANNEL_ID + " INTEGER"
 	                    + ");");
         	
+        	db.execSQL("CREATE TABLE " + IMAGES_TABLE_NAME + " (" + Images.ID
+                    + " INTEGER PRIMARY KEY AUTOINCREMENT," 
+                    + Images.URL + " VARCHAR(1000),"
+                    + Images.RETRIES + " INTEGER,"
+                    + Images.STATUS + " INTEGER"
+                    + ");");
+        	
+        	db.execSQL("CREATE INDEX IF NOT EXISTS " + CHANNELS_TABLE_NAME
+                    + "UrlIndex ON " +  CHANNELS_TABLE_NAME +" (" + Channels.URL + ");");
+        	
         	db.execSQL("CREATE INDEX IF NOT EXISTS " + ITEMS_TABLE_NAME
-                    + "LinkIndex ON " +  ITEMS_TABLE_NAME +" (" + Items.LINK + ");");
+                    + "LinkIndex ON " +  ITEMS_TABLE_NAME +" (" + Items.LINK + ");");        	
         	db.execSQL("CREATE INDEX IF NOT EXISTS " + ITEMS_TABLE_NAME
                     + "ChannelIdIndex ON " +  ITEMS_TABLE_NAME +" (" + Items.CHANNEL_ID + ");");
         	db.execSQL("CREATE INDEX IF NOT EXISTS " + ITEMS_TABLE_NAME
                     + "ReadIndex ON " +  ITEMS_TABLE_NAME +" (" + Items.READ + ");");
+        	
+        	db.execSQL("CREATE INDEX IF NOT EXISTS " + IMAGES_TABLE_NAME
+                    + "UrlIndex ON " +  IMAGES_TABLE_NAME +" (" + Images.URL + ");");
+        	db.execSQL("CREATE INDEX IF NOT EXISTS " + IMAGES_TABLE_NAME
+                    + "StatusIndex ON " +  IMAGES_TABLE_NAME +" (" + Images.STATUS + ");");
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        	db.execSQL("DROP INDEX IF EXISTS " + CHANNELS_TABLE_NAME + "UrlIndex");
         	db.execSQL("DROP INDEX IF EXISTS " + ITEMS_TABLE_NAME + "ReadIndex");
         	db.execSQL("DROP INDEX IF EXISTS " + ITEMS_TABLE_NAME + "ChannelIdIndex");
         	db.execSQL("DROP INDEX IF EXISTS " + ITEMS_TABLE_NAME + "ReadIndex");
+        	db.execSQL("DROP INDEX IF EXISTS " + IMAGES_TABLE_NAME + "UrlIndex");
+        	db.execSQL("DROP INDEX IF EXISTS " + IMAGES_TABLE_NAME + "StatusIndex");
+        	
+        	db.execSQL("DROP TABLE IF EXISTS " + IMAGES_TABLE_NAME);
         	db.execSQL("DROP TABLE IF EXISTS " + ITEMS_TABLE_NAME);
         	db.execSQL("DROP TABLE IF EXISTS " + CHANNELS_TABLE_NAME);
         	onCreate(db);
         }
 
         @Override
-        public void onOpen(SQLiteDatabase db) {
-            //onDatabaseOpened(db);
+        public void onOpen(SQLiteDatabase db) {           
         }
-    }  
+    }
 	
 	static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(AUTHORITY, CHANNELS_TABLE_NAME, CHANNELS);
         uriMatcher.addURI(AUTHORITY, ITEMS_TABLE_NAME, ITEMS);
+        uriMatcher.addURI(AUTHORITY, IMAGES_TABLE_NAME, IMAGES);
+        uriMatcher.addURI(AUTHORITY, ITEMS_TABLE_NAME + "/#", ITEMS_LIMIT);
+        uriMatcher.addURI(AUTHORITY, ITEMS_TABLE_NAME + "/#/#", ITEMS_LIMIT_OFFSET);
         uriMatcher.addURI(AUTHORITY, ITEMS_TABLE_NAME + "/unread", ITEMS_UNREAD_COUNT);
 
         channelsProjectionMap = new HashMap<String, String>();
@@ -241,5 +293,11 @@ public class ContentsProvider extends ContentProvider {
         itemsProjectionMap.put(Items.READ, Items.READ);
         itemsProjectionMap.put(Items.CHANNEL_ID, Items.CHANNEL_ID);
         itemsProjectionMap.put(Items.UNREAD_COUNT, "COUNT(*) AS UNREAD");
+        
+        imagesProjectionMap = new HashMap<String, String>();
+        imagesProjectionMap.put(Images.ID, Images.ID);
+        imagesProjectionMap.put(Images.URL, Images.URL);
+        imagesProjectionMap.put(Images.STATUS, Images.STATUS);
+        imagesProjectionMap.put(Images.RETRIES, Images.RETRIES);
     }
 }
