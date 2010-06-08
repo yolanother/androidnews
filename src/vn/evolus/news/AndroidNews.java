@@ -107,7 +107,9 @@ public class AndroidNews extends BetterDefaultActivity {
 		return true;
 	}
     
-	private void showSettings() {		
+	private void showSettings() {
+		Intent intent = new Intent(this, SettingsActivity.class);
+		startActivity(intent);
 	}
 
 	private void loadChannels() {
@@ -200,12 +202,30 @@ public class AndroidNews extends BetterDefaultActivity {
     	channelListView.setChannels(channels);
     }
 	
+	private ArrayList<Channel> getUnreadChannels() {
+		ArrayList<Channel> unreadChannels = new ActiveList<Channel>();
+		if (this.channels != null) {
+			for (Channel channel : channels) {
+				if (channel.countUnreadItems() > 0) {
+					unreadChannels.add(channel);
+				}
+			}
+		}		
+		return unreadChannels;
+	}
+	
 	private void refreshUnreadCounts() {
 		Log.d(TAG, "Refresing unread count...");
 		BetterAsyncTask<Void, Void, Void> refreshTask = new BetterAsyncTask<Void, Void, Void>(this) {
 			@Override
-			protected void after(Context arg0, Void arg1) {
-				channelListView.refresh();
+			protected void after(Context context, Void arg1) {
+				ArrayList<Channel> unreadChannels = getUnreadChannels(); 
+				channelListView.setChannels(unreadChannels);
+				if (unreadChannels.size() == 0) {
+					Toast.makeText(context, "There is no channel has new items now", 100)
+						.show();
+				}
+				//channelListView.refresh();
 			}
 			@Override
 			protected void handleError(Context arg0, Exception arg1) {

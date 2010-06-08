@@ -15,6 +15,8 @@
         </activity>
         <activity android:name=".ChannelActivity" />
         <activity android:name=".ItemActivity" />
+        <activity android:name=".SettingsActivity" />
+        
         <service android:name=".services.ContentsUpdatingService" />
         <service android:name=".services.ImagesDownloadingService" />
         

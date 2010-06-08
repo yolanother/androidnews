@@ -14,4 +14,19 @@
     <string name="new_items_notification">{total} new items</string>
     <string name="adding_channel">Adding channel, please wait...</string>
     <string name="mark_all_as_read">Mark all as read</string>
+    <string name="no_channel_has_new_items">There are no channel has new items now.</string>
+    
+    <string name="auto_update_option_title">Auto update</string>
+    <string name="auto_update_on">Feeds will be updated automatically</string>
+    <string name="auto_update_off">You must manually update your feeds</string>
+    
+    <string name="show_updated_channels_option_title">Show channels</string>
+    <string name="show_updated_channels_on">which have new items</string>
+    <string name="show_updated_channels_off">show all channels</string>
+    
+    <string name="update_interval_dialog_title">Update interval</string>
+    <string name="update_interval_dialog_message">How long will we update feeds?</string>
+    
+    <string name="max_items_per_channel_dialog_title">Max items per channel?</string>
+    <string name="max_items_per_channel_dialog_message">How many items should we keep per channel?</string>
 </resources>
