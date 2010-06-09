@@ -29,8 +29,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-public class Channel extends Observable implements Serializable {	
-	public static final int MAX_ITEMS = 20;
+public class Channel extends Observable implements Serializable {
 	
 	private static final long serialVersionUID = 6204335219893986724L;	
 	private static SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -253,7 +252,7 @@ public class Channel extends Observable implements Serializable {
 		return unreadCounts;
 	}
 	
-	public int update(ContentResolver cr) {
+	public int update(ContentResolver cr, int maxItemsPerChannel) {
 		synchronized (synRoot) {
 			if (updating) return 0;			
 			updating = true;
@@ -268,7 +267,7 @@ public class Channel extends Observable implements Serializable {
 			get.setHeader("User-Agent", "DroidNews");
 			HttpResponse response = client.execute(get);
 			is = response.getEntity().getContent();
-			newItems = parse(is, cr);			
+			newItems = parse(is, cr, maxItemsPerChannel);			
     	} catch (Throwable e) {
     		Log.e("ERROR", "Error on parsing " + this.getUrl() + ": " +  e.getMessage());
     	} finally {
@@ -295,10 +294,10 @@ public class Channel extends Observable implements Serializable {
     	return newItems;
     }
 	
-	private int parse(InputStream is, ContentResolver cr) {
+	private int parse(InputStream is, ContentResolver cr, int maxItemsPerChannel) {
 		//long lastTicks = System.currentTimeMillis();
 		// instantiate our handler
-		RssHandler rssHandler = new RssHandler(this, cr);
+		RssHandler rssHandler = new RssHandler(this, maxItemsPerChannel, cr);
 		try {
 			// create a parser
 			SAXParser parser = factory.newSAXParser();

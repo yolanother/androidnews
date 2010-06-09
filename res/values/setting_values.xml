@@ -7,13 +7,13 @@
         <item>1 hour</item>
         <item>1 day</item>
     </string-array>
-    <integer-array name="update_interval_values">        
+    <string-array name="update_interval_values">        
         <item>5</item>
         <item>15</item>
         <item>30</item>
         <item>60</item>
         <item>1440</item>
-    </integer-array>
+    </string-array>
     <string-array name="max_items_per_channel_titles">        
         <item>10</item>
         <item>15</item>
@@ -21,11 +21,11 @@
         <item>25</item>
         <item>30</item>
     </string-array>
-    <integer-array name="max_items_per_channel_values">        
+    <string-array name="max_items_per_channel_values">        
          <item>10</item>
         <item>15</item>
         <item>20</item>
         <item>25</item>
         <item>30</item>
-    </integer-array>        
+    </string-array>        
 </resources>

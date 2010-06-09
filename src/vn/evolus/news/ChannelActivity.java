@@ -143,7 +143,7 @@ public class ChannelActivity extends Activity {
 	
 	private void refresh() {
 		this.setBusy();
-		
+		final int maxItemsPerChannel = Settings.getMaxItemsPerChannel(this);
 		BetterAsyncTask<Void, Void, Void> task = new BetterAsyncTask<Void, Void, Void>(this) {			
 			protected void after(Context context, Void args) {				
 				onChannelUpdated(channel);				
@@ -155,7 +155,7 @@ public class ChannelActivity extends Activity {
 		};
 		task.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
 			public Void call(BetterAsyncTask<Void, Void, Void> task) throws Exception {
-				channel.update(getContentResolver());
+				channel.update(cr, maxItemsPerChannel);
 				return null;
 			}    			
 		});

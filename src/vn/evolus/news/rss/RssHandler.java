@@ -38,7 +38,8 @@ public class RssHandler extends DefaultHandler {
 	final int RSS_ITEM_DESCRIPTION = 24;
 	
 	private ContentResolver cr;
-	private Channel channel;	
+	private Channel channel;
+	private int maxItemsPerChannel;
 	private int currentState = RSS_CHANNEL;
 	private Item item;
 	private StringBuffer currentTextValue;	
@@ -70,10 +71,11 @@ public class RssHandler extends DefaultHandler {
 		blackListImagePattern = Pattern.compile(sb.substring(1));
 	}
 	
-	public RssHandler(Channel channel, ContentResolver cr) {
+	public RssHandler(Channel channel, int maxItemsPerChannel, ContentResolver cr) {
 		this.channel = channel;
 		this.cr = cr;		
 		this.newItems = 0;
+		this.maxItemsPerChannel = maxItemsPerChannel;
 	}
 	
 	public Channel getChannel() {
@@ -169,7 +171,7 @@ public class RssHandler extends DefaultHandler {
 			channel.addItem(item);
 			newItems++;
 			currentState = RSS_CHANNEL;
-			if (channel.getItems().size() == Channel.MAX_ITEMS) {
+			if (channel.getItems().size() == maxItemsPerChannel) {
 				throw new SAXException("Reaching maximum items. Stop parsing.");
 			}			
 		}		

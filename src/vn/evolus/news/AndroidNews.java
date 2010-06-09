@@ -214,18 +214,23 @@ public class AndroidNews extends BetterDefaultActivity {
 		return unreadChannels;
 	}
 	
-	private void refreshUnreadCounts() {
-		Log.d(TAG, "Refresing unread count...");
+	private void refreshUnreadCounts() {		
 		BetterAsyncTask<Void, Void, Void> refreshTask = new BetterAsyncTask<Void, Void, Void>(this) {
 			@Override
 			protected void after(Context context, Void arg1) {
-				ArrayList<Channel> unreadChannels = getUnreadChannels(); 
-				channelListView.setChannels(unreadChannels);
-				if (unreadChannels.size() == 0) {
-					Toast.makeText(context, "There is no channel has new items now", 100)
-						.show();
+				if (Settings.getShowUpdatedChannels(context)) {
+					Log.d("DEBUG", "Show updated channels only");
+					ArrayList<Channel> unreadChannels = getUnreadChannels();				
+					channelListView.setChannels(unreadChannels);
+					if (unreadChannels.size() == 0) {
+						Toast.makeText(context, context.getString(R.string.no_channel_has_new_items), 100)
+							.show();
+					}
+				} else {
+					Log.d("DEBUG", "Show all channels");
+					channelListView.setChannels(channels);
+					//channelListView.refresh();
 				}
-				//channelListView.refresh();
 			}
 			@Override
 			protected void handleError(Context arg0, Exception arg1) {
@@ -255,6 +260,7 @@ public class AndroidNews extends BetterDefaultActivity {
 	}      
 	
 	private void refresh() {
+		final int maxItemsPerChannel = Settings.getMaxItemsPerChannel(this);
 		BetterAsyncTask<Void, Void, Void> refreshTask = new BetterAsyncTask<Void, Void, Void>(this) {
 			@Override
 			protected void after(Context arg0, Void arg1) {
@@ -269,7 +275,7 @@ public class AndroidNews extends BetterDefaultActivity {
 					throws Exception {
 				for (Channel channel : channels) {
 					try {						
-						channel.update(cr);
+						channel.update(cr, maxItemsPerChannel);
 						channelListView.refresh();
 					} catch (Exception e) {
 						Log.e("ERROR", e.getMessage());
@@ -343,6 +349,7 @@ public class AndroidNews extends BetterDefaultActivity {
     }
     
     private void startAddChannel(String url) {    	
+    	final int maxItemsPerChannel = Settings.getMaxItemsPerChannel(this);
     	final Channel channel = new Channel(url);
     	if (Channel.exists(cr, channel)) {
     		String message = getString(R.string.channel_already_exists).replace("{url}", channel.getUrl());
@@ -375,7 +382,7 @@ public class AndroidNews extends BetterDefaultActivity {
     	addChannelTask.disableDialog();
     	addChannelTask.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
 			public Void call(BetterAsyncTask<Void, Void, Void> arg0) throws Exception {
-				channel.update(cr);
+				channel.update(cr, maxItemsPerChannel);
 				return null;
 			}    		
     	});

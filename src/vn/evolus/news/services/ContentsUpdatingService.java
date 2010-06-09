@@ -8,6 +8,7 @@ import java.util.TimerTask;
 import vn.evolus.news.AndroidNews;
 import vn.evolus.news.ConnectivityReceiver;
 import vn.evolus.news.R;
+import vn.evolus.news.Settings;
 import vn.evolus.news.rss.Channel;
 import vn.evolus.news.util.ImageLoader;
 import android.app.AlarmManager;
@@ -24,8 +25,7 @@ import android.util.Log;
 public class ContentsUpdatingService extends Service {
 	private static final String TAG = "ContentsService";
 	private static final int NOTIFICATION_ID = 0;
-	
-	private static final int UPDATE_INTERVAL = 1000 * 60 * 5;
+		
 	private Object synRoot = new Object();
 	private boolean updating = false;	
 	private Timer timer = new Timer();
@@ -79,6 +79,7 @@ public class ContentsUpdatingService extends Service {
 		Log.d(TAG, "Start updating feeds at " + new Date());
 		
 		int totalNewItems = 0;
+		int maxItemsPerChannel = Settings.getMaxItemsPerChannel(this);
 		if (ConnectivityReceiver.hasGoodEnoughNetworkConnection(this)) {
 			ArrayList<Channel> channels = Channel.loadAllChannels(cr);
 			for (Channel channel : channels) {
@@ -87,9 +88,9 @@ public class ContentsUpdatingService extends Service {
 				}
 								
 				try {
-					int newItems = channel.update(cr);
+					int newItems = channel.update(cr, maxItemsPerChannel);
 					if (newItems > 0) {
-						channel.clean(cr, Channel.MAX_ITEMS);
+						channel.clean(cr, maxItemsPerChannel);
 					}
 					totalNewItems += newItems;
 					channel.getItems().clear();
@@ -133,8 +134,9 @@ public class ContentsUpdatingService extends Service {
 		AlarmManager am = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 		Intent intent = new Intent(this, ContentsUpdatingService.class);
 		PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);		
-		long firstWake = System.currentTimeMillis() + UPDATE_INTERVAL;
-		am.setRepeating(AlarmManager.RTC, firstWake, UPDATE_INTERVAL, pendingIntent);
+		int updateInterval = Settings.getUpdateInterval(this) * 1000 * 60;
+		long firstWake = System.currentTimeMillis() + updateInterval;
+		am.setRepeating(AlarmManager.RTC, firstWake, updateInterval, pendingIntent);
 	}
 
 }

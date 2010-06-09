@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
+<PreferenceScreen  
   xmlns:android="http://schemas.android.com/apk/res/android">
     <CheckBoxPreference
-        android:key="auto_update"
+        android:key="@string/auto_update_key"
         android:title="@string/auto_update_option_title" 
         android:summaryOff="@string/auto_update_off" 
         android:summaryOn="@string/auto_update_on" />
     <CheckBoxPreference
-        android:key="show_updated_channels"
+        android:key="@string/show_updated_channels_key"
         android:title="@string/show_updated_channels_option_title" 
         android:summaryOff="@string/show_updated_channels_off" 
         android:summaryOn="@string/show_updated_channels_on" android:summary="@string/update_interval_dialog_message"/>
     <ListPreference
-        android:key="show_updated_channels"
+        android:key="@string/update_interval_key"
         android:title="@string/update_interval_dialog_title"
         android:summary="@string/update_interval_dialog_message"        
-        android:entryValues="@array/update_interval_values" 
+        android:entryValues="@array/update_interval_values"
         android:entries="@array/update_interval_titles"
         android:dialogTitle="@string/update_interval_dialog_title" /> 
     <ListPreference
-        android:key="max_items_per_channel"
+        android:key="@string/max_items_per_channel_key"
         android:title="@string/max_items_per_channel_dialog_title" 
         android:summary="@string/max_items_per_channel_dialog_message"
         android:dialogTitle="@string/max_items_per_channel_dialog_title"         

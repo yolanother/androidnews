@@ -15,7 +15,12 @@
         </activity>
         <activity android:name=".ChannelActivity" />
         <activity android:name=".ItemActivity" />
-        <activity android:name=".SettingsActivity" />
+        <activity android:name=".SettingsActivity">
+            <intent-filter>
+                <action android:name="vn.evolus.intent.action.Preferences" /> 
+                <category android:name="android.intent.category.PREFERENCE" />
+            </intent-filter>
+        </activity>
         
         <service android:name=".services.ContentsUpdatingService" />
         <service android:name=".services.ImagesDownloadingService" />
