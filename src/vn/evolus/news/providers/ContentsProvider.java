@@ -2,9 +2,9 @@ package vn.evolus.news.providers;
 
 import java.util.HashMap;
 
+import vn.evolus.news.model.Channel.Channels;
 import vn.evolus.news.model.Image.Images;
-import vn.evolus.news.rss.Channel.Channels;
-import vn.evolus.news.rss.Item.Items;
+import vn.evolus.news.model.Item.Items;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -153,7 +153,7 @@ public class ContentsProvider extends ContentProvider {
                 qb.setTables(ITEMS_TABLE_NAME);
                 qb.setProjectionMap(itemsProjectionMap);
                 group = Items.CHANNEL_ID;
-                break;
+                break;            
             case IMAGES:
                 qb.setTables(IMAGES_TABLE_NAME);
                 qb.setProjectionMap(imagesProjectionMap);

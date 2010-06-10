@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import vn.evolus.news.R;
 import vn.evolus.news.adapter.ChannelListViewAdapter;
-import vn.evolus.news.rss.Channel;
+import vn.evolus.news.model.Channel;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;

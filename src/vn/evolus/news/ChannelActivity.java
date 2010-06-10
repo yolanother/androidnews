@@ -1,7 +1,7 @@
 package vn.evolus.news;
 
-import vn.evolus.news.rss.Channel;
-import vn.evolus.news.rss.Item;
+import vn.evolus.news.model.Channel;
+import vn.evolus.news.model.Item;
 import vn.evolus.news.util.ImageLoader;
 import vn.evolus.news.widget.ItemListView;
 import android.app.Activity;

@@ -2,8 +2,8 @@ package vn.evolus.news;
 
 import java.util.ArrayList;
 
-import vn.evolus.news.rss.Channel;
-import vn.evolus.news.rss.Item;
+import vn.evolus.news.model.Channel;
+import vn.evolus.news.model.Item;
 import vn.evolus.news.util.ImageLoader;
 import vn.evolus.news.widget.ItemView;
 import vn.evolus.news.widget.ScrollView;
@@ -40,7 +40,7 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 		} else {
 			currentItemId = getIntent().getLongExtra("ItemId", 0);
 		}
-				
+		
 		Channel channel = Channel.load(getIntent().getLongExtra("ChannelId", 0), cr);
 		channel.loadFullItems(cr);
 		items = channel.getItems();
@@ -119,7 +119,7 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 	}
 	
 	private Item showItem(int itemIndex) {
-		ItemView itemView = (ItemView)scrollView.getChildAt(itemIndex);
+		ItemView itemView = (ItemView)scrollView.getChildAt(itemIndex);		
 		Item item = items.get(itemIndex);
 		itemView.setItem(item);
 		if (!item.equals(currentItem)) {

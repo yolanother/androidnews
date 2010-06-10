@@ -3,7 +3,7 @@ package vn.evolus.news.widget;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import vn.evolus.news.rss.Item;
+import vn.evolus.news.model.Item;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.AttributeSet;

@@ -1,4 +1,4 @@
-package vn.evolus.news.rss;
+package vn.evolus.news.model;
 
 import java.io.Serializable;
 import java.util.Date;

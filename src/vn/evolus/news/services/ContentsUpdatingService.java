@@ -9,7 +9,7 @@ import vn.evolus.news.AndroidNews;
 import vn.evolus.news.ConnectivityReceiver;
 import vn.evolus.news.R;
 import vn.evolus.news.Settings;
-import vn.evolus.news.rss.Channel;
+import vn.evolus.news.model.Channel;
 import vn.evolus.news.util.ImageLoader;
 import android.app.AlarmManager;
 import android.app.Notification;

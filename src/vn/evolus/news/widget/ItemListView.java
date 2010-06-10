@@ -2,7 +2,7 @@ package vn.evolus.news.widget;
 
 import vn.evolus.news.R;
 import vn.evolus.news.adapter.ItemListViewAdapter;
-import vn.evolus.news.rss.Item;
+import vn.evolus.news.model.Item;
 import vn.evolus.news.util.ActiveList;
 import android.content.Context;
 import android.util.AttributeSet;

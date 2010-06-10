@@ -13,7 +13,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import vn.evolus.news.model.Channel;
 import vn.evolus.news.model.Image;
+import vn.evolus.news.model.Item;
 import vn.evolus.news.providers.ImagesProvider;
 import vn.evolus.news.util.ImageCache;
 import android.content.ContentResolver;

@@ -1,7 +1,7 @@
 package vn.evolus.news.adapter;
 
 import vn.evolus.news.R;
-import vn.evolus.news.rss.Item;
+import vn.evolus.news.model.Item;
 import vn.evolus.news.util.ActiveList;
 import vn.evolus.news.util.ImageLoader;
 import vn.evolus.news.util.ImageLoaderHandler;

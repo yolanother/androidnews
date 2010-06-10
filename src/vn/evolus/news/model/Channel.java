@@ -1,4 +1,4 @@
-package vn.evolus.news.rss;
+package vn.evolus.news.model;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,8 +18,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
+import vn.evolus.news.model.Item.Items;
 import vn.evolus.news.providers.ContentsProvider;
-import vn.evolus.news.rss.Item.Items;
+import vn.evolus.news.rss.RssHandler;
 import vn.evolus.news.util.ActiveList;
 import android.content.ContentResolver;
 import android.content.ContentUris;

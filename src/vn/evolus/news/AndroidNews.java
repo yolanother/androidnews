@@ -3,7 +3,7 @@ package vn.evolus.news;
 import java.util.ArrayList;
 import java.util.Map;
 
-import vn.evolus.news.rss.Channel;
+import vn.evolus.news.model.Channel;
 import vn.evolus.news.services.ContentsUpdatingService;
 import vn.evolus.news.services.ImagesDownloadingService;
 import vn.evolus.news.util.ActiveList;
