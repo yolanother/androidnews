@@ -127,6 +127,23 @@ public class Item implements Serializable {
 		}
 	}	
 	
+	public static Item load(ContentResolver cr, long id) {		
+		ItemLoader loader = FULL_ITEM_LOADER;
+		Cursor cursor = cr.query(Items.CONTENT_URI,
+				loader.getProjection(),
+				Items.ID + "=?", 
+				new String[] { String.valueOf(id) }, 
+				null);
+		Item item = null;
+		if (cursor.moveToNext()) {						
+			item = new Item();			
+			loader.load(cursor, item);
+			//item.setChannel(channel);
+		}
+		cursor.close();
+		return item;
+	}
+	
 	public static boolean exists(ContentResolver cr, Item item) {
 		Cursor cursor = cr.query(Items.CONTENT_URI, 
 				new String[] {
@@ -139,6 +156,7 @@ public class Item implements Serializable {
 		cursor.close();
 		return result;
 	}
+	
 	public static void loadAllItemsOfChannel(ContentResolver cr, Channel channel, boolean lightweight) {
 		ItemLoader loader = lightweight ? LIGHTWEIGHT_ITEM_LOADER : FULL_ITEM_LOADER;
 		Cursor cursor = cr.query(Items.CONTENT_URI,

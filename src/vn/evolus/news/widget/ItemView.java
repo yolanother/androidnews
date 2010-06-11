@@ -35,7 +35,7 @@ public class ItemView extends WebView {
 		}		
 		this.setTag(item);		
 		StringBuffer sb = new StringBuffer();
-		sb.append("<html><head><style type=\"text/css\">img{max-width:300px;border:0}</style></head><body>");
+		sb.append("<html><head><style type=\"text/css\">body {font-family: serif; font-size: 1.1em; line-height: 1.6em;} img{max-width:300px;border:solid 2px #EEE;display:block} a{color: #000;}</style></head><body>");
 		sb.append("<h3>");
 		sb.append(TextUtils.htmlEncode(item.getTitle()));
 		sb.append("</h3>");

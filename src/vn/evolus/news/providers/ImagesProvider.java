@@ -2,16 +2,17 @@ package vn.evolus.news.providers;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 
 import vn.evolus.news.model.Image;
 import vn.evolus.news.util.ImageCache;
+import vn.evolus.news.util.ImageLoader;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 
 public class ImagesProvider extends ContentProvider {
 	private static final String URI_PREFIX = "content://vn.evolus.news.images";
@@ -29,9 +30,11 @@ public class ImagesProvider extends ContentProvider {
 			long id = ContentUris.parseId(uri);
 			Image image = Image.load(id, getContext().getContentResolver());
 			if (image != null) {
+				Log.d("DEBUG", "Image not found. Start downloading " + image.getUrl());
 				try {
-					ImageCache.downloadImage(image.getUrl());
-				} catch (IOException e) {
+					//ImageCache.downloadImage(image.getUrl());					
+					ImageLoader.start(image.getUrl(), null);
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}

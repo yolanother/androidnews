@@ -14,14 +14,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 public class ItemActivity extends Activity implements OnItemSelectedListener {	
 	private ScrollView scrollView;
 	private ArrayList<Item> items;
-	private Item currentItem;
-	private WebViewClient client;
+	private Item currentItem;	
 	private ContentResolver cr;
 		
 	@Override
@@ -41,22 +38,21 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 			currentItemId = getIntent().getLongExtra("ItemId", 0);
 		}
 		
-		Channel channel = Channel.load(getIntent().getLongExtra("ChannelId", 0), cr);
+		Channel channel = Channel.load(getIntent().getLongExtra("ChannelId", 0), cr);		
 		channel.loadFullItems(cr);
 		items = channel.getItems();
+		
+//		currentItem = Item.load(cr, currentItemId);
+//		items = new ActiveList<Item>();
+//		items.add(currentItem);
+
 		int index = items.indexOf(new Item(currentItemId));		
 		if (index >= 0) {
 			currentItem  = items.get(index);
 		}
-		setTitle(channel.getTitle());
-		
-		client = new WebViewClient() {
-			@Override
-			public void onLoadResource(WebView view, String url) {
-				super.onLoadResource(view, url);
-			}
-		};
-		loadItems();
+		//*/
+		setTitle(channel.getTitle());				
+		loadItems();		
 	}	
 	
 	@Override
@@ -69,7 +65,6 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 		int i = 0, currentItemIndex = 0;
 		for (Item item : items) {
 			ItemView itemView = new ItemView(this);
-			itemView.setWebViewClient(client);
 			if (item.equals(currentItem)) {
 				currentItemIndex = i;
 				itemView.setItem(item);

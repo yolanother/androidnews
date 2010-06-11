@@ -26,6 +26,7 @@ public class RssHandler extends DefaultHandler {
 	private static Pattern blackListImagePattern;
 	private static DateFormat dateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
 	private static String feedBurnerUri = "http://purl.org/rss/1.0/modules/content/";	
+	private static String IMAGE_RESIZER_SERVICE_URL = "http://droidfeed.appspot.com/resize/";
 
 	final int RSS_CHANNEL = 0;
 	final int RSS_CHANNEL_TITLE = 1;
@@ -60,7 +61,9 @@ public class RssHandler extends DefaultHandler {
 			"images.pheedo.com/images/mm",
 			"cdn.stumble-upon.com",
 			"vietnamnet.gif",
-			"digg-badge-custom-1.gif"
+			"digg-badge-custom-1.gif",
+			"http://a.gigaom.com/feed-injector/img",
+			"openx.com"
 		};
 		
 		//
@@ -260,15 +263,16 @@ public class RssHandler extends DefaultHandler {
 			String imageUrl = matcher.group(1);
 			String foundImageTag = matcher.group();
 			if (!blackListImagePattern.matcher(imageUrl).find()) {				
-				String cachedImageUrl = "http://image-resize.appspot.com/?width=300&height=300&url=" + URLEncoder.encode(imageUrl);				
-				if (!images.contains(cachedImageUrl)) {					
+				//String cachedImageUrl = "http://image-resize.appspot.com/?width=300&height=300&url=" + URLEncoder.encode(imageUrl);
+				String cachedImageUrl = IMAGE_RESIZER_SERVICE_URL + "?width=300&height=0&op=resize&url=" + URLEncoder.encode(imageUrl);
+				if (!images.contains(cachedImageUrl)) {
 					images.add(cachedImageUrl);
 					Image.queue(cachedImageUrl, cr);
 					itemDescription = itemDescription.replace(foundImageTag,
 							"<img src=\"" + ImagesProvider.constructUri(ImageCache.getCacheFileName(cachedImageUrl)) + "\" />");
 				}
 				if (!found) {
-					item.setImageUrl("http://feeds.demo.evolus.vn/resizer/?width=60&height=60&url=" +
+					item.setImageUrl(IMAGE_RESIZER_SERVICE_URL + "?width=60&height=60&op=crop&url=" +
 							URLEncoder.encode(imageUrl));
 					images.add(item.getImageUrl());
 					Image.queue(item.getImageUrl(), cr);
