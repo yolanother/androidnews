@@ -20,8 +20,10 @@
             android:layout_height="wrap_content" 
             android:text="@string/applicationName" 
             android:shadowColor="#ff333333" 
-            android:layout_weight="1.0" />                               
-        <ImageButton 
+            android:layout_weight="1.0"
+            android:focusable="false" />                               
+        <ImageButton
+            android:focusable="false" 
             android:background="@color/toolbarSeparator" 
             android:layout_width="1.0px" 
             android:layout_height="fill_parent" />
@@ -32,8 +34,11 @@
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content"
             android:layout_gravity="center"  
-            android:layout_margin="2.0sp" />
-        <ImageButton 
+            android:layout_margin="2.0sp"            
+            android:nextFocusRight="@id/refresh"
+            android:nextFocusDown="@+id/channelListView" />
+        <ImageButton
+            android:focusable="false"
             android:background="@color/toolbarSeparator" 
             android:layout_width="1.0px"
             android:layout_height="fill_parent" />
@@ -44,7 +49,9 @@
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content"
             android:layout_gravity="center"  
-            android:layout_margin="2.0sp" />
+            android:layout_margin="2.0sp"
+            android:nextFocusLeft="@id/edit"
+            android:nextFocusDown="@+id/channelListView" />
     </LinearLayout>
     <vn.evolus.news.widget.ChannelListView 
         android:id="@+id/channelListView" 
@@ -53,5 +60,6 @@
         android:layout_height="fill_parent" 
         android:cacheColorHint="@color/itemBackground" 
         android:divider="@android:drawable/divider_horizontal_bright" 
-        android:layout_weight="1.0" />
+        android:layout_weight="1.0"
+        android:nextFocusUp="@+id/edit" />
 </LinearLayout>

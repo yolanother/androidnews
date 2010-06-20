@@ -21,8 +21,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
@@ -70,6 +73,20 @@ public class AndroidNews extends BetterDefaultActivity {
 				Channel channel = (Channel)adapterView.getItemAtPosition(position);
 				showChannelOptions(channel);
 				return true;
+			}        	
+        });
+        
+        ImageButton editButton = (ImageButton)findViewById(R.id.edit);        
+        editButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				addChannel();
+			}        	
+        });
+        
+        ImageButton refreshButton = (ImageButton)findViewById(R.id.refresh);
+        refreshButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				//refresh();
 			}        	
         });
                 
@@ -330,7 +347,6 @@ public class AndroidNews extends BetterDefaultActivity {
     	final EditText url = new EditText(this);
     	url.setHint(R.string.enter_your_rss_url_hint);
     	url.setText("http://");
-    	url.setPadding(5, 0, 0, 5);
     	AlertDialog dialog = new AlertDialog.Builder(this)
     		.setTitle("Enter your RSS feed URL")
     		.setView(url)
