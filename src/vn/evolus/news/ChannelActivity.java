@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,7 +32,7 @@ public class ChannelActivity extends Activity {
 	private ContentResolver cr;
 	private Channel channel;
 	
-	TextView channelName;	
+	TextView channelName;
 	ItemListView itemListView;	
 	ViewSwitcher refreshOrProgress;
 		
@@ -45,13 +44,6 @@ public class ChannelActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.channel_view);
-		
-		Button back = (Button)findViewById(R.id.back);
-		back.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				finish();
-			}
-		});
 		
 		refreshOrProgress = (ViewSwitcher)findViewById(R.id.refreshOrProgress);
 		ImageButton refresh = (ImageButton)findViewById(R.id.refresh);

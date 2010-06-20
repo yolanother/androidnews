@@ -98,7 +98,6 @@ public class ImagesDownloadingService extends Service {
 					image.save(cr);
 					
 					downloadImage(image.getUrl(), new DownloadCallback() {
-						@Override
 						public void onComplete() {
 							synchronized (synDownload) {
 								totalDownloads--;
@@ -106,8 +105,10 @@ public class ImagesDownloadingService extends Service {
 							image.setStatus(Image.IMAGE_STATUS_DOWNLOADED);
 							image.save(cr);
 						}
-						@Override
 						public void onFailed() {
+							synchronized (synDownload) {
+								totalDownloads--;
+							}
 							if (image.getRetries() == Image.MAX_RETRIES) {
 								image.setStatus(Image.IMAGE_STATUS_FAILED);								
 								image.save(cr);
@@ -150,7 +151,6 @@ public class ImagesDownloadingService extends Service {
 		}
 		
 		executor.execute(new Runnable() {
-			@Override
 			public void run() {
 	            try {	            	
 	                ImageCache.downloadImage(imageUrl);

@@ -13,6 +13,7 @@ import android.provider.BaseColumns;
 public class Image {
 	public static final byte MAX_RETRIES = 3;
 	
+	public static final byte IMAGE_STATUS_PENDING = -1;
 	public static final byte IMAGE_STATUS_QUEUED = 0;
 	public static final byte IMAGE_STATUS_DOWNLOADING = 1;
 	public static final byte IMAGE_STATUS_DOWNLOADED = 2;
@@ -57,7 +58,7 @@ public class Image {
 		Image image = load(url, cr);
 		if (image != null) return image.id;		
 		
-		image = new Image(url, IMAGE_STATUS_QUEUED);
+		image = new Image(url, IMAGE_STATUS_PENDING);
 		image.save(cr);		
 		return image.id;
 	}

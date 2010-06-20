@@ -16,8 +16,6 @@ import org.xml.sax.helpers.DefaultHandler;
 import vn.evolus.news.model.Channel;
 import vn.evolus.news.model.Image;
 import vn.evolus.news.model.Item;
-import vn.evolus.news.providers.ImagesProvider;
-import vn.evolus.news.util.ImageCache;
 import android.content.ContentResolver;
 
 public class RssHandler extends DefaultHandler {	
@@ -263,13 +261,12 @@ public class RssHandler extends DefaultHandler {
 			String imageUrl = matcher.group(1);
 			String foundImageTag = matcher.group();
 			if (!blackListImagePattern.matcher(imageUrl).find()) {				
-				//String cachedImageUrl = "http://image-resize.appspot.com/?width=300&height=300&url=" + URLEncoder.encode(imageUrl);
 				String cachedImageUrl = IMAGE_RESIZER_SERVICE_URL + "?width=300&height=0&op=resize&url=" + URLEncoder.encode(imageUrl);
 				if (!images.contains(cachedImageUrl)) {
 					images.add(cachedImageUrl);
-					Image.queue(cachedImageUrl, cr);
+					long imageId = Image.queue(cachedImageUrl, cr);
 					itemDescription = itemDescription.replace(foundImageTag,
-							"<img src=\"" + ImagesProvider.constructUri(ImageCache.getCacheFileName(cachedImageUrl)) + "\" />");
+							"<img src=\"" + cachedImageUrl + "#" + imageId + "\" />");
 				}
 				if (!found) {
 					item.setImageUrl(IMAGE_RESIZER_SERVICE_URL + "?width=60&height=60&op=crop&url=" +

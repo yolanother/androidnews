@@ -1,69 +1,57 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:orientation="vertical" 
+    android:layout_width="fill_parent" 
     android:layout_height="fill_parent">
-    <LinearLayout
-        android:orientation="horizontal"    
-        android:background="@color/toolbarBackground"
-        android:paddingTop="10px"
-        android:paddingBottom="10px"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">        
-        <Button
-            android:id="@+id/back"
-            android:text="Back"                 
+    <LinearLayout 
+        android:orientation="horizontal" 
+        android:background="@drawable/toolbar_bg" 
+        android:focusable="true" 
+        android:layout_width="fill_parent" 
+        android:layout_height="@dimen/toolbarHeight">
+        <TextView
+            android:id="@+id/channelName" 
+            android:textSize="15.0sp" 
             android:textStyle="bold" 
-            android:textColor="@color/toolbarButton"            
-            android:layout_width="wrap_content"
-            android:background="@drawable/back_bg"
-            android:layout_height="35sp"  
-            android:layout_weight="0"    
-            android:layout_marginLeft="5px"
-            android:layout_marginRight="5px"
-            android:layout_gravity="center_vertical"                          
-        />
-        <TextView 
-            android:id="@+id/channelName"
-            android:textSize="22sp"
-            android:textColor="@color/channelName"
-            android:textStyle="bold"
-            android:text=""
-            android:ellipsize="marquee"
-            android:maxLines="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"  
-            android:layout_weight="8"
-            android:gravity="center"
-        />
-        <ViewSwitcher android:id="@+id/refreshOrProgress"
-            android:layout_width="35sp"
-            android:layout_height="35sp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="5px"
-            android:layout_marginRight="5px">
-            <ImageButton
-	            android:id="@+id/refresh"            
-	            android:src="@drawable/refresh"
-	            android:background="@drawable/refresh_bg"
-	            android:hint="Refresh"         
-	            android:layout_width="35sp"
-	            android:layout_height="35sp"
-	            android:layout_weight="0"
-            />
-            <ProgressBar
-                android:id="@+id/progress"
-                android:indeterminate="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                style="?android:attr/progressBarStyleSmall"                                                               
-            />                            
-        </ViewSwitcher>        
+            android:textColor="@color/channelName" 
+            android:gravity="left" 
+            android:layout_gravity="center"              
+            android:padding="5.0sp" 
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content" 
+            android:text="@string/applicationName" 
+            android:shadowColor="#ff333333" 
+            android:layout_weight="1.0" />
+        <ImageButton 
+            android:background="@color/toolbarSeparator" 
+            android:layout_width="1.0px" 
+            android:layout_height="fill_parent" />
+        <ViewSwitcher 
+            android:layout_gravity="center" 
+            android:id="@+id/refreshOrProgress" 
+            android:layout_width="@dimen/toolbarHeight" 
+            android:layout_height="@dimen/toolbarHeight" 
+            android:layout_margin="2.0sp">
+            <ImageButton 
+                android:id="@+id/refresh" 
+                android:background="@drawable/toolbar_button_selector" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:src="@drawable/ic_toolbar_refresh" 
+                android:hint="Refresh" 
+                android:layout_weight="0.0" />
+            <ProgressBar 
+                android:layout_gravity="center" 
+                android:id="@+id/progress" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:indeterminate="true" 
+                style="?android:progressBarStyleSmall" />
+        </ViewSwitcher>
     </LinearLayout>
-    <vn.evolus.news.widget.ItemListView
-	    android:id="@+id/itemListView"
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"               
+    <vn.evolus.news.widget.ItemListView 
+        android:id="@+id/itemListView" 
+        android:layout_width="fill_parent" 
+        android:layout_height="fill_parent" 
     />
 </LinearLayout>

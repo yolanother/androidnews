@@ -1,25 +1,57 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">            
-    <TextView                
-        android:textSize="22sp"
-        android:textColor="@color/channelName"
-        android:textStyle="bold"        
-        android:text="@string/applicationName"
-        android:background="@color/toolbarBackground"
-        android:layout_width="fill_parent"
-        android:layout_height="50sp"
-        android:layout_gravity="center"
-        android:gravity="center"
-    />
-    <vn.evolus.news.widget.ChannelListView
-        android:id="@+id/channelListView"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:background="@color/itemBackground"        
-        android:cacheColorHint="@color/itemBackground"
-        android:divider="@android:drawable/divider_horizontal_bright"
-    />       
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:orientation="vertical" 
+    android:layout_width="fill_parent" 
+    android:layout_height="fill_parent">
+    <LinearLayout 
+        android:orientation="horizontal" 
+        android:background="@drawable/toolbar_bg"        
+        android:layout_width="fill_parent" 
+        android:layout_height="@dimen/toolbarHeight">
+        <TextView
+            android:id="@+id/toolbarTitle" 
+            android:textSize="15.0sp" 
+            android:textStyle="bold" 
+            android:textColor="@color/channelName" 
+            android:gravity="left" 
+            android:layout_gravity="center"             
+            android:padding="5.0sp" 
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content" 
+            android:text="@string/applicationName" 
+            android:shadowColor="#ff333333" 
+            android:layout_weight="1.0" />                               
+        <ImageButton 
+            android:background="@color/toolbarSeparator" 
+            android:layout_width="1.0px" 
+            android:layout_height="fill_parent" />
+        <ImageButton 
+            android:id="@+id/edit"
+            android:src="@drawable/ic_toolbar_edit"            
+            android:background="@drawable/toolbar_button_selector"  
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"  
+            android:layout_margin="2.0sp" />
+        <ImageButton 
+            android:background="@color/toolbarSeparator" 
+            android:layout_width="1.0px"
+            android:layout_height="fill_parent" />
+        <ImageButton
+            android:id="@+id/refresh"     
+            android:src="@drawable/ic_toolbar_refresh"        
+            android:background="@drawable/toolbar_button_selector" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"  
+            android:layout_margin="2.0sp" />
+    </LinearLayout>
+    <vn.evolus.news.widget.ChannelListView 
+        android:id="@+id/channelListView" 
+        android:background="@color/itemBackground" 
+        android:layout_width="fill_parent" 
+        android:layout_height="fill_parent" 
+        android:cacheColorHint="@color/itemBackground" 
+        android:divider="@android:drawable/divider_horizontal_bright" 
+        android:layout_weight="1.0" />
 </LinearLayout>

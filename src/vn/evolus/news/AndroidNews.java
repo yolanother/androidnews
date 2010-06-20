@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -53,6 +54,8 @@ public class AndroidNews extends BetterDefaultActivity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
+        TextView title = (TextView)findViewById(R.id.toolbarTitle);
+        title.setText(title.getText().toString().toUpperCase());
         
         channelListView = (ChannelListView)findViewById(R.id.channelListView);               
         channelListView.setOnItemClickListener(new OnItemClickListener() {

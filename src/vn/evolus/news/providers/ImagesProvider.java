@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 
 import vn.evolus.news.model.Image;
-import vn.evolus.news.util.ImageCache;
 import vn.evolus.news.util.ImageLoader;
 import android.content.ContentProvider;
 import android.content.ContentUris;

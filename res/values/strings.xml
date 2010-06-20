@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>   
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
     <string name="applicationName">Droid News</string>
     <string name="settings">Settings</string>
     <string name="back">Back</string>
@@ -7,29 +7,25 @@
     <string name="add_channel">Add channel</string>
     <string name="add">Add</string>
     <string name="cancel">Cancel</string>
-    <string name="add_channel_successfully">"{channel}" channel has been added successfully.</string>
-    <string name="add_channel_failed">Cannot add "{url}" channel. Please check your URL.</string>
-    <string name="channel_already_exists">Channel "{url}" has already existed.</string>
+    <string name="add_channel_successfully">{channel} channel has been added successfully.</string>
+    <string name="add_channel_failed">Cannot add {url} channel. Please check your URL.</string>
+    <string name="channel_already_exists">Channel {url} has already existed.</string>
     <string name="enter_your_rss_url_hint">enter your RSS feed link</string>
     <string name="new_items_notification">{total} new items</string>
     <string name="adding_channel">Adding channel, please wait...</string>
     <string name="mark_all_as_read">Mark all as read</string>
     <string name="no_channel_has_new_items">There are no channel has new items now.</string>
-    
-    <string name="auto_update_key">auto_update</string> 
+    <string name="auto_update_key">auto_update</string>
     <string name="auto_update_option_title">Auto update</string>
     <string name="auto_update_on">Feeds will be updated automatically</string>
     <string name="auto_update_off">You must manually update your feeds</string>
-    
     <string name="show_updated_channels_key">show_updated_channels</string>
     <string name="show_updated_channels_option_title">Show channels</string>
     <string name="show_updated_channels_on">which have new items</string>
     <string name="show_updated_channels_off">show all channels</string>
-    
     <string name="update_interval_key">update_interval</string>
     <string name="update_interval_dialog_title">Update interval</string>
     <string name="update_interval_dialog_message">How long will we update feeds?</string>
-    
     <string name="max_items_per_channel_key">max_items_per_channel</string>
     <string name="max_items_per_channel_dialog_title">Max items per channel?</string>
     <string name="max_items_per_channel_dialog_message">How many items should we keep per channel?</string>

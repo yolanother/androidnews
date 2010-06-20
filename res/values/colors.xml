@@ -1,12 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>    
-    <color name="toolbarBackground">#000000</color>
-    <color name="itemTitle">#333</color>
-    <color name="itemTitleRead">#666</color>
-    <color name="itemDate">#999</color>
-    <color name="itemBackground">#FFFFFF</color>
-    <color name="itemReadBackground">#EEEEEE</color>
-    <color name="channelName">#FFFFFF</color>
-    <color name="unreadCount">#F00</color>
-    <color name="toolbarButton">#EEE</color>
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <color name="clear">#00000000</color>
+    <color name="toolbarBackground">#ff000000</color>
+    <color name="toolbarSeparator">#ff555555</color>
+    <color name="itemTitle">#ff333333</color>
+    <color name="itemTitleRead">#ff666666</color>
+    <color name="itemDate">#ff999999</color>
+    <color name="itemBackground">#ffffffff</color>
+    <color name="itemReadBackground">#ffeeeeee</color>
+    <color name="channelName">#ffffffff</color>
+    <color name="unreadCount">#ffff0000</color>
+    <color name="toolbarButton">#ffeeeeee</color>
 </resources>
