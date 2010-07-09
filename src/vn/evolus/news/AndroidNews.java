@@ -22,7 +22,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -164,6 +163,7 @@ public class AndroidNews extends BetterDefaultActivity {
 		channels.add(new Channel("Google Android Blog", "http://feeds.feedburner.com/androinica"));
 		
 		channels.add(new Channel("Tinh tế", "http://feeds.feedburner.com/androidnews/tinhte"));		
+		/*
 		channels.add(new Channel("Số Hóa - Điện thoại", "http://feeds.feedburner.com/androidnews/sohoa/dienthoai"));
 		channels.add(new Channel("Số Hóa - Máy tính", "http://feeds.feedburner.com/androidnews/sohoa/maytinh"));
 		channels.add(new Channel("Số Hóa - Camera", "http://feeds.feedburner.com/androidnews/sohoa/camera"));
@@ -202,7 +202,7 @@ public class AndroidNews extends BetterDefaultActivity {
 				
 		channels.add(new Channel("Vietstock", "http://feeds.feedburner.com/androidnews/vietstock/chungkhoan"));
 		channels.add(new Channel("CafeF", "http://feeds.feedburner.com/androidnews/cafef/chungkhoan"));
-		
+		*/
 		saveChannels();
 	}
 		

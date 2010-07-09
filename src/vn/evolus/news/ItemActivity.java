@@ -64,7 +64,7 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 	private void loadItems() {
 		int i = 0, currentItemIndex = 0;
 		for (Item item : items) {
-			ItemView itemView = new ItemView(this);
+			ItemView itemView = new ItemView(this.getApplicationContext());
 			if (item.equals(currentItem)) {
 				currentItemIndex = i;
 				itemView.setItem(item);

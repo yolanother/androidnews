@@ -43,7 +43,7 @@ public class ContentsUpdatingService extends Service {
 	}
 	
 	@Override
-	public void onStart(Intent intent, int startId) {
+	public void onStart(Intent intent, int startId) {		
 		super.onStart(intent, startId);
 		ImageLoader.initialize(this);
 		timer.schedule(new TimerTask() {
@@ -71,6 +71,10 @@ public class ContentsUpdatingService extends Service {
 	}
 	
 	protected void updateFeeds() {
+		if (!Settings.getAutoUpdate(this)) {
+			return;
+		}
+		
 		synchronized (synRoot) {
 			if (updating) return;
 			updating = true;

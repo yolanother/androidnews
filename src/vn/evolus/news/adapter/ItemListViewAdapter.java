@@ -26,6 +26,8 @@ public class ItemListViewAdapter extends BaseAdapter {
 	
 	private int itemTitleReadColor = 0;
 	private int itemTitleColor = 0;
+	private int itemBackgroundColor = 0;
+	private int itemReadBackgroundColor = 0;
 	private ActiveList<Item> items = new ActiveList<Item>();
 	private Context context;
 	Handler handler = new Handler() {
@@ -62,6 +64,8 @@ public class ItemListViewAdapter extends BaseAdapter {
 		ImageLoader.initialize(context);
 		itemTitleReadColor = context.getResources().getColor(R.color.itemTitleRead);
 		itemTitleColor = context.getResources().getColor(R.color.itemTitle);
+		itemBackgroundColor = context.getResources().getColor(R.color.itemBackground);
+		itemReadBackgroundColor = context.getResources().getColor(R.color.itemReadBackground);
 	}
 	public int getCount() {
 		return items.size();
@@ -100,8 +104,10 @@ public class ItemListViewAdapter extends BaseAdapter {
 		holder.title.setText(item.getTitle());
 		if (item.getRead()) {
 			holder.title.setTextColor(itemTitleReadColor);
+			convertView.setBackgroundColor(itemReadBackgroundColor);			
 		} else {
 			holder.title.setTextColor(itemTitleColor);
+			convertView.setBackgroundColor(itemBackgroundColor);
 		}
 		if (item.getPubDate() != null) {
 			holder.date.setText(DateUtils.getRelativeDateTimeString(context, item.getPubDate().getTime(), 1, DateUtils.DAY_IN_MILLIS, 0));
