@@ -1,16 +1,16 @@
 TODO:
 * Allow add/edit/delete channels
-* Refresh item read status when user goes back to ChannelActivity
+* Refresh item read status when user goes back to ChannelActivity   
+* Parse YouTube video code
+* Clean up images cache folder
+
+DONE:
 * Settings: 
     * manually update/auto update 
     * maximum items/channel
     * update interval
     * option to show all channels or just channels have new items
-    * option to show all items or unread items in ChannelActivity    
-* Parse YouTube video code
-* Clean up images cache folder
-
-DONE:
+    * option to show all items or unread items in ChannelActivity 
 * improve ItemActivity open speed
 * Mark item as read when user flings on item view
 * Queued images for download

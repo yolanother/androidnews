@@ -5,7 +5,7 @@
     android:layout_height="fill_parent">
     <LinearLayout 
         android:orientation="horizontal" 
-        android:background="@drawable/toolbar_bg"        
+        android:background="@drawable/toolbar_bg"
         android:layout_width="fill_parent" 
         android:layout_height="@dimen/toolbarHeight">
         <TextView

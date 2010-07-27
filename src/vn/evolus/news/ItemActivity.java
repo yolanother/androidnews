@@ -11,11 +11,14 @@ import vn.evolus.news.widget.ScrollView.OnItemSelectedListener;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class ItemActivity extends Activity implements OnItemSelectedListener {	
+public class ItemActivity extends Activity implements OnItemSelectedListener {
+	private static final int MENU_SHARE = 1;
+	private static final int MENU_VIEW_ORIGINAL = 2;
 	private ScrollView scrollView;
 	private ArrayList<Item> items;
 	private Item currentItem;	
@@ -77,18 +80,25 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(R.string.share).setIcon(android.R.drawable.ic_menu_share);
-		menu.add(R.string.view_original).setIcon(android.R.drawable.ic_menu_view);
+		menu.add(Menu.NONE, MENU_SHARE, 0, R.string.share).setIcon(android.R.drawable.ic_menu_share);
+		menu.add(Menu.NONE, MENU_VIEW_ORIGINAL, 1, R.string.view_original).setIcon(android.R.drawable.ic_menu_view);
 		return super.onCreateOptionsMenu(menu);
 	}
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		share();
+		switch (item.getItemId()) {
+			case MENU_SHARE:
+				share();
+				break;
+			case MENU_VIEW_ORIGINAL:
+				viewOriginal();
+				break;
+		}		
 		return true;
 	}
 	
-	public void share() {
+	private void share() {
 		if (currentItem == null) return;
 		Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND);
 		shareIntent.setType("text/plain");
@@ -97,6 +107,11 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 		shareText = shareText.replace("{link}", currentItem.getLink());		
 		shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareText);
 		startActivity(Intent.createChooser(shareIntent, getResources().getString(R.string.share)));      
+	}
+	
+	private void viewOriginal() {
+		Intent viewIntent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(currentItem.getLink()));
+		startActivity(viewIntent);
 	}
 
 	@Override
