@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="ReadTitleText" parent="@android:style/TextAppearance">
+	    <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/itemTitle</item>
+        <item name="android:textStyle">normal</item>
+	</style>
+	<style name="UnreadTitleText" parent="@android:style/TextAppearance">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/itemTitle</item>
+        <item name="android:textStyle">bold</item>
+    </style>    
+</resources>

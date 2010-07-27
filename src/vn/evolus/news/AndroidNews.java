@@ -10,7 +10,6 @@ import vn.evolus.news.util.ActiveList;
 import vn.evolus.news.util.ImageLoader;
 import vn.evolus.news.widget.ChannelListView;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -23,7 +22,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -344,69 +342,8 @@ public class AndroidNews extends BetterDefaultActivity {
     }
     
     private void addChannel() {
-    	final EditText url = new EditText(this);
-    	url.setHint(R.string.enter_your_rss_url_hint);
-    	url.setText("http://");
-    	AlertDialog dialog = new AlertDialog.Builder(this)
-    		.setTitle("Enter your RSS feed URL")
-    		.setView(url)
-    		.setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {					
-					startAddChannel(url.getText().toString());
-					dialog.dismiss();
-				}    			
-    		})
-    		.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.dismiss();
-				}    			
-    		})
-    		.create();
-    	dialog.show();
-    }
-    
-    private void startAddChannel(String url) {    	
-    	final int maxItemsPerChannel = Settings.getMaxItemsPerChannel(this);
-    	final Channel channel = new Channel(url);
-    	if (Channel.exists(cr, channel)) {
-    		String message = getString(R.string.channel_already_exists).replace("{url}", channel.getUrl());
-			Toast.makeText(this, message, 1000).show();
-    		return;
-    	}
-    	channel.save(cr);
-    	
-    	final ProgressDialog progressDialog = new ProgressDialog(this);
-    	progressDialog.setMessage(getString(R.string.adding_channel));
-    	BetterAsyncTask<Void, Void, Void> addChannelTask = new BetterAsyncTask<Void, Void, Void>(this) {
-			@Override
-			protected void after(Context context, Void arg1) {
-				progressDialog.dismiss();
-				if (channel.getItems().size() > 0) {
-					channel.save(cr);
-					String message = context.getString(R.string.add_channel_successfully).replace("{channel}", channel.getTitle());
-					Toast.makeText(context, message, 1000).show();
-					loadData();
-				} else {
-					channel.delete(cr);
-					String message = context.getString(R.string.add_channel_failed).replace("{url}", channel.getUrl());
-					Toast.makeText(context, message, 1000).show();					
-				}				
-			}
-			@Override
-			protected void handleError(Context arg0, Exception arg1) {
-			}    		
-    	};
-    	addChannelTask.disableDialog();
-    	addChannelTask.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
-			public Void call(BetterAsyncTask<Void, Void, Void> arg0) throws Exception {
-				channel.update(cr, maxItemsPerChannel);
-				return null;
-			}    		
-    	});
-    	progressDialog.show();
-    	addChannelTask.execute();    	
+    	Intent intent = new Intent(this, SubscriptionActivity.class);
+    	startActivity(intent);
     }
     
     @Override

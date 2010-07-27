@@ -31,7 +31,8 @@ public class ItemListView extends ListView {
 		
 		this.setBackgroundColor(getResources().getColor(R.color.itemBackground));
 		this.setCacheColorHint(getResources().getColor(R.color.itemBackground));
-		this.setDivider(getResources().getDrawable(android.R.drawable.divider_horizontal_bright));
+		this.setDivider(getResources().getDrawable(android.R.drawable.divider_horizontal_bright));		
+		this.setVerticalScrollBarEnabled(false);
 	}
 
 	public void setItems(ActiveList<Item> items) {

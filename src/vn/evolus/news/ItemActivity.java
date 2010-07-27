@@ -77,9 +77,10 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add("Share").setIcon(android.R.drawable.ic_menu_share);
+		menu.add(R.string.share).setIcon(android.R.drawable.ic_menu_share);
+		menu.add(R.string.view_original).setIcon(android.R.drawable.ic_menu_view);
 		return super.onCreateOptionsMenu(menu);
-	}	
+	}
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -91,10 +92,11 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 		if (currentItem == null) return;
 		Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND);
 		shareIntent.setType("text/plain");
-		shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "I want to share");
-		shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, currentItem.getLink());
-
-		startActivity(Intent.createChooser(shareIntent, "Share"));      
+		shareIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, currentItem.getTitle());		
+		String shareText = getResources().getString(R.string.share_text);
+		shareText = shareText.replace("{link}", currentItem.getLink());		
+		shareIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareText);
+		startActivity(Intent.createChooser(shareIntent, getResources().getString(R.string.share)));      
 	}
 
 	@Override

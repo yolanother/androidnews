@@ -1,5 +1,7 @@
 package vn.evolus.news.adapter;
 
+import java.lang.ref.WeakReference;
+
 import vn.evolus.news.R;
 import vn.evolus.news.model.Item;
 import vn.evolus.news.util.ActiveList;
@@ -19,15 +21,14 @@ import android.widget.TextView;
 public class ItemListViewAdapter extends BaseAdapter {
 	private static final int REFRESH_MESSAGE = 1;
 	static class ViewHolder {
+		ImageView readIndicator;
 		ImageView image;
 		TextView title;
 		TextView date;
 	}
 	
-	private int itemTitleReadColor = 0;
-	private int itemTitleColor = 0;
-	private int itemBackgroundColor = 0;
-	private int itemReadBackgroundColor = 0;
+	private int readIndicatorColor = 0;
+	private int unreadIndicatorColor = 0;
 	private ActiveList<Item> items = new ActiveList<Item>();
 	private Context context;
 	Handler handler = new Handler() {
@@ -62,10 +63,8 @@ public class ItemListViewAdapter extends BaseAdapter {
 	public ItemListViewAdapter(Context context) {
 		this.context = context;
 		ImageLoader.initialize(context);
-		itemTitleReadColor = context.getResources().getColor(R.color.itemTitleRead);
-		itemTitleColor = context.getResources().getColor(R.color.itemTitle);
-		itemBackgroundColor = context.getResources().getColor(R.color.itemBackground);
-		itemReadBackgroundColor = context.getResources().getColor(R.color.itemReadBackground);
+		readIndicatorColor = context.getResources().getColor(R.color.readIndicator);
+		unreadIndicatorColor = context.getResources().getColor(R.color.unreadIndicator);
 	}
 	public int getCount() {
 		return items.size();
@@ -93,6 +92,7 @@ public class ItemListViewAdapter extends BaseAdapter {
 			convertView = View.inflate(context, R.layout.item, null);
 			
 			holder = new ViewHolder();
+			holder.readIndicator = (ImageView)convertView.findViewById(R.id.readIndicator);
 			holder.title = (TextView)convertView.findViewById(R.id.itemTitle);
 			holder.date = (TextView)convertView.findViewById(R.id.itemDate);
 			holder.image = (ImageView)convertView.findViewById(R.id.itemImage);
@@ -103,22 +103,25 @@ public class ItemListViewAdapter extends BaseAdapter {
 				
 		holder.title.setText(item.getTitle());
 		if (item.getRead()) {
-			holder.title.setTextColor(itemTitleReadColor);
-			convertView.setBackgroundColor(itemReadBackgroundColor);			
-		} else {
-			holder.title.setTextColor(itemTitleColor);
-			convertView.setBackgroundColor(itemBackgroundColor);
+			holder.title.setTextAppearance(context, R.style.ReadTitleText);
+			holder.readIndicator.setBackgroundColor(readIndicatorColor);					
+		} else {			
+			holder.title.setTextAppearance(context, R.style.UnreadTitleText);
+			holder.readIndicator.setBackgroundColor(unreadIndicatorColor);
 		}
 		if (item.getPubDate() != null) {
 			holder.date.setText(DateUtils.getRelativeDateTimeString(context, item.getPubDate().getTime(), 1, DateUtils.DAY_IN_MILLIS, 0));
 		}
-		holder.image.setImageResource(R.drawable.no_image);
+		
+		holder.image.setImageBitmap(null);
+		holder.image.setVisibility(View.GONE);
 		String imageUrl = item.getImageUrl();
 		holder.image.setTag(imageUrl);
 		if (imageUrl != null) {
 			try {
 				Bitmap itemImage = ImageLoader.get(imageUrl);			
 				if (itemImage != null) {
+					holder.image.setVisibility(View.VISIBLE);
 					holder.image.setImageBitmap(itemImage);
 				} else {					
 					ImageLoader.start(imageUrl, new ItemImageLoaderHandler(holder.image, imageUrl));
@@ -131,17 +134,21 @@ public class ItemListViewAdapter extends BaseAdapter {
 	}		
 	
 	private class ItemImageLoaderHandler extends ImageLoaderHandler {
-		private ImageView imageView;
+		private WeakReference<ImageView> imageRef;
 		private String imageUrl;
 		
 		public ItemImageLoaderHandler(ImageView imageView, String imageUrl) {
-			this.imageView = imageView;
+			this.imageRef = new WeakReference<ImageView>(imageView);
 			this.imageUrl = imageUrl;
 		}
 		public void handleMessage(Message msg) {
 	        super.handleMessage(msg);
 	        if (msg.what == ImageLoader.BITMAP_DOWNLOADED_SUCCESS) {
+	        	ImageView imageView = imageRef.get();
+	        	if (imageView == null) return;
+	        	
 		        if (imageUrl.equals((String)imageView.getTag())) {
+		        	imageView.setVisibility(View.VISIBLE);
 		        	imageView.setImageBitmap(super.getImage());
 		        }
 	        }

@@ -1,5 +1,4 @@
 TODO:
-* improve ItemActivity open speed
 * Allow add/edit/delete channels
 * Refresh item read status when user goes back to ChannelActivity
 * Settings: 
@@ -12,6 +11,7 @@ TODO:
 * Clean up images cache folder
 
 DONE:
+* improve ItemActivity open speed
 * Mark item as read when user flings on item view
 * Queued images for download
 * Save channel to disk

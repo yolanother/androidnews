@@ -11,4 +11,7 @@
     <color name="channelName">#ffffffff</color>
     <color name="unreadCount">#ffff0000</color>
     <color name="toolbarButton">#ffeeeeee</color>
+    
+    <color name="unreadIndicator">#00FF00</color>
+    <color name="readIndicator">#00000000</color>
 </resources>

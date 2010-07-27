@@ -5,7 +5,8 @@
       android:versionName="1.0">
     <application 
         android:name="Application"
-        android:icon="@drawable/icon" android:label="@string/applicationName">
+        android:icon="@drawable/icon" android:label="@string/applicationName"
+        android:debuggable="true">
         <activity android:name=".AndroidNews"
                   android:label="@string/applicationName">
             <intent-filter>
@@ -15,6 +16,7 @@
         </activity>
         <activity android:name=".ChannelActivity" />
         <activity android:name=".ItemActivity" />
+        <activity android:name=".SubscriptionActivity" />
         <activity android:name=".SettingsActivity">
             <intent-filter>
                 <action android:name="vn.evolus.intent.action.Preferences" /> 
@@ -34,7 +36,7 @@
 		    <intent-filter>
 		        <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
 		    </intent-filter>
-		</receiver>                  
+		</receiver>
     </application>    
     <uses-sdk android:minSdkVersion="4" />
     

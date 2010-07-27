@@ -7,6 +7,7 @@
     <string name="add_channel">Add channel</string>
     <string name="add">Add</string>
     <string name="cancel">Cancel</string>
+    <string name="search">Search</string>
     <string name="add_channel_successfully">{channel} channel has been added successfully.</string>
     <string name="add_channel_failed">Cannot add {url} channel. Please check your URL.</string>
     <string name="channel_already_exists">Channel {url} has already existed.</string>
@@ -29,4 +30,8 @@
     <string name="max_items_per_channel_key">max_items_per_channel</string>
     <string name="max_items_per_channel_dialog_title">Max items per channel?</string>
     <string name="max_items_per_channel_dialog_message">How many items should we keep per channel?</string>
+    
+    <string name="share">Share</string>
+    <string name="view_original">View original</string>
+    <string name="share_text">Hi,\n\nYour friend want to share with you a nice article: {link}\n\nHave fun.</string>
 </resources>

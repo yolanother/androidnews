@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/title"
+    android:text="Channel name"				
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingLeft="64px"
+    android:paddingRight="10sp"		
+    android:textColor="@color/itemTitle"
+    android:background="@android:color/transparent"
+    android:maxLines="1"
+    android:ellipsize="marquee"
+    android:checkMark="?android:attr/listChoiceIndicatorMultiple"    
+    android:gravity="center_vertical"
+    android:layout_weight="1" />

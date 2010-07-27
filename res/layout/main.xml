@@ -59,7 +59,7 @@
         android:layout_width="fill_parent" 
         android:layout_height="fill_parent" 
         android:cacheColorHint="@color/itemBackground" 
-        android:divider="@android:drawable/divider_horizontal_bright" 
+        android:divider="@android:drawable/divider_horizontal_bright"
         android:layout_weight="1.0"
         android:nextFocusUp="@+id/edit" />
 </LinearLayout>

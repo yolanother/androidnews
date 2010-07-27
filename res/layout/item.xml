@@ -1,45 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"    
-	android:id="@+id/newsRow"
-	android:paddingLeft="5px"
-    android:paddingRight="5px"
-    android:paddingTop="5px"
-    android:paddingBottom="5px"    
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"		
+	android:paddingLeft="0dp"
 	android:orientation="horizontal"
 	android:layout_width="fill_parent"
-	android:layout_height="fill_parent">	
-	<ImageView
-	   android:id="@+id/itemImage"
-       android:layout_width="60dip"
-       android:layout_height="60dip"
-       android:src="@drawable/no_image"       
-    />
-	<LinearLayout	    
-	    android:paddingLeft="5px"	    
+	android:layout_height="fill_parent">
+    <ImageView
+       android:id="@+id/readIndicator"
+       android:layout_width="5dp"
+       android:layout_height="fill_parent"
+       android:layout_weight="0"
+       android:layout_gravity="center_vertical"
+       android:background="@color/unreadIndicator" />
+	<LinearLayout	           
 	    android:orientation="vertical"
 	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:padding="5dp"
 	    android:layout_weight="1">
-	   <TextView android:id="@+id/itemTitle"
-			android:layout_width="wrap_content"
+        <TextView android:id="@+id/itemTitle"
+            android:text="Title"
+            android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:textSize="15sp"
 			android:textStyle="bold"
 			android:textColor="@color/itemTitle"
 			android:maxLines="2"
-            android:ellipsize="marquee"
-		/>
+			android:ellipsize="end" />
 		<TextView android:id="@+id/itemDate"
+		    android:text="June 17th, 1980"
 			android:textColor="@color/itemDate"
 			android:textSize="11sp"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			/>						
+			android:layout_marginRight="5dp" />						
 	</LinearLayout>
+	<ImageView
+       android:id="@+id/itemImage"
+       android:layout_width="60dip"
+       android:layout_height="60dip"
+       android:layout_weight="0"
+       android:layout_gravity="center_vertical"
+       android:paddingLeft="5px" />
 	<ImageView       
 	   android:src="@drawable/chevron"
 	   android:background="@android:color/transparent"
-       android:paddingLeft="5px"   
+       android:paddingLeft="5dip"   
        android:layout_width="20px"
        android:layout_height="13px"          
        android:layout_weight="0"
