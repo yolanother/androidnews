@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:orientation="vertical" 
+    android:layout_width="fill_parent" 
+    android:layout_height="fill_parent">
+    <LinearLayout 
+        android:orientation="horizontal" 
+        android:background="@drawable/toolbar_bg" 
+        android:focusable="true" 
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/toolbarHeight">
+        <TextView
+            android:id="@+id/title" 
+            android:text="@string/latest"
+            android:textSize="15.0sp" 
+            android:textStyle="bold" 
+            android:textColor="@color/channelName" 
+            android:gravity="left" 
+            android:layout_gravity="center"              
+            android:padding="5.0sp" 
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content"            
+            android:shadowColor="#ff333333" 
+            android:layout_weight="1.0" />
+        <ImageButton
+            android:focusable="false" 
+            android:background="@color/toolbarSeparator" 
+            android:layout_width="1.0px" 
+            android:layout_height="fill_parent" />
+        <ImageButton 
+            android:id="@+id/channels"
+            android:src="@drawable/ic_toolbar_feeds"            
+            android:background="@drawable/toolbar_button_selector"  
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"  
+            android:layout_margin="1.0sp"            
+            android:nextFocusRight="@id/refresh"
+            android:nextFocusDown="@+id/channelListView" />
+        <ImageButton 
+            android:background="@color/toolbarSeparator" 
+            android:layout_width="1.0px" 
+            android:layout_height="fill_parent" />
+        <ViewSwitcher 
+            android:layout_gravity="center" 
+            android:id="@+id/refreshOrProgress" 
+            android:layout_width="@dimen/toolbarHeight" 
+            android:layout_height="@dimen/toolbarHeight" 
+            android:layout_margin="1.0sp">
+            <ImageButton 
+                android:id="@+id/refresh" 
+                android:background="@drawable/toolbar_button_selector" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:src="@drawable/ic_toolbar_refresh" 
+                android:hint="Refresh" 
+                android:layout_weight="0.0" />
+            <ProgressBar 
+                android:layout_gravity="center" 
+                android:id="@+id/progress" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:indeterminate="true" 
+                style="?android:progressBarStyleSmall" />
+        </ViewSwitcher>
+    </LinearLayout>
+    <vn.evolus.droidnews.widget.ItemListView 
+        android:id="@+id/itemListView" 
+        android:layout_width="fill_parent" 
+        android:layout_height="fill_parent" 
+    />
+</LinearLayout>
