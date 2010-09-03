@@ -169,6 +169,10 @@ public class ContentManager {
 		return item;
 	}
 	
+	public static void deleteItem(Item item) {
+		cr.delete(Items.CONTENT_URI, Items.ID + "=?", new String[] { String.valueOf(item.id) });		
+	}
+	
 	public static void processItem(Item item) {
 		for (ItemProcessor processor : itemProcessors) {
 			processor.process(item);

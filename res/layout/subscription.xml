@@ -3,6 +3,13 @@
     android:orientation="vertical" 
     android:layout_width="fill_parent" 
     android:layout_height="fill_parent">
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/subscribe_to"
+        android:background="@android:drawable/title_bar"
+        android:gravity="center_vertical"
+    />
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
 	    android:orientation="horizontal" 
 	    android:layout_width="fill_parent" 
@@ -10,7 +17,7 @@
 	    android:background="@color/itemBackground">
 	    <EditText
 	        android:id="@+id/channelUrl"        
-	        android:hint="Enter our RSS url"
+	        android:hint="Enter RSS url"
 	        android:singleLine="true"
 	        android:maxLines="1"
 	        android:layout_width="fill_parent" 
@@ -18,39 +25,26 @@
 	        android:layout_weight="1.0" />
         <Button
             android:id="@+id/add"
-            android:text="@string/add"
+            android:text="@string/subscribe"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:layout_gravity="center_vertical" />            	        
-    </LinearLayout>
-    <!-- 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
-        android:orientation="horizontal" 
-        android:layout_width="fill_parent" 
+    </LinearLayout>    
+    <TextView
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@color/itemBackground">
-        <EditText
-            android:id="@+id/searchText"        
-            android:hint="Enter keyword to search RSS"                                 
-            android:layout_width="fill_parent" 
-            android:layout_height="wrap_content"
-            android:layout_weight="1.0" />
-        <Button
-            android:id="@+id/search"
-            android:text="@string/search"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />                     
-    </LinearLayout>
-    -->
+        android:text="@string/our_suggestion"
+        android:background="@android:drawable/title_bar"
+        android:gravity="center_vertical"
+    />
     <ExpandableListView 
         android:id="@+id/channels" 
         android:layout_width="fill_parent" 
         android:layout_height="fill_parent"
         android:divider="@android:drawable/divider_horizontal_bright"
         android:childDivider="@android:drawable/divider_horizontal_bright"
-        android:background="@color/itemBackground"
-        android:choiceMode="multipleChoice"        
+        android:background="@color/itemBackground"               
         android:cacheColorHint="@color/itemBackground"
         android:layout_weight="1.0" />
 </LinearLayout>

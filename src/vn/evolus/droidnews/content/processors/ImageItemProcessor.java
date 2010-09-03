@@ -30,7 +30,9 @@ public class ImageItemProcessor implements ItemProcessor {
 			"vietnamnet.gif",
 			"digg-badge-custom-1.gif",
 			"http://a.gigaom.com/feed-injector/img",
-			"openx.com"
+			"openx.com",
+			"imp.constantcontact.com",
+			"commindo-media-ressourcen.de"
 		};
 		
 		//

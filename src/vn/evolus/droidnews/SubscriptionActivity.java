@@ -1,7 +1,9 @@
 package vn.evolus.droidnews;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import vn.evolus.droidnews.adapter.SuggestedChannelsAdapter;
 import vn.evolus.droidnews.content.ContentManager;
@@ -12,11 +14,13 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ExpandableListView.OnChildClickListener;
 
 import com.github.droidfu.concurrent.BetterAsyncTask;
 import com.github.droidfu.concurrent.BetterAsyncTaskCallable;
@@ -29,7 +33,7 @@ public class SubscriptionActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);		
-		
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.subscription);
 		
 		channelUrl = (TextView)findViewById(R.id.channelUrl);
@@ -37,10 +41,27 @@ public class SubscriptionActivity extends Activity {
 		addButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				addChannel();
+			}
+		});
+		listView = (ExpandableListView)findViewById(R.id.channels);				
+		loadSuggestedChannels();		
+		listView.setOnChildClickListener(new OnChildClickListener() {
+			public boolean onChildClick(ExpandableListView parent, View v, 
+					int groupPosition, int childPosition, long id) {
+				Channel channel = (Channel)adapter.getChild(groupPosition, childPosition);
+				if (channel.id == 0) {
+					startAddChannel(channel.url);
+				} else {
+					removeChannel(channel);
+				}
+				return true;
 			}			
 		});
-		listView = (ExpandableListView)findViewById(R.id.channels);
-		loadSuggestedChannels();
+	}
+
+	protected void removeChannel(Channel channel) {
+		ContentManager.deleteChannel(channel);
+		adapter.notifyDataSetChanged();
 	}
 
 	protected void addChannel() {
@@ -92,10 +113,71 @@ public class SubscriptionActivity extends Activity {
 		group.setChannels(channels);
 		channelGroups.add(group);
 		
+		group = new ChannelGroup();
+		group.setTitle("VnExpress");
+		channels = new ArrayList<Channel>();
+		channels.add(new Channel("VnExpress - Xã hội", "http://feeds.feedburner.com/androidnews/vnexpress/xahoi"));
+		channels.add(new Channel("VnExpress - Đời sống", "http://feeds.feedburner.com/androidnews/vnexpress/doisong"));
+		channels.add(new Channel("VnExpress - Kinh doanh", "http://feeds.feedburner.com/androidnews/vnexpress/kinhdoanh"));
+		channels.add(new Channel("VnExpress - Vi tính", "http://feeds.feedburner.com/androidnews/vnexpress/vitinh"));
+		channels.add(new Channel("VnExpress - Ôtô & Xe máy", "http://feeds.feedburner.com/androidnews/vnexpress/oto-xemay"));
+		channels.add(new Channel("VnExpress - Thế giới", "http://feeds.feedburner.com/androidnews/vnexpress/thegioi"));
+		channels.add(new Channel("VnExpress - Thể thao", "http://feeds.feedburner.com/androidnews/vnexpress/thethao"));
+		channels.add(new Channel("VnExpress - Văn hóa", "http://feeds.feedburner.com/androidnews/vnexpress/vanhoa"));
+		channels.add(new Channel("VnExpress - Pháp luật", "http://feeds.feedburner.com/androidnews/vnexpress/phapluat"));
+		channels.add(new Channel("VnExpress - Khoa học", "http://feeds.feedburner.com/androidnews/vnexpress/khoahoc"));
+		group.setChannels(channels);
+		channelGroups.add(group);
+		
+		group = new ChannelGroup();
+		group.setTitle("VietnamNet");
+		channels = new ArrayList<Channel>();
+		channels.add(new Channel("VietNamNet - CNTT - Viễn thông", "http://feeds.feedburner.com/androidnews/vietnamnet/cntt"));
+		channels.add(new Channel("VietNamNet - Kinh tế", "http://feeds.feedburner.com/androidnews/vietnamnet/kinhte"));
+		channels.add(new Channel("VietNamNet - Chính trị", "http://feeds.feedburner.com/androidnews/vietnamnet/chinhtri"));
+		channels.add(new Channel("VietNamNet - Xã hội", "http://feeds.feedburner.com/androidnews/vietnamnet/xahoi"));
+		channels.add(new Channel("VietNamNet - Khoa học", "http://feeds.feedburner.com/androidnews/vietnamnet/khoahoc"));
+		channels.add(new Channel("VietNamNet - Văn hóa", "http://feeds.feedburner.com/androidnews/vietnamnet/vanhoa"));
+		channels.add(new Channel("VietNamNet - Thế giới", "http://feeds.feedburner.com/androidnews/vietnamnet/thegioi"));		
+		channels.add(new Channel("VietNamNet - Giáo dục", "http://feeds.feedburner.com/androidnews/vietnamnet/giaoduc"));
+		group.setChannels(channels);
+		channelGroups.add(group);
+		
+		group = new ChannelGroup();
+		group.setTitle("Tuổi Trẻ");
+		channels = new ArrayList<Channel>();
+		channels.add(new Channel("Tuổi Trẻ - Nhịp sống số", "http://feeds.feedburner.com/androidnews/tuoitre/nhipsongso"));
+		channels.add(new Channel("Tuổi Trẻ - Chính trị - Xã hội", "http://feeds.feedburner.com/androidnews/tuoitre/chinhtri-xahoi"));		
+		channels.add(new Channel("Tuổi Trẻ - Kinh tế", "http://feeds.feedburner.com/androidnews/tuoitre/kinhte"));
+		channels.add(new Channel("Tuổi Trẻ - Văn hóa - Giải Trí", "http://feeds.feedburner.com/androidnews/tuoitre/vanhoa-giaitri"));
+		channels.add(new Channel("Tuổi Trẻ - Thế giới", "http://feeds.feedburner.com/androidnews/tuoitre/thegioi"));
+		channels.add(new Channel("Tuổi Trẻ - Giáo dục", "http://feeds.feedburner.com/androidnews/tuoitre/giaoduc"));
+		channels.add(new Channel("Tuổi Trẻ - Thể thao", "http://feeds.feedburner.com/androidnews/tuoitre/thethao"));		
+		channels.add(new Channel("Tuổi Trẻ - Nhịp sống trẻ", "http://feeds.feedburner.com/androidnews/tuoitre/nhipsongtre"));
+		group.setChannels(channels);
+		channelGroups.add(group);
+		
+		checkSubscritions(channelGroups, ContentManager.loadAllChannels(ContentManager.LIGHTWEIGHT_CHANNEL_LOADER));
+		
 		adapter = new SuggestedChannelsAdapter(this, channelGroups);
 		listView.setAdapter(adapter);
 	}
 	
+	private void checkSubscritions(List<ChannelGroup> channelGroups,
+			ArrayList<Channel> subscribedChannels) {
+		Map<String, Long> channelMap = new HashMap<String, Long>(); 
+		for (Channel channel : subscribedChannels) {
+			channelMap.put(channel.url, channel.id);
+		}
+		for (ChannelGroup channelGroup : channelGroups) {
+			for (Channel channel : channelGroup.getChannels()) {
+				if (channelMap.containsKey(channel.url)) {
+					channel.id = channelMap.get(channel.url);
+				}
+			}
+		}
+	}
+
 	private void startAddChannel(String url) {    	
     	final int maxItemsPerChannel = Settings.getMaxItemsPerChannel(this);
     	final Channel channel = new Channel(url);
@@ -116,7 +198,7 @@ public class SubscriptionActivity extends Activity {
 					ContentManager.saveChannel(channel);
 					String message = context.getString(R.string.add_channel_successfully).replace("{channel}", channel.title);
 					Toast.makeText(context, message, 1000).show();
-					finish();
+					adapter.updateChannel(channel);
 				} else {
 					ContentManager.deleteChannel(channel);
 					String message = context.getString(R.string.add_channel_failed).replace("{url}", channel.url);

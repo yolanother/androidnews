@@ -91,8 +91,6 @@ public class AndroidNews extends BetterDefaultActivity {
 			}        	
         });
                 
-        loadData();
-        
         if (ConnectivityReceiver.hasGoodEnoughNetworkConnection(this)) {
         	Intent service = new Intent(this, ContentsUpdatingService.class);
         	startService(service);
@@ -101,6 +99,12 @@ public class AndroidNews extends BetterDefaultActivity {
         	startService(downloadService);
         }
     }	
+	
+	@Override
+	protected void onStart() {	
+		super.onStart();
+		loadData();
+	}
 	
 	@Override
 	protected void onResume() {

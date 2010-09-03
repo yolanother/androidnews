@@ -5,7 +5,7 @@
     <string name="back">Back</string>
     <string name="refresh">Refresh</string>
     <string name="add_channel">Add channel</string>
-    <string name="add">Add</string>
+    <string name="subscribe">Subscribe</string>
     <string name="cancel">Cancel</string>
     <string name="search">Search</string>
     <string name="add_channel_successfully">{channel} channel has been added successfully.</string>
@@ -32,6 +32,8 @@
     <string name="max_items_per_channel_dialog_message">How many items should we keep per channel?</string>
     
     <string name="latest">Latest</string>
+    <string name="subscribe_to">Subscribe to</string>
+    <string name="our_suggestion">Our suggestion</string>
     
     <string name="share">Share</string>
     <string name="view_original">View original</string>

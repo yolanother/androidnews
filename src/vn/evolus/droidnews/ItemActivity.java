@@ -123,7 +123,11 @@ public class ItemActivity extends Activity implements OnItemSelectedListener {
 	@Override
 	public void onSelected(int selectedIndex) {		
 		currentItem = showItem(selectedIndex);
-		title.setText(currentItem.channel.title);
+		if (currentItem.channel == null) {
+			ContentManager.deleteItem(currentItem);
+		} else {
+			title.setText(currentItem.channel.title);
+		}
 		subTitle.setText(String.valueOf(selectedIndex + 1)
 				.concat("/")
 				.concat(String.valueOf(items.size())));
