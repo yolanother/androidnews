@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:myapp="http://schemas.android.com/apk/res/vn.evolus.droidnews" 
     android:orientation="vertical" 
     android:layout_width="fill_parent" 
     android:layout_height="fill_parent">
-    <LinearLayout 
+    <LinearLayout
         android:orientation="horizontal" 
         android:background="@drawable/toolbar_bg"
-        android:layout_width="fill_parent" 
+        android:layout_width="fill_parent"
         android:layout_height="@dimen/toolbarHeight">
         <TextView
             android:id="@+id/toolbarTitle" 
-            android:textSize="15.0sp" 
+            android:textSize="15.0sp"
             android:textStyle="bold" 
             android:textColor="@color/channelName" 
             android:gravity="left" 
@@ -51,15 +52,43 @@
             android:layout_gravity="center"  
             android:layout_margin="2.0sp"
             android:nextFocusLeft="@id/edit"
-            android:nextFocusDown="@+id/channelListView" />
-    </LinearLayout>
-    <vn.evolus.news.widget.ChannelListView 
-        android:id="@+id/channelListView" 
-        android:background="@color/itemBackground" 
-        android:layout_width="fill_parent" 
-        android:layout_height="fill_parent" 
-        android:cacheColorHint="@color/itemBackground" 
-        android:divider="@android:drawable/divider_horizontal_bright"
+            android:nextFocusDown="@+id/settings" />
+        <ImageButton
+            android:focusable="false"
+            android:background="@color/toolbarSeparator" 
+            android:layout_width="1.0px"
+            android:layout_height="fill_parent" />
+        <ImageButton
+            android:id="@+id/settings"     
+            android:src="@drawable/ic_toolbar_settings"        
+            android:background="@drawable/toolbar_button_selector" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"  
+            android:layout_margin="2.0sp"
+            android:nextFocusLeft="@id/edit"
+            android:nextFocusDown="@+id/channelListView" />                    
+    </LinearLayout>    
+    <GridView 
+        android:id="@+id/channelGridView"
+        android:background="#000000" 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="1.0"
+        
+        android:numColumns="auto_fit"
+        android:columnWidth="72dp"
+        android:stretchMode="spacingWidth"
+        android:horizontalSpacing="5sp"
+        android:verticalSpacing="5sp"        
         android:nextFocusUp="@+id/edit" />
+    <!-- 
+    <com.admob.android.ads.AdView
+        android:id="@+id/ad"        
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"        
+        myapp:backgroundColor="#000000"
+        myapp:primaryTextColor="#FFFFFF"
+        myapp:secondaryTextColor="#CCCCCC" />
+    -->    
 </LinearLayout>

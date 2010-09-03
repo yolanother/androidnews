@@ -1,10 +1,11 @@
 TODO:
 * Allow add/edit/delete channels
-* Refresh item read status when user goes back to ChannelActivity   
 * Parse YouTube video code
 * Clean up images cache folder
+* Move blacklist to configuration file
 
 DONE:
+* Refresh item read status when user goes back to ChannelActivity
 * Settings: 
     * manually update/auto update 
     * maximum items/channel

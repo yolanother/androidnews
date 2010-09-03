@@ -31,6 +31,8 @@
     <string name="max_items_per_channel_dialog_title">Max items per channel?</string>
     <string name="max_items_per_channel_dialog_message">How many items should we keep per channel?</string>
     
+    <string name="latest">Latest</string>
+    
     <string name="share">Share</string>
     <string name="view_original">View original</string>
     <string name="share_text">Hi,\n\nYour friend want to share with you a nice article: {link}\n\nHave fun.</string>

@@ -1,46 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    xmlns:a="http://schemas.android.com/apk/res/android"
-    a:layout_width="fill_parent"
-    a:layout_height="fill_parent"
-    a:orientation="vertical">
-    <vn.evolus.news.widget.ScrollView
-        a:id="@+id/scrollView"
-        a:layout_width="fill_parent"
-        a:layout_height="fill_parent"
-        a:layout_weight="1"        
-    />
-    <!--     
-    <vn.evolus.news.widget.ItemView
-        a:id="@+id/itemView"
-        a:layout_width="fill_parent"
-        a:layout_height="wrap_content"
-        a:layout_weight="1"        
-    />     
-    <RelativeLayout
-        a:layout_width="fill_parent"
-        a:layout_height="wrap_content"        
-        a:orientation="horizontal">
-        <Button
-            a:id="@+id/share"
-            a:layout_width="wrap_content"
-            a:layout_height="wrap_content"
-            a:text="Share"            
-        />        
-        <Button
-            a:id="@+id/prevItem"
-            a:layout_width="wrap_content"
-            a:layout_height="wrap_content"
-            a:text=" &lt; "
-            a:layout_toLeftOf="@+id/nextItem"       
-        />
-        <Button
-            a:id="@+id/nextItem"
-            a:layout_width="wrap_content"
-            a:layout_height="wrap_content"
-            a:layout_alignParentRight="true"
-            a:text=" &gt; "              
-        />        
-    </RelativeLayout>  
-    -->     
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:myapp="http://schemas.android.com/apk/res/vn.evolus.droidnews"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+    <LinearLayout 
+        android:orientation="horizontal" 
+        android:background="@drawable/toolbar_bg" 
+        android:focusable="true" 
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/toolbarHeight">
+        <TextView
+            android:id="@+id/title" 
+            android:text="@string/latest"
+            android:textSize="15.0sp"
+            android:textStyle="bold" 
+            android:textColor="@color/channelName" 
+            android:gravity="left" 
+            android:layout_gravity="center"              
+            android:padding="5.0sp" 
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content"            
+            android:shadowColor="#ff333333" 
+            android:layout_weight="1.0" />
+        <TextView
+            android:id="@+id/subTitle" 
+            android:text="15/20"
+            android:textSize="11.0sp"
+            android:textStyle="bold" 
+            android:textColor="@color/channelName" 
+            android:gravity="right" 
+            android:layout_gravity="center"              
+            android:padding="5.0sp" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"            
+            android:shadowColor="#ff333333" />    
+        <ImageButton
+            android:focusable="false" 
+            android:background="@color/toolbarSeparator" 
+            android:layout_width="1.0px" 
+            android:layout_height="fill_parent" />
+        <ImageButton 
+            android:id="@+id/share"
+            android:src="@drawable/ic_toolbar_share"            
+            android:background="@drawable/toolbar_button_selector"  
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"  
+            android:layout_margin="1.0sp"            
+            android:nextFocusRight="@id/refresh"
+            android:nextFocusDown="@+id/viewOriginal" />
+        <ImageButton
+            android:focusable="false" 
+            android:background="@color/toolbarSeparator" 
+            android:layout_width="1.0px" 
+            android:layout_height="fill_parent" />
+        <ImageButton 
+            android:id="@+id/viewOriginal"
+            android:src="@drawable/ic_toolbar_view"            
+            android:background="@drawable/toolbar_button_selector"  
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"  
+            android:layout_margin="1.0sp"            
+            android:nextFocusRight="@id/refresh"
+            android:nextFocusDown="@+id/channelListView" />        
+    </LinearLayout>    
+    <vn.evolus.droidnews.widget.ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1.0" />
+    <com.admob.android.ads.AdView
+        android:id="@+id/ad"        
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"        
+        myapp:backgroundColor="#000000"
+        myapp:primaryTextColor="#FFFFFF"
+        myapp:secondaryTextColor="#CCCCCC" />     
 </LinearLayout>

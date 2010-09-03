@@ -22,6 +22,21 @@
             android:text="@string/applicationName" 
             android:shadowColor="#ff333333" 
             android:layout_weight="1.0" />
+        <ImageButton
+            android:focusable="false" 
+            android:background="@color/toolbarSeparator" 
+            android:layout_width="1.0px" 
+            android:layout_height="fill_parent" />
+        <ImageButton 
+            android:id="@+id/markAllAsRead"
+            android:src="@drawable/ic_toolbar_mark"            
+            android:background="@drawable/toolbar_button_selector"  
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"  
+            android:layout_margin="2.0sp"            
+            android:nextFocusRight="@+id/refreshOrProgress"
+            android:nextFocusDown="@+id/itemListView" />    
         <ImageButton 
             android:background="@color/toolbarSeparator" 
             android:layout_width="1.0px" 
@@ -49,7 +64,7 @@
                 style="?android:progressBarStyleSmall" />
         </ViewSwitcher>
     </LinearLayout>
-    <vn.evolus.news.widget.ItemListView 
+    <vn.evolus.droidnews.widget.ItemListView 
         android:id="@+id/itemListView" 
         android:layout_width="fill_parent" 
         android:layout_height="fill_parent" 

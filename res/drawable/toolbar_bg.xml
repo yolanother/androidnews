@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bitmap xmlns:android="http://schemas.android.com/apk/res/android" 
     android:src="@drawable/toolbar_background" 
-    android:dither="true" 
-    android:tileMode="repeat" />
+    android:dither="true" />

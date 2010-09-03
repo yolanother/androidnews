@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="vn.evolus.news"
+      package="vn.evolus.droidnews"
       android:versionCode="1"
       android:versionName="1.0">
     <application 
         android:name="Application"
         android:icon="@drawable/icon" android:label="@string/applicationName"
         android:debuggable="true">
-        <activity android:name=".AndroidNews"
+        <activity android:name=".HomeActivity"
                   android:label="@string/applicationName">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".AndroidNews" />
         <activity android:name=".ChannelActivity" />
         <activity android:name=".ItemActivity" />
         <activity android:name=".SubscriptionActivity" />
@@ -37,6 +38,8 @@
 		        <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
 		    </intent-filter>
 		</receiver>
+		
+		<meta-data android:value="a14c777fa0be570" android:name="ADMOB_PUBLISHER_ID" /> 
     </application>    
     <uses-sdk android:minSdkVersion="4" />
     
