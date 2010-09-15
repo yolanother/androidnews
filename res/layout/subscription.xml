@@ -3,41 +3,40 @@
     android:orientation="vertical" 
     android:layout_width="fill_parent" 
     android:layout_height="fill_parent">
-    <TextView
+    <LinearLayout 
+        android:orientation="horizontal" 
+        android:background="@drawable/toolbar_bg" 
+        android:focusable="true" 
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/subscribe_to"
-        android:background="@android:drawable/title_bar"
-        android:gravity="center_vertical"
-    />
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
-	    android:orientation="horizontal" 
-	    android:layout_width="fill_parent" 
-	    android:layout_height="wrap_content"
-	    android:background="@color/itemBackground">
-	    <EditText
-	        android:id="@+id/channelUrl"        
-	        android:hint="Enter RSS url"
-	        android:singleLine="true"
-	        android:maxLines="1"
-	        android:layout_width="fill_parent" 
-	        android:layout_height="wrap_content"
-	        android:layout_weight="1.0" />
-        <Button
+        android:layout_height="@dimen/toolbarHeight">
+        <TextView
+            android:id="@+id/title" 
+            android:text="@string/subscriptions"
+            android:textSize="15.0sp" 
+            android:textStyle="bold" 
+            android:textColor="@color/channelName" 
+            android:gravity="left" 
+            android:layout_gravity="center"              
+            android:padding="5.0sp" 
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content"            
+            android:shadowColor="#ff333333" 
+            android:layout_weight="1.0" />
+        <ImageButton
+            android:focusable="false" 
+            android:background="@color/toolbarSeparator" 
+            android:layout_width="1.0px" 
+            android:layout_height="fill_parent" />
+        <ImageButton 
             android:id="@+id/add"
-            android:text="@string/subscribe"
+            android:src="@drawable/ic_toolbar_plus"            
+            android:background="@drawable/toolbar_button_selector"  
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:layout_gravity="center_vertical" />            	        
-    </LinearLayout>    
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/our_suggestion"
-        android:background="@android:drawable/title_bar"
-        android:gravity="center_vertical"
-    />
+            android:layout_gravity="center"  
+            android:layout_margin="1.0sp"
+            android:nextFocusDown="@+id/channels" />         
+    </LinearLayout>      
     <ExpandableListView 
         android:id="@+id/channels" 
         android:layout_width="fill_parent" 
@@ -47,4 +46,22 @@
         android:background="@color/itemBackground"               
         android:cacheColorHint="@color/itemBackground"
         android:layout_weight="1.0" />
+    <LinearLayout 
+        android:orientation="horizontal"        
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/itemBackground">
+        <Button
+            android:id="@+id/save"
+            android:text="@string/save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0" />
+        <Button
+            android:id="@+id/cancel"
+            android:text="@string/cancel"
+            android:layout_width="wrap_content"                                   
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0" />                        
+    </LinearLayout>        
 </LinearLayout>

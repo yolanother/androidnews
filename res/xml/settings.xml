@@ -5,24 +5,31 @@
         android:key="@string/auto_update_key"
         android:title="@string/auto_update_option_title" 
         android:summaryOff="@string/auto_update_off" 
-        android:summaryOn="@string/auto_update_on" />
-    <CheckBoxPreference
-        android:key="@string/show_updated_channels_key"
-        android:title="@string/show_updated_channels_option_title" 
-        android:summaryOff="@string/show_updated_channels_off" 
-        android:summaryOn="@string/show_updated_channels_on" android:summary="@string/update_interval_dialog_message"/>
+        android:summaryOn="@string/auto_update_on" />    
     <ListPreference
         android:key="@string/update_interval_key"
         android:title="@string/update_interval_dialog_title"
         android:summary="@string/update_interval_dialog_message"        
         android:entryValues="@array/update_interval_values"
         android:entries="@array/update_interval_titles"
-        android:dialogTitle="@string/update_interval_dialog_title" /> 
+        android:dialogTitle="@string/update_interval_dialog_title" />
+    <CheckBoxPreference
+        android:key="@string/show_updated_channels_key"
+        android:title="@string/show_updated_channels_option_title" 
+        android:summaryOff="@string/show_updated_channels_off" 
+        android:summaryOn="@string/show_updated_channels_on" android:summary="@string/update_interval_dialog_message" />         
     <ListPreference
         android:key="@string/max_items_per_channel_key"
         android:title="@string/max_items_per_channel_dialog_title" 
         android:summary="@string/max_items_per_channel_dialog_message"
         android:dialogTitle="@string/max_items_per_channel_dialog_title"         
         android:entryValues="@array/max_items_per_channel_values" 
-        android:entries="@array/max_items_per_channel_titles"/>           
+        android:entries="@array/max_items_per_channel_titles" />
+    <ListPreference
+        android:key="@string/language_key"
+        android:title="@string/language_dialog_title" 
+        android:summary="@string/language_dialog_message"
+        android:dialogTitle="@string/language_dialog_title"         
+        android:entryValues="@array/language_values" 
+        android:entries="@array/language_titles"/>                 
 </PreferenceScreen>

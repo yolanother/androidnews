@@ -13,7 +13,9 @@
             android:id="@+id/channelName" 
             android:textSize="15.0sp" 
             android:textStyle="bold" 
-            android:textColor="@color/channelName" 
+            android:textColor="@color/channelName"
+            android:maxLines="1"
+            android:ellipsize="end" 
             android:gravity="left" 
             android:layout_gravity="center"              
             android:padding="5.0sp" 
@@ -64,7 +66,7 @@
                 style="?android:progressBarStyleSmall" />
         </ViewSwitcher>
     </LinearLayout>
-    <vn.evolus.droidnews.widget.ItemListView 
+    <vn.evolus.droidreader.widget.ItemListView 
         android:id="@+id/itemListView" 
         android:layout_width="fill_parent" 
         android:layout_height="fill_parent" 

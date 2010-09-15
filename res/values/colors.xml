@@ -4,7 +4,7 @@
     <color name="toolbarBackground">#ff000000</color>
     <color name="toolbarSeparator">#ff555555</color>
     <color name="itemTitle">#ff333333</color>
-    <color name="itemTitleRead">#ff666666</color>
+    <color name="itemTitleRead">#737373</color>
     <color name="itemDate">#ff999999</color>
     <color name="itemBackground">#ffffffff</color>
     <color name="itemReadBackground">#ffEEEEEE</color>
@@ -15,4 +15,8 @@
     <color name="unreadIndicator">#AAFF00</color>
     <color name="readIndicator">#00000000</color>
     <color name="shadow">#333333</color>
+    
+    <color name="separator">#999999</color>
+    <color name="buttonText">#000000</color>
+    <color name="buttonBackground">#FFFFFF</color>
 </resources>

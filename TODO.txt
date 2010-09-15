@@ -1,10 +1,19 @@
 TODO:
-* Clean up images cache folder
-* Move blacklist to configuration file
-* Move suggested channel to configuration file / update from server
-* Integrate with Google Reader?
+* Widgets
+* Fonts
+* Improve subscriptions screen
+* Sync with Google Reader
+    * Mark as read/unread
+    * Star/unstar
+* Reading mode?    
 
 DONE:
+* Sync with Google Reader
+    * Subscribe/Unsubscribe
+    * Fetching feeds    
+* Clean up images cache folder
+* Move suggested channels to configuration file / update from server
+* Move blacklist to configuration file
 * Allow add/edit/delete channels
 * Parse YouTube video code
 * Refresh item read status when user goes back to ChannelActivity
@@ -16,7 +25,7 @@ DONE:
     * option to show all items or unread items in ChannelActivity 
 * improve ItemActivity open speed
 * Mark item as read when user flings on item view
-* Queued images for download
+* Queued images for downloading
 * Save channel to disk
 * Enhance title bar
 * Unread count

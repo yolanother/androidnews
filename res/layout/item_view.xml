@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:myapp="http://schemas.android.com/apk/res/vn.evolus.droidnews"
+    xmlns:myapp="http://schemas.android.com/apk/res/vn.evolus.droidreader"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical">
@@ -17,7 +17,8 @@
             android:textSize="15.0sp"
             android:textStyle="bold" 
             android:textColor="@color/channelName"
-            android:maxLines="1" 
+            android:maxLines="1"            
+            android:ellipsize="end" 
             android:gravity="left" 
             android:layout_gravity="center"              
             android:padding="5.0sp" 
@@ -68,16 +69,18 @@
             android:nextFocusRight="@id/refresh"
             android:nextFocusDown="@+id/channelListView" />        
     </LinearLayout>    
-    <vn.evolus.droidnews.widget.ScrollView
+    <vn.evolus.droidreader.widget.ScrollView
         android:id="@+id/scrollView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1.0" />
+    <!--          
     <com.admob.android.ads.AdView
         android:id="@+id/ad"        
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"        
         myapp:backgroundColor="#000000"
         myapp:primaryTextColor="#FFFFFF"
-        myapp:secondaryTextColor="#CCCCCC" />     
+        myapp:secondaryTextColor="#CCCCCC" />
+    -->
 </LinearLayout>

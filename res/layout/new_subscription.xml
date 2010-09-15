@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:orientation="vertical" 
+    android:layout_width="fill_parent" 
+    android:layout_height="fill_parent"
+    android:background="@android:color/white"
+    android:padding="5sp">
+    <TextView
+        android:text="@string/website_url"
+        android:textColor="@color/buttonText"
+        android:singleLine="true"
+        android:maxLines="1"
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content"        
+        android:layout_gravity="center_vertical" />
+    <LinearLayout 
+        android:orientation="horizontal" 
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content">
+	    <EditText
+	        android:id="@+id/channelUrl"
+            android:text="http://"	        
+	        android:inputType="textUri"
+	        android:singleLine="true"
+	        android:maxLines="1"
+	        android:layout_width="wrap_content" 
+	        android:layout_height="fill_parent"
+	        android:layout_weight="1.0"
+	        android:layout_gravity="center_vertical" />
+        <ViewSwitcher 
+            android:layout_gravity="center" 
+            android:id="@+id/searchOrProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">            
+            <ImageButton
+	            android:id="@+id/search"
+	            android:src="@android:drawable/ic_search_category_default"            
+	            android:layout_width="wrap_content"
+	            android:layout_height="fill_parent"            
+	            android:layout_gravity="center_vertical" />
+            <ProgressBar 
+                android:layout_gravity="center" 
+                android:id="@+id/progress" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 
+                android:indeterminate="true" 
+                style="?android:progressBarStyleSmall" />	            
+        </ViewSwitcher>        	        
+    </LinearLayout>        
+    <ListView 
+        android:id="@+id/results" 
+        android:layout_width="fill_parent" 
+        android:layout_height="fill_parent"
+        android:divider="@android:drawable/divider_horizontal_bright"
+        android:background="@color/itemBackground"               
+        android:cacheColorHint="@color/itemBackground"
+        android:layout_weight="1.0" />        
+    <LinearLayout 
+	    android:orientation="horizontal" 
+	    android:layout_width="fill_parent" 
+	    android:layout_height="wrap_content">	    
+        <Button
+            android:id="@+id/subscribe"
+            android:text="@string/subscribe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical" />
+        <Button
+            android:id="@+id/cancel"
+            android:text="@string/cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical" />            	        
+    </LinearLayout>        
+</LinearLayout>

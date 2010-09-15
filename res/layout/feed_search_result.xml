@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="horizontal"
+	android:layout_height="wrap_content"
+	android:layout_width="fill_parent"
+	android:paddingLeft="10sp"
+	android:paddingRight="10sp">
+	<ImageView
+	   android:id="@+id/image"
+	   android:layout_width="32sp"
+	   android:layout_height="32sp"
+	   android:src="@drawable/rss"
+	   android:layout_weight="0"
+	   android:layout_gravity="center" />	
+    <CheckedTextView 
+        android:id="@+id/title"
+        android:text="Channel name"				
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingLeft="10sp"
+		android:textColor="@color/itemTitle"
+		android:background="@android:color/transparent"
+		android:maxLines="1"
+        android:ellipsize="marquee"
+        android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+        android:layout_gravity="center"
+        android:gravity="center_vertical"
+        android:layout_weight="1" />       	
+</LinearLayout>

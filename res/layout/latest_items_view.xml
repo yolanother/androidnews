@@ -36,7 +36,7 @@
             android:layout_gravity="center"  
             android:layout_margin="1.0sp"            
             android:nextFocusRight="@id/refresh"
-            android:nextFocusDown="@+id/channelListView" />
+            android:nextFocusDown="@+id/itemListView" />
         <ImageButton 
             android:background="@color/toolbarSeparator" 
             android:layout_width="1.0px" 
@@ -63,8 +63,23 @@
                 android:indeterminate="true" 
                 style="?android:progressBarStyleSmall" />
         </ViewSwitcher>
+        <ImageButton
+            android:focusable="false"
+            android:background="@color/toolbarSeparator" 
+            android:layout_width="1.0px"
+            android:layout_height="fill_parent" />
+        <ImageButton
+            android:id="@+id/settings"     
+            android:src="@drawable/ic_toolbar_settings"        
+            android:background="@drawable/toolbar_button_selector" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"  
+            android:layout_margin="2.0sp"
+            android:nextFocusLeft="@id/refresh"
+            android:nextFocusDown="@+id/itemListView" />
     </LinearLayout>
-    <vn.evolus.droidnews.widget.ItemListView 
+    <vn.evolus.droidreader.widget.ItemListView 
         android:id="@+id/itemListView" 
         android:layout_width="fill_parent" 
         android:layout_height="fill_parent" 

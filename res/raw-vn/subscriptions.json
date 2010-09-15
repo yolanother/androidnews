@@ -1,0 +1,100 @@
+[       
+    { 
+        "title": "VnExpress", 
+        "channels": [
+            { "title": "VnExpress - Xã hội", "url": "http://feeds.feedburner.com/androidnews/vnexpress/xahoi" },
+            { "title": "VnExpress - Đời sống", "url": "http://feeds.feedburner.com/androidnews/vnexpress/doisong" },
+            { "title": "VnExpress - Kinh doanh", "url": "http://feeds.feedburner.com/androidnews/vnexpress/kinhdoanh" },
+            { "title": "VnExpress - Vi tính", "url": "http://feeds.feedburner.com/androidnews/vnexpress/vitinh" },
+            { "title": "VnExpress - Ôtô & Xe máy", "url": "http://feeds.feedburner.com/androidnews/vnexpress/oto-xemay" },
+            { "title": "VnExpress - Thế giới", "url": "http://feeds.feedburner.com/androidnews/vnexpress/thegioi" },
+            { "title": "VnExpress - Thể thao", "url": "http://feeds.feedburner.com/androidnews/vnexpress/thethao" },
+            { "title": "VnExpress - Văn hóa", "url": "http://feeds.feedburner.com/androidnews/vnexpress/vanhoa" },
+            { "title": "VnExpress - Pháp luật", "url": "http://feeds.feedburner.com/androidnews/vnexpress/phapluat" },
+            { "title": "VnExpress - Khoa học", "url": "http://feeds.feedburner.com/androidnews/vnexpress/khoahoc" }
+        ]
+    },
+    { 
+        "title": "VietnamNet", 
+        "channels": [
+            { "title": "VietNamNet - CNTT - Viễn thông", "url": "http://feeds.feedburner.com/androidnews/vietnamnet/cntt" },
+            { "title": "VietNamNet - Kinh tế", "url": "http://feeds.feedburner.com/androidnews/vietnamnet/kinhte" },
+            { "title": "VietNamNet - Chính trị", "url": "http://feeds.feedburner.com/androidnews/vietnamnet/chinhtri" },
+            { "title": "VietNamNet - Xã hội", "url": "http://feeds.feedburner.com/androidnews/vietnamnet/xahoi" },
+            { "title": "VietNamNet - Khoa học", "url": "http://feeds.feedburner.com/androidnews/vietnamnet/khoahoc" },
+            { "title": "VietNamNet - Văn hóa", "url": "http://feeds.feedburner.com/androidnews/vietnamnet/vanhoa" },
+            { "title": "VietNamNet - Thế giới", "url": "http://feeds.feedburner.com/androidnews/vietnamnet/thegioi" },       
+            { "title": "VietNamNet - Giáo dục", "url": "http://feeds.feedburner.com/androidnews/vietnamnet/giaoduc" }
+        ]
+    },
+    { 
+        "title": "Tuổi Trẻ", 
+        "channels": [
+            { "title": "Tuổi Trẻ - Nhịp sống số", "url": "http://feeds.feedburner.com/androidnews/tuoitre/nhipsongso" },
+            { "title": "Tuổi Trẻ - Chính trị - Xã hội", "url": "http://feeds.feedburner.com/androidnews/tuoitre/chinhtri-xahoi" },       
+            { "title": "Tuổi Trẻ - Kinh tế", "url": "http://feeds.feedburner.com/androidnews/tuoitre/kinhte" },
+            { "title": "Tuổi Trẻ - Văn hóa - Giải Trí", "url": "http://feeds.feedburner.com/androidnews/tuoitre/vanhoa-giaitri" },
+            { "title": "Tuổi Trẻ - Thế giới", "url": "http://feeds.feedburner.com/androidnews/tuoitre/thegioi" },
+            { "title": "Tuổi Trẻ - Giáo dục", "url": "http://feeds.feedburner.com/androidnews/tuoitre/giaoduc" },
+            { "title": "Tuổi Trẻ - Thể thao", "url": "http://feeds.feedburner.com/androidnews/tuoitre/thethao" },        
+            { "title": "Tuổi Trẻ - Nhịp sống trẻ", "url": "http://feeds.feedburner.com/androidnews/tuoitre/nhipsongtre" }
+        ]
+    }
+    ,
+    { 
+        "title": "Dân Trí", 
+        "channels": [
+            { "title": "Dân Trí - Sự kiện trong ngày" , "url": "http://feeds.feedburner.com/androidnews/dantri/sukien" },
+            { "title": "Dân trí - Thế giới" , "url": "http://feeds.feedburner.com/androidnews/dantri/thegioi" },
+            { "title": "Dân Trí - Thể thao" , "url": "http://feeds.feedburner.com/androidnews/dantri/thethao" },
+            { "title": "Dân Trí - Kinh doanh" , "url": "http://feeds.feedburner.com/androidnews/dantri/kinhdoanh" },
+            { "title": "Dân Trí - Nhịp sống trẻ" , "url": "http://feeds.feedburner.com/androidnews/dantri/nhipsongtre" },
+            { "title": "Dân Trí - Tình yêu & Giới tính" , "url": "http://feeds.feedburner.com/androidnews/dantri/tinhyeu-gioitinh" },
+            { "title": "Dân Trí - Giải Trí" , "url": "http://feeds.feedburner.com/androidnews/dantri/giaitri" },
+            { "title": "Dân Trí - Sức mạnh số" , "url": "http://feeds.feedburner.com/androidnews/dantri/sucmanhso" },
+            { "title": "Dân Trí - Ô tô & Xe máy" , "url": "http://feeds.feedburner.com/androidnews/dantri/oto-xemay" },
+            { "title": "Dân Trí - Sức khỏe" , "url": "http://feeds.feedburner.com/androidnews/dantri/suckhoe" },
+            { "title": "Dân Trí - Giáo dục & Khuyến học" , "url": "http://feeds.feedburner.com/androidnews/dantri/giaoduc-khuyenhoc" },
+            { "title": "Dân Trí - Chuyện lạ" , "url": "http://feeds.feedburner.com/androidnews/dantri/chuyenla" }          
+        ]
+    },
+    { 
+        "title": "Số Hóa", 
+        "channels": [
+            { "title": "Số Hóa - Điện thoại", "url": "http://feeds.feedburner.com/androidnews/sohoa/dienthoai" },
+            { "title": "Số Hóa - Máy tính", "url": "http://feeds.feedburner.com/androidnews/sohoa/maytinh" },
+            { "title": "Số Hóa - Camera", "url": "http://feeds.feedburner.com/androidnews/sohoa/camera" },
+            { "title": "Số Hóa - Hình ảnh", "url": "http://feeds.feedburner.com/androidnews/sohoa/hinhanh" },
+            { "title": "Số Hóa - Âm thanh", "url": "http://feeds.feedburner.com/androidnews/sohoa/amthanh" },
+            { "title": "Số Hóa - Đồ chơi số", "url": "http://feeds.feedburner.com/androidnews/sohoa/dochoiso" }
+        ]
+    },
+    { 
+        "title": "Tin công nghệ nước ngoài", 
+        "channels": [
+            { "title": "Engadget", "url": "http://feeds.feedburner.com/androidnews/engadget" },      
+            { "title": "Gizmodo", "url": "http://feeds.feedburner.com/androidnews/gizmodo" },
+            { "title": "TechCrunch", "url": "http://feeds.feedburner.com/TechCrunch" },
+            { "title": "Lifehacker", "url": "http://feeds.feedburner.com/androidnews/lifehacker" },
+            { "title": "Download Squad", "url": "http://feeds.feedburner.com/androidnews/downloadsquad" },
+            { "title": "GigaOM", "url": "http://feeds.feedburner.com/ommalik" },
+            { "title": "Ars Technica", "url": "http://feeds.arstechnica.com/arstechnica/everything" },
+            { "title": "Boy Genius Report", "url": "http://feeds.feedburner.com/TheBoyGeniusReport" },
+            { "title": "ReadWriteWeb", "url": "http://feeds.feedburner.com/readwriteweb" },
+            { "title": "The Design Blog", "url": "http://feeds.feedburner.com/thedesignblog/ntLw" },
+            { "title": "Smashing Magazine", "url": "http://feeds.feedburner.com/androidnews/smashingmagazine" }
+        ]
+    },
+    { 
+        "title": "Tin về Android", 
+        "channels": [
+            { "title": "Android and Me", "url": "http://feeds.feedburner.com/androidandme" },        
+            { "title": "AndroidGuys", "url": "http://feeds.feedburner.com/androidguyscom" },
+            { "title": "Android Phone Fans", "url": "http://feeds2.feedburner.com/AndroidPhoneFans" },
+            { "title": "Android Community", "url": "http://feeds2.feedburner.com/AndroidCommunity" },
+            { "title": "AndroidSpin", "url": "http://feeds.feedburner.com/androidspin" },
+            { "title": "Android Central", "url": "http://feeds2.feedburner.com/androidcentral" },
+            { "title": "Google Android Blog", "url": "http://feeds.feedburner.com/androinica" }
+        ]
+    }
+]

@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="vn.evolus.droidnews"
+      package="vn.evolus.droidreader"
       android:versionCode="1"
       android:versionName="1.0">
     <application 
         android:name="Application"
         android:icon="@drawable/icon" android:label="@string/applicationName"
         android:debuggable="true">
-        <activity android:name=".HomeActivity"
+        <activity android:name=".LatestItemsActivity"
                   android:label="@string/applicationName">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AndroidNews" />
+        <activity android:name=".MainActivity" />
         <activity android:name=".ChannelActivity" />
         <activity android:name=".ItemActivity" />
         <activity android:name=".SubscriptionActivity" />
+        <activity android:name=".NewSubscriptionActivity" />
         <activity android:name=".SettingsActivity">
             <intent-filter>
                 <action android:name="vn.evolus.intent.action.Preferences" /> 
@@ -25,8 +26,17 @@
             </intent-filter>
         </activity>
         
-        <service android:name=".services.ContentsUpdatingService" />
-        <service android:name=".services.ImagesDownloadingService" />
+        <activity android:name=".AuthorizationActivity" android:launchMode="singleInstance">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"></action>
+				<category android:name="android.intent.category.DEFAULT"></category>
+				<category android:name="android.intent.category.BROWSABLE"></category>
+				<data android:scheme="droidreader" android:host="authorization"></data>
+            </intent-filter>
+        </activity>
+        
+        <service android:name=".services.ContentSynchronizationService" />
+        <service android:name=".services.ImageDownloadingService" />
         
         <provider android:name=".providers.ImagesProvider"
            android:authorities="vn.evolus.news.images" />

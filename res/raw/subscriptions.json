@@ -1,0 +1,43 @@
+[
+    { 
+        "title": "News",
+        "channels": [
+            { "title": "CNN", "url": "http://rss.cnn.com/rss/edition.rss" },      
+            { "title": "Yahoo! News Top stories", "url": "http://rss.news.yahoo.com/rss/topstories" },
+            { "title": "BBC News", "url": "http://feeds.bbci.co.uk/news/rss.xml" }            
+        ]
+    },
+    { 
+        "title": "Technology",
+        "channels": [
+            { "title": "Engadget", "url": "http://feeds.feedburner.com/androidnews/engadget" },      
+            { "title": "Gizmodo", "url": "http://feeds.feedburner.com/androidnews/gizmodo" },
+            { "title": "TechCrunch", "url": "http://feeds.feedburner.com/TechCrunch" },
+            { "title": "Lifehacker", "url": "http://feeds.feedburner.com/androidnews/lifehacker" },
+            { "title": "Download Squad", "url": "http://feeds.feedburner.com/androidnews/downloadsquad" },
+            { "title": "GigaOM", "url": "http://feeds.feedburner.com/ommalik" },
+            { "title": "Ars Technica", "url": "http://feeds.arstechnica.com/arstechnica/everything" },
+            { "title": "Boy Genius Report", "url": "http://feeds.feedburner.com/TheBoyGeniusReport" },
+            { "title": "ReadWriteWeb", "url": "http://feeds.feedburner.com/readwriteweb" }
+        ]
+    },
+    {
+        "title": "Android", 
+        "channels": [
+            { "title": "Android and Me", "url": "http://feeds.feedburner.com/androidandme" },        
+            { "title": "AndroidGuys", "url": "http://feeds.feedburner.com/androidguyscom" },
+            { "title": "Android Phone Fans", "url": "http://feeds2.feedburner.com/AndroidPhoneFans" },
+            { "title": "Android Community", "url": "http://feeds2.feedburner.com/AndroidCommunity" },
+            { "title": "AndroidSpin", "url": "http://feeds.feedburner.com/androidspin" },
+            { "title": "Android Central", "url": "http://feeds2.feedburner.com/androidcentral" },
+            { "title": "Google Android Blog", "url": "http://feeds.feedburner.com/androinica" }
+        ]
+    },
+    { 
+        "title": "Graphic & Design",
+        "channels": [
+            { "title": "The Design Blog", "url": "http://feeds.feedburner.com/thedesignblog/ntLw" },
+            { "title": "Smashing Magazine", "url": "http://feeds.feedburner.com/androidnews/smashingmagazine" }
+        ]
+    }
+]

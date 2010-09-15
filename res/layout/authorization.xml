@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:orientation="vertical" 
+    android:layout_width="fill_parent" 
+    android:layout_height="fill_parent"
+    android:background="@android:color/white"
+    android:padding="5sp">
+    <LinearLayout 
+	    android:orientation="vertical" 
+	    android:layout_width="fill_parent" 
+	    android:layout_height="fill_parent"	    
+	    android:layout_weight="1.0">    
+	    <TextView
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:text="@string/google_reader_authorization_guideline"
+	        android:textColor="@color/buttonText"
+	        android:layout_weight="1.0"
+	        android:gravity="center_vertical"
+	        android:padding="10sp"               
+	    />    
+	    <Button
+	        android:id="@+id/authorize"
+	        android:text="@string/authorize"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"	        
+	        android:layout_gravity="center"
+	        android:layout_marginLeft="50sp"
+	        android:layout_marginRight="50sp" />
+    </LinearLayout>
+    <LinearLayout 
+        android:orientation="vertical" 
+        android:layout_width="fill_parent" 
+        android:layout_height="fill_parent"     
+        android:layout_weight="1.0">
+	    <TextView
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:text="@string/google_reader_registration_guideline"
+	        android:textColor="@color/buttonText"	        
+	        android:gravity="center_vertical"
+	        android:layout_marginTop="50sp"
+	        android:padding="10sp" />    
+	    <Button
+	        android:id="@+id/register"
+	        android:text="@string/register"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"        	        
+	        android:layout_gravity="center"
+	        android:layout_marginLeft="50sp"
+	        android:layout_marginRight="50sp" />
+    </LinearLayout>
+</LinearLayout>
