@@ -14,3 +14,6 @@ a.gigaom.com/feed-injector/img
 openx.com
 imp.constantcontact.com
 commindo-media-ressourcen.de
+javascript:void
+pixel.quantserve.com
+segment-pixel.invitemedia.com

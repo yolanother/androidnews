@@ -8,7 +8,8 @@
         android:icon="@drawable/icon" android:label="@string/applicationName"
         android:debuggable="true">
         <activity android:name=".LatestItemsActivity"
-                  android:label="@string/applicationName">
+                  android:label="@string/applicationName"
+                  android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

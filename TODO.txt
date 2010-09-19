@@ -1,11 +1,13 @@
 TODO:
-* Widgets
-* More languages
+* Keep scrolling position
 * Sync with Google Reader
     * Mark as read/unread
     * Star/unstar
+* Widgets
+* More languages
 * Offline article images?
 * Update subscriptions/blacklist from server
+* User define "Share" templates
 
 DONE:
 * Led/Vibrate/Sound options for notification

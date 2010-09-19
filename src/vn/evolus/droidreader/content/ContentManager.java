@@ -192,10 +192,10 @@ public class ContentManager {
 		}
 	}
 	
-	public static void saveItem(Item item) {
+	public static boolean saveItem(Item item) {
 		ContentValues values = new ContentValues();
 		if (item.id == 0) {
-			if (existItem(item)) return;
+			if (existItem(item)) return false;
 						
 			values.put(Items.TITLE, item.title);
 			values.put(Items.DESCRIPTION, item.description);
@@ -210,8 +210,9 @@ public class ContentManager {
 		} else {
 			values.put(Items.READ, item.read);
 			cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
-					new String[] { String.valueOf(item.id) });
+					new String[] { String.valueOf(item.id) });			
 		}
+		return true;
 	}
 	
 	public static Item loadItem(long id, ItemLoader loader, ChannelLoader channelLoader) {		

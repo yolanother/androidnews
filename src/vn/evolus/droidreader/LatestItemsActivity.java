@@ -12,7 +12,6 @@ import vn.evolus.droidreader.util.ActiveList;
 import vn.evolus.droidreader.util.ImageCache;
 import vn.evolus.droidreader.util.ImageLoader;
 import vn.evolus.droidreader.widget.ItemListView;
-import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -75,7 +74,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 			public void onClick(View v) {
 				v.setSelected(!v.isSelected());
 				Settings.saveShowRead(LatestItemsActivity.this, v.isSelected());
-				showLatestItems(MAX_ITEMS);
+				loadLatestItems(MAX_ITEMS);
 			}			
 		});		
 				
@@ -87,17 +86,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 			}
         });        
         
-        checkAndShowWhatsNew();
-        
-//        try {
-//			AtomFeed feed = GoogleReaderFactory.getGoogleReader().fetchFeed("http://feeds.arstechnica.com/arstechnica/everything", 20);
-//			for (Entry entry : feed.getEntries()) {
-//				Log.d("DEBUG", ">>" + entry.getTitle());
-//				Log.d("DEBUG", "   >>" + entry.getSummary());
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+        checkAndShowWhatsNew();        
 	}
 	
 	@Override
@@ -115,25 +104,25 @@ public class LatestItemsActivity extends LocalizedActivity {
 			Intent intent = new Intent(this, SubscriptionActivity.class);
 			startActivity(intent);
 		}
+				
+		startSynchronizationService();
 		
-		NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		notificationManager.cancel(ContentSynchronizationService.NOTIFICATION_ID);
-		
-		synchronize();
-		
-		showLatestItems(MAX_ITEMS);
-	}
-
-	private void synchronize() {
-		if (ConnectivityReceiver.hasGoodEnoughNetworkConnection(this)) {
-        	Intent service = new Intent(this, ContentSynchronizationService.class);
-        	startService(service);
-        	
-        	Intent downloadService = new Intent(this, ImageDownloadingService.class);
-        	startService(downloadService);
-        }
+		loadLatestItems(MAX_ITEMS);
 	}
 	
+	@Override
+	protected void onResume() {	
+		super.onResume();
+		
+		Application.getInstance().registerOnNewItemsListener(onNewItemsListener);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Application.getInstance().unregisterOnNewItemsListener(onNewItemsListener);
+	}
+
 	@Override
 	protected void onDestroy() {	
 		super.onDestroy();
@@ -156,8 +145,18 @@ public class LatestItemsActivity extends LocalizedActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+
+	private void startSynchronizationService() {
+		if (ConnectivityReceiver.hasGoodEnoughNetworkConnection(this)) {
+        	Intent service = new Intent(this, ContentSynchronizationService.class);
+        	startService(service);
+        	
+        	Intent downloadService = new Intent(this, ImageDownloadingService.class);
+        	startService(downloadService);
+        }
+	}
 	
-	private void checkAndShowWhatsNew() {
+	private void checkAndShowWhatsNew() {		
 		int versionCode = Settings.getVersion(this);
 		try {
 			ComponentName comp = new ComponentName(this, LatestItemsActivity.class);
@@ -228,7 +227,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 		loadMoreItemsTask.execute();
 	}
 	
-	private void showLatestItems(final int maxItems) {
+	private void loadLatestItems(final int maxItems) {
 		this.setBusy();
 		BetterAsyncTask<Void, Void, ActiveList<Item>> task = 
 				new BetterAsyncTask<Void, Void, ActiveList<Item>>(this) {			
@@ -269,8 +268,8 @@ public class LatestItemsActivity extends LocalizedActivity {
 		};
 		task.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
 			public Void call(BetterAsyncTask<Void, Void, Void> task) throws Exception {
-				synchronize();				
-				showLatestItems(MAX_ITEMS);
+				startSynchronizationService();				
+				loadLatestItems(MAX_ITEMS);
 				return null;
 			}    			
 		});
@@ -297,5 +296,15 @@ public class LatestItemsActivity extends LocalizedActivity {
 		public void onRequest(Item lastItem) {
 			loadMoreItems(lastItem);
 		}
+    };
+    
+    private OnNewItemsListener onNewItemsListener = new OnNewItemsListener() {
+		public void onNewItems() {			
+			runOnUiThread(new Runnable() {
+				public void run() {
+					loadLatestItems(MAX_ITEMS);
+				}
+			});			
+		}    	
     };
 }
