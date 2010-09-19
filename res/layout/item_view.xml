@@ -66,8 +66,23 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"  
             android:layout_margin="1.0sp"            
+            android:nextFocusRight="@+id/nightMode"
+            android:nextFocusDown="@+id/channelListView" />
+        <ImageButton
+            android:focusable="false" 
+            android:background="@color/toolbarSeparator" 
+            android:layout_width="1.0px" 
+            android:layout_height="fill_parent" />
+        <ImageButton 
+            android:id="@+id/nightMode"
+            android:src="@drawable/reading_mode_toggle_selector"            
+            android:background="@drawable/toolbar_button_selector"  
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"  
+            android:layout_margin="1.0sp"            
             android:nextFocusRight="@id/refresh"
-            android:nextFocusDown="@+id/channelListView" />        
+            android:nextFocusDown="@+id/channelListView" />                    
     </LinearLayout>    
     <vn.evolus.droidreader.widget.ScrollView
         android:id="@+id/scrollView"

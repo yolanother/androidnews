@@ -1,35 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen  
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <CheckBoxPreference
-        android:key="@string/auto_update_key"
-        android:title="@string/auto_update_option_title" 
-        android:summaryOff="@string/auto_update_off" 
-        android:summaryOn="@string/auto_update_on" />    
-    <ListPreference
-        android:key="@string/update_interval_key"
-        android:title="@string/update_interval_dialog_title"
-        android:summary="@string/update_interval_dialog_message"        
-        android:entryValues="@array/update_interval_values"
-        android:entries="@array/update_interval_titles"
-        android:dialogTitle="@string/update_interval_dialog_title" />
-    <CheckBoxPreference
-        android:key="@string/show_updated_channels_key"
-        android:title="@string/show_updated_channels_option_title" 
-        android:summaryOff="@string/show_updated_channels_off" 
-        android:summaryOn="@string/show_updated_channels_on" android:summary="@string/update_interval_dialog_message" />         
-    <ListPreference
-        android:key="@string/max_items_per_channel_key"
-        android:title="@string/max_items_per_channel_dialog_title" 
-        android:summary="@string/max_items_per_channel_dialog_message"
-        android:dialogTitle="@string/max_items_per_channel_dialog_title"         
-        android:entryValues="@array/max_items_per_channel_values" 
-        android:entries="@array/max_items_per_channel_titles" />
-    <ListPreference
-        android:key="@string/language_key"
-        android:title="@string/language_dialog_title" 
-        android:summary="@string/language_dialog_message"
-        android:dialogTitle="@string/language_dialog_title"         
-        android:entryValues="@array/language_values" 
-        android:entries="@array/language_titles"/>                 
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory            
+        android:title="@string/synchronization_options">
+	    <CheckBoxPreference
+	        android:key="@string/auto_update_key"
+	        android:title="@string/auto_update_option_title" 
+	        android:summaryOff="@string/auto_update_off" 
+	        android:summaryOn="@string/auto_update_on" />    
+	    <ListPreference
+	        android:key="@string/update_interval_key"
+	        android:title="@string/update_interval_dialog_title"
+	        android:summary="@string/update_interval_dialog_message"        
+	        android:entryValues="@array/update_interval_values"
+	        android:entries="@array/update_interval_titles"
+	        android:dialogTitle="@string/update_interval_dialog_title" />            
+	    <ListPreference
+	        android:key="@string/max_items_per_channel_key"
+	        android:title="@string/max_items_per_channel_dialog_title" 
+	        android:summary="@string/max_items_per_channel_dialog_message"
+	        android:dialogTitle="@string/max_items_per_channel_dialog_title"         
+	        android:entryValues="@array/max_items_per_channel_values" 
+	        android:entries="@array/max_items_per_channel_titles" />
+    </PreferenceCategory>
+    <PreferenceCategory        
+        android:title="@string/display_options">        
+        <ListPreference
+	        android:key="font"
+	        android:title="@string/font_dialog_title"
+	        android:summary="@string/font_dialog_message"
+	        android:dialogTitle="@string/font_dialog_title"         
+	        android:entryValues="@array/font_values" 
+	        android:entries="@array/font_titles"/>
+        <ListPreference
+            android:key="font_size"
+            android:title="@string/font_size_dialog_title"
+            android:summary="@string/font_size_dialog_message"
+            android:dialogTitle="@string/font_size_dialog_title"         
+            android:entryValues="@array/font_size_values" 
+            android:entries="@array/font_size_titles"/>
+        <ListPreference
+            android:key="@string/language_key"
+            android:title="@string/language_dialog_title" 
+            android:summary="@string/language_dialog_message"
+            android:dialogTitle="@string/language_dialog_title"         
+            android:entryValues="@array/language_values" 
+            android:entries="@array/language_titles"/>            	        
+    </PreferenceCategory>
+    <PreferenceCategory                
+        android:title="@string/notification_options">
+        <CheckBoxPreference
+            android:key="notification_sound"
+            android:title="@string/notification_sound_title"
+            android:summaryOff="@string/off" 
+            android:summaryOn="@string/on" />
+        <CheckBoxPreference
+            android:key="notification_vibrate"
+            android:title="@string/notification_vibrate_title"
+            android:summaryOff="@string/off" 
+            android:summaryOn="@string/on" />
+        <CheckBoxPreference
+            android:key="notification_light"
+            android:title="@string/notification_light_title"
+            android:summaryOff="@string/off" 
+            android:summaryOn="@string/on" />                        
+    </PreferenceCategory>        
 </PreferenceScreen>

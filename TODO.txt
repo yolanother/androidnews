@@ -1,13 +1,18 @@
 TODO:
 * Widgets
-* Fonts
-* Improve subscriptions screen
+* More languages
 * Sync with Google Reader
     * Mark as read/unread
     * Star/unstar
-* Reading mode?    
+* Offline article images?
+* Update subscriptions/blacklist from server
 
 DONE:
+* Led/Vibrate/Sound options for notification
+* Fonts
+* Reading mode?
+* Read/Unread on Latest Items screen
+* Improve subscriptions screen
 * Sync with Google Reader
     * Subscribe/Unsubscribe
     * Fetching feeds    

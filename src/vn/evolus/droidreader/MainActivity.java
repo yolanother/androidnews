@@ -72,13 +72,6 @@ public class MainActivity extends LocalizedActivity {
 			}        	
         });
         
-        ImageButton refreshButton = (ImageButton)findViewById(R.id.refresh);
-        refreshButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				refresh();
-			}        	
-        });
-        
         ImageButton settingsButton = (ImageButton)findViewById(R.id.settings);
         settingsButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -184,35 +177,7 @@ public class MainActivity extends LocalizedActivity {
 			}    		
     	});
     	refreshTask.execute();
-	}      
-	
-	private void refresh() {
-		final int maxItemsPerChannel = Settings.getMaxItemsPerChannel(this);
-		BetterAsyncTask<Void, Void, Void> refreshTask = new BetterAsyncTask<Void, Void, Void>(this) {
-			@Override
-			protected void after(Context arg0, Void arg1) {
-			}
-			@Override
-			protected void handleError(Context arg0, Exception arg1) {
-			}    		
-    	};
-    	refreshTask.disableDialog();
-    	refreshTask.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
-			public Void call(BetterAsyncTask<Void, Void, Void> arg0)
-					throws Exception {
-				for (Channel channel : channels) {
-					try {						
-						channel.update(maxItemsPerChannel);
-						adapter.refresh();
-					} catch (Exception e) {
-						Log.e("ERROR", e.getMessage());
-					}
-				}
-				return null;
-			}    		
-    	});
-    	refreshTask.execute();
-	}
+	}		
     
     private void showChannel(Channel channel) {
     	Intent intent = new Intent(this, ChannelActivity.class);
@@ -231,7 +196,7 @@ public class MainActivity extends LocalizedActivity {
 						switch (which) {
 							case 0: 
 								dialog.dismiss();
-								deleteChannel(channel);							
+								confirmDeleteChannel(channel);							
 								break;
 						}
 					}    			
@@ -239,6 +204,27 @@ public class MainActivity extends LocalizedActivity {
     		).create();
     	dialog.show();
 	}
+    
+    private void confirmDeleteChannel(final Channel channel) {
+    	String confirmMessage = getString(R.string.unsubscribe_confirmation)
+    		.replace("{feeds}", "* " + channel.title);
+    	AlertDialog dialog = new AlertDialog.Builder(this)
+			.setTitle(channel.title)
+			.setMessage(confirmMessage)
+			.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+					deleteChannel(channel);					
+				}								
+			})
+			.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			})
+			.create();
+		dialog.show();
+    }
     
     private void deleteChannel(final Channel channel) {
     	final ProgressDialog progressDialog = new ProgressDialog(this);

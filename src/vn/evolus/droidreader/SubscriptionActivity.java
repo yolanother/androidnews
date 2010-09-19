@@ -15,11 +15,12 @@ import vn.evolus.droidreader.model.Channel;
 import vn.evolus.droidreader.model.Subscription;
 import vn.evolus.droidreader.model.SubscriptionGroup;
 import vn.evolus.droidreader.util.StreamUtils;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
@@ -35,6 +36,7 @@ import com.github.droidfu.concurrent.BetterAsyncTaskCallable;
 public class SubscriptionActivity extends LocalizedActivity {	
 	private ExpandableListView listView;
 	private SuggestedChannelsAdapter adapter;
+	private Button saveButton;
 	
 	private Map<String, Channel> newSubscriptions = new HashMap<String, Channel>();
 	private Map<String, Channel> removedSubscriptions = new HashMap<String, Channel>();
@@ -66,10 +68,11 @@ public class SubscriptionActivity extends LocalizedActivity {
 			}			
 		});
 		
-		Button saveButton = (Button)findViewById(R.id.save);
+		saveButton = (Button)findViewById(R.id.save);
+		saveButton.setEnabled(false);
 		saveButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				saveSubscriptions();
+				confirmBeforeSavingSubscriptions();				
 			}
 		});
 		
@@ -81,6 +84,38 @@ public class SubscriptionActivity extends LocalizedActivity {
 		});
 	}
 	
+	private void confirmBeforeSavingSubscriptions() {
+		if (removedSubscriptions.size() == 0) {
+			saveSubscriptions();
+			return;
+		}
+		StringBuilder sb = new StringBuilder();
+		for (Channel channel : removedSubscriptions.values()) {
+			sb.append("* ");
+			sb.append(channel.title);
+			sb.append("\n");
+		}
+		
+		String confirmMessage = getString(R.string.unsubscribe_confirmation)
+			.replace("{feeds}", sb.toString()); 
+    	AlertDialog dialog = new AlertDialog.Builder(this)
+			.setTitle(R.string.confirmation)
+			.setMessage(confirmMessage)
+			.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+					saveSubscriptions();
+				}								
+			})
+			.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			})
+			.create();
+		dialog.show();
+	}
+	
 	private void saveSubscriptions() {
 		final ProgressDialog progressDialog = new ProgressDialog(this);
     	progressDialog.setMessage(getString(R.string.saving_subscriptions));
@@ -88,7 +123,8 @@ public class SubscriptionActivity extends LocalizedActivity {
 			@Override
 			protected void after(Context context, Void arg1) {				
 				progressDialog.dismiss();				
-				loadSubscriptions();								
+				loadSubscriptions();
+				saveButton.setEnabled(false);
 			}
 			@Override
 			protected void handleError(Context context, Exception arg1) {
@@ -116,7 +152,6 @@ public class SubscriptionActivity extends LocalizedActivity {
 		for (String url : newSubscriptions.keySet()) {
 			Channel channel = newSubscriptions.get(url);
 			try {
-				Log.d("DEBUG", "Subscribing to " + channel.title);
 				ContentManager.subscribe(channel);
 			} catch (Exception e) {
 				failed = true;
@@ -129,7 +164,6 @@ public class SubscriptionActivity extends LocalizedActivity {
 		for (String url : removedSubscriptions.keySet()) {
 			Channel channel = removedSubscriptions.get(url);
 			try {
-				Log.d("DEBUG", "Unsubscribing " + channel.title);
 				ContentManager.unsubscribe(channel);
 			} catch (Exception e) {
 				failed = true;
@@ -148,21 +182,23 @@ public class SubscriptionActivity extends LocalizedActivity {
 		if (subscription.id == 0) {
 			// new channel
 			if (newSubscriptions.containsKey(subscription.url)) {
-				Log.d("DEBUG", "Remove " + subscription.title + " from SUBSCRIBE list");
 				newSubscriptions.remove(subscription.url);
 			} else {
-				Log.d("DEBUG", "Add " + subscription.title + " to SUBSCRIBE list");				
 				newSubscriptions.put(subscription.url, new Channel(subscription.title, subscription.url));
 			}
 		} else {
 			// existing channel
 			if (removedSubscriptions.containsKey(subscription.url)) {
-				Log.d("DEBUG", "Remove " + subscription.title + " from UNSUBSCRIBE list");
 				removedSubscriptions.remove(subscription.url);
 			} else {
-				Log.d("DEBUG", "Add " + subscription.title + " to UNSUBSCRIBE list");
 				removedSubscriptions.put(subscription.url, channelMap.get(subscription.url));
 			}
+		}
+		
+		if (newSubscriptions.size() > 0 || removedSubscriptions.size() > 0) {
+			saveButton.setEnabled(true);
+		} else {
+			saveButton.setEnabled(false);
 		}
 	}
 

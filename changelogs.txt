@@ -1,0 +1,8 @@
+2010-09-19:
+* Fonts
+* Reading mode (Night/Day)
+* Read/Unread toggle
+* Notification options
+
+2010-09-15:
+Google Reader support

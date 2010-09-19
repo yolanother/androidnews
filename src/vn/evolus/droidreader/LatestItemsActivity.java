@@ -13,8 +13,10 @@ import vn.evolus.droidreader.util.ImageCache;
 import vn.evolus.droidreader.util.ImageLoader;
 import vn.evolus.droidreader.widget.ItemListView;
 import android.app.NotificationManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -25,7 +27,6 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ViewSwitcher;
 import android.widget.AdapterView.OnItemClickListener;
 
@@ -36,6 +37,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 	private static final int MAX_ITEMS = 15;
 	
 	private static final int MENU_LOGOUT = 1;
+	private static final int MENU_SETTING = 2;
 	
 	private boolean loading = false;
 	private ItemListView itemListView;
@@ -56,7 +58,7 @@ public class LatestItemsActivity extends LocalizedActivity {
         viewChannelsButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				viewChannels();
-			}        	
+			}
         });
 		
 		refreshOrProgress = (ViewSwitcher)findViewById(R.id.refreshOrProgress);
@@ -67,12 +69,15 @@ public class LatestItemsActivity extends LocalizedActivity {
 			}
 		});
 		
-		ImageButton settingsButton = (ImageButton)findViewById(R.id.settings);
-        settingsButton.setOnClickListener(new OnClickListener() {
+		ImageButton showReadToggle = (ImageButton)findViewById(R.id.showRead);
+		showReadToggle.setSelected(Settings.getShowRead(this));
+		showReadToggle.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				showSettings();
-			}        	
-        });
+				v.setSelected(!v.isSelected());
+				Settings.saveShowRead(LatestItemsActivity.this, v.isSelected());
+				showLatestItems(MAX_ITEMS);
+			}			
+		});		
 				
         itemListView = (ItemListView)findViewById(R.id.itemListView);
         itemListView.setOnItemClickListener(new OnItemClickListener() {
@@ -80,21 +85,19 @@ public class LatestItemsActivity extends LocalizedActivity {
 				Item item = (Item)adapterView.getItemAtPosition(position);				
 				showItem(item);
 			}
-        });
-        ItemAdapter adapter = (ItemAdapter)itemListView.getAdapter();
-        adapter.setItemRequestListener(new OnItemRequestListener() {
-			public void onRequest(Item lastItem) {
-				requestMoreItems(lastItem);
-			}
-        });
+        });        
         
-        if (ConnectivityReceiver.hasGoodEnoughNetworkConnection(this)) {
-        	Intent service = new Intent(this, ContentSynchronizationService.class);
-        	startService(service);
-        	
-        	Intent downloadService = new Intent(this, ImageDownloadingService.class);
-        	startService(downloadService);
-        }
+        checkAndShowWhatsNew();
+        
+//        try {
+//			AtomFeed feed = GoogleReaderFactory.getGoogleReader().fetchFeed("http://feeds.arstechnica.com/arstechnica/everything", 20);
+//			for (Entry entry : feed.getEntries()) {
+//				Log.d("DEBUG", ">>" + entry.getTitle());
+//				Log.d("DEBUG", "   >>" + entry.getSummary());
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 	}
 	
 	@Override
@@ -116,7 +119,19 @@ public class LatestItemsActivity extends LocalizedActivity {
 		NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		notificationManager.cancel(ContentSynchronizationService.NOTIFICATION_ID);
 		
+		synchronize();
+		
 		showLatestItems(MAX_ITEMS);
+	}
+
+	private void synchronize() {
+		if (ConnectivityReceiver.hasGoodEnoughNetworkConnection(this)) {
+        	Intent service = new Intent(this, ContentSynchronizationService.class);
+        	startService(service);
+        	
+        	Intent downloadService = new Intent(this, ImageDownloadingService.class);
+        	startService(downloadService);
+        }
 	}
 	
 	@Override
@@ -127,7 +142,8 @@ public class LatestItemsActivity extends LocalizedActivity {
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(0, MENU_LOGOUT, 0, R.string.logout);
+		menu.add(0, MENU_LOGOUT, 0, R.string.logout).setIcon(R.drawable.ic_menu_logout);
+		menu.add(0, MENU_SETTING, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
 		return super.onCreateOptionsMenu(menu);
 	}
 	
@@ -135,19 +151,39 @@ public class LatestItemsActivity extends LocalizedActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == MENU_LOGOUT) {
 			logout();
+		} else if (item.getItemId() == MENU_SETTING) {
+			showSettings();
 		}
 		return super.onOptionsItemSelected(item);
 	}
 	
+	private void checkAndShowWhatsNew() {
+		int versionCode = Settings.getVersion(this);
+		try {
+			ComponentName comp = new ComponentName(this, LatestItemsActivity.class);
+			PackageInfo pinfo = this.getPackageManager().getPackageInfo(comp.getPackageName(), 0);
+			if (pinfo.versionCode > versionCode) {
+				Settings.saveVersion(this, versionCode);
+				showWhatsNew();
+				// show what's new
+			}
+		} catch (android.content.pm.PackageManager.NameNotFoundException e) {			
+		}
+	}
+	
+	private void showWhatsNew() {
+		
+	}
+
 	private void logout() {
 		Settings.clearGoogleReaderAccessTokenAndSecret(this);
 	}
-
+	
 	private void showSettings() {
 		Intent intent = new Intent(this, SettingsActivity.class);
 		startActivity(intent);
 	}
-	
+
 	private void setBusy() {
 		refreshOrProgress.setDisplayedChild(1);
 	}
@@ -156,7 +192,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 		refreshOrProgress.setDisplayedChild(0);
 	}
 	
-	protected void requestMoreItems(final Item lastItem) {
+	protected void loadMoreItems(final Item lastItem) {
 		if (loading) return;
 		
 		loading = true;
@@ -175,7 +211,6 @@ public class LatestItemsActivity extends LocalizedActivity {
 			}			
 			protected void handleError(Context context, Exception e) {
 				e.printStackTrace();
-				Toast.makeText(context, "Cannot load more items: " + e.getMessage(), 5).show();
 				setIdle();
 				loading = false;
 			}
@@ -183,7 +218,8 @@ public class LatestItemsActivity extends LocalizedActivity {
 		loadMoreItemsTask.setCallable(new BetterAsyncTaskCallable<Void, Void, List<Item>>() {
 			public List<Item> call(BetterAsyncTask<Void, Void, List<Item>> task) 
 				throws Exception {				
-				return ContentManager.loadOlderItems(lastItem, MAX_ITEMS, 
+				return ContentManager.loadOlderItems(lastItem, MAX_ITEMS,
+						Settings.getShowRead(LatestItemsActivity.this),
 						ContentManager.LIGHTWEIGHT_ITEM_LOADER, 
 						ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);				
 			}
@@ -197,12 +233,14 @@ public class LatestItemsActivity extends LocalizedActivity {
 		BetterAsyncTask<Void, Void, ActiveList<Item>> task = 
 				new BetterAsyncTask<Void, Void, ActiveList<Item>>(this) {			
 			protected void after(Context context, ActiveList<Item> items) {
-				itemListView.setItems(items);
+				ItemAdapter adapter = (ItemAdapter)itemListView.getAdapter();
+		        adapter.setItemRequestListener(onItemRequestListener);
+				itemListView.setItems(items);				
+				
 				onItemsUpdated();
 			}			
 			protected void handleError(Context context, Exception e) {
 				e.printStackTrace();
-				Toast.makeText(context, "Cannot load the feed: " + e.getMessage(), 5).show();
 				setIdle();
 			}
 		};
@@ -210,7 +248,8 @@ public class LatestItemsActivity extends LocalizedActivity {
 			public ActiveList<Item> call(BetterAsyncTask<Void, Void, ActiveList<Item>> task) 
 				throws Exception {				
 				return ContentManager.loadLatestItems(maxItems, 
-						ContentManager.LIGHTWEIGHT_ITEM_LOADER, 
+						Settings.getShowRead(LatestItemsActivity.this),
+						ContentManager.LIGHTWEIGHT_ITEM_LOADER,
 						ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);				
 			}
 		});
@@ -224,13 +263,14 @@ public class LatestItemsActivity extends LocalizedActivity {
 			protected void after(Context context, Void args) {				
 				onItemsUpdated();				
 			}			
-			protected void handleError(Context context, Exception e) {
-				Toast.makeText(context, "Cannot load the feed: " + e.getMessage(), 5).show();
+			protected void handleError(Context context, Exception e) {				
 				setIdle();
 			}			
 		};
 		task.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
-			public Void call(BetterAsyncTask<Void, Void, Void> task) throws Exception {				
+			public Void call(BetterAsyncTask<Void, Void, Void> task) throws Exception {
+				synchronize();				
+				showLatestItems(MAX_ITEMS);
 				return null;
 			}    			
 		});
@@ -252,4 +292,10 @@ public class LatestItemsActivity extends LocalizedActivity {
 		intent.putExtra("ItemId", item.id);		
 		startActivity(intent);		
 	}		
+
+	private OnItemRequestListener onItemRequestListener = new OnItemRequestListener() {
+		public void onRequest(Item lastItem) {
+			loadMoreItems(lastItem);
+		}
+    };
 }

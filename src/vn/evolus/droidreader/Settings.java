@@ -5,10 +5,10 @@ import android.content.SharedPreferences;
 
 public class Settings {
 	public static final int MAX_ITEMS = 15;
-	private static final String PREFS_NAME = "vn.evolus.droidreader_preferences";
-	
+	public static final String PREFS_NAME = "vn.evolus.droidreader_preferences";
+		
 	public static boolean getFirstTime(Context context) {
-		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);		
 		return prefs.getBoolean(context.getString(R.string.first_time_key), true);
 	}
 	
@@ -76,5 +76,61 @@ public class Settings {
 
 	public static boolean isAuthenticated(Context context) {
 		return getGoogleReaderAccessToken(context) != null;
+	}
+	
+	public static int getVersion(Context context) {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+		return prefs.getInt("version", 0);
+	}
+	
+	public static void saveVersion(Context context, int versionCode) {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);		
+		SharedPreferences.Editor editor = prefs.edit();		
+		editor.putInt("version", versionCode);				
+		editor.commit();
+	}
+	
+	public static boolean getShowRead(Context context) {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+		return prefs.getBoolean("show_read", true);
+	}
+
+	public static void saveShowRead(Context context, boolean showRead) {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);		
+		SharedPreferences.Editor editor = prefs.edit();		
+		editor.putBoolean("show_read", showRead);				
+		editor.commit();
+	}
+
+	public static String getFont(Context context) {		
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+		return prefs.getString("font", "serif");
+	}
+	public static String getFontSize(Context context) {		
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+		return prefs.getString("font_size", "1.1em");
+	}
+	public static boolean getNightReadingMode(Context context) {		
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+		return prefs.getBoolean("night_mode", false);
+	}
+	public static void saveNightReadingMode(Context context, boolean nightMode) {		
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);		
+		SharedPreferences.Editor editor = prefs.edit();		
+		editor.putBoolean("night_mode", nightMode);				
+		editor.commit();
+	}
+
+	public static boolean getNotificationSound(Context context) {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+		return prefs.getBoolean("notification_sound", false);
 	}	
+	public static boolean getNotificationVibrate(Context context) {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+		return prefs.getBoolean("notification_vibrate", false);
+	}	
+	public static boolean getNotificationLight(Context context) {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+		return prefs.getBoolean("notification_light", false);
+	}
 }

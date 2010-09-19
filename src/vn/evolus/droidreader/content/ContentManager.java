@@ -83,7 +83,7 @@ public class ContentManager {
 	public static void unsubscribe(Channel channel) throws Exception {
 		GoogleReader reader = GoogleReaderFactory.getGoogleReader();
 		reader.unsubscribe(channel.url);
-		deleteChannel(channel);		
+		deleteChannel(channel);
 	}
 	
 	public static void saveChannel(Channel channel) {
@@ -235,6 +235,13 @@ public class ContentManager {
 		cr.delete(Items.CONTENT_URI, Items.ID + "=?", new String[] { String.valueOf(item.id) });		
 	}
 	
+	public static void markItemAsRead(long itemId) {
+		ContentValues values = new ContentValues();
+		values.put(Items.READ, 1);
+		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
+				new String[] { String.valueOf(itemId) });		
+	}	
+	
 	public static void processItem(Item item) {
 		for (ItemProcessor processor : itemProcessors) {
 			processor.process(item);
@@ -276,11 +283,15 @@ public class ContentManager {
 		cursor.close();
 	}
 	
-	public static ActiveList<Item> loadLatestItems(int maxItems, 
+	public static ActiveList<Item> loadLatestItems(int maxItems, boolean showRead,
 			ItemLoader loader, ChannelLoader channelLoader) {
+		String selection = null;		
+		if (!showRead) {
+			selection = Items.READ + "=0";			
+		}
 		Cursor cursor = cr.query(Items.limit(maxItems),
 				loader.getProjection(),
-				null,
+				selection,
 				null,
 				Items.UPDATE_TIME + " DESC, " +
 				Items.PUB_DATE + " DESC, " +
@@ -299,22 +310,27 @@ public class ContentManager {
 	}
 	
 	public static List<Item> loadOlderItems(
-			Item olderThanItem,			
-			int maxItems, 
+			Item olderThanItem,
+			int maxItems,
+			boolean showRead,
 			ItemLoader loader, 
 			ChannelLoader channelLoader) {
-		return loadOlderItems(olderThanItem, ALL_CHANNELS, maxItems, loader, channelLoader);
+		return loadOlderItems(olderThanItem, ALL_CHANNELS, maxItems, showRead, loader, channelLoader);
 	}
 	
 	public static List<Item> loadOlderItems(
 			Item olderThanItem,
 			long channelId,
-			int maxItems, 
+			int maxItems,
+			boolean showRead,
 			ItemLoader loader, 
 			ChannelLoader channelLoader) {
 		String selection = 
 			"(" + Items.UPDATE_TIME + "<? OR (" + Items.UPDATE_TIME + "=? AND (" + 
 				Items.PUB_DATE + "<? OR (" + Items.PUB_DATE + " =? AND " + Items.ID + ">?))))";
+		if (!showRead) {
+			selection = selection + " AND " + Items.READ + "=0";
+		}
 		String[] selectionArgs = null;
 		if (channelId > 0) {
 			selection += " AND " + Items.CHANNEL_ID + "=?";
@@ -357,21 +373,26 @@ public class ContentManager {
 	
 	public static List<Item> loadNewerItems(
 			Item newerThanItem,			
-			int maxItems, 
+			int maxItems,
+			boolean loadReadItems,
 			ItemLoader loader, 
 			ChannelLoader channelLoader) {
-		return loadNewerItems(newerThanItem, ALL_CHANNELS, maxItems, loader, channelLoader);
+		return loadNewerItems(newerThanItem, ALL_CHANNELS, maxItems, loadReadItems, loader, channelLoader);
 	}
 	
 	public static List<Item> loadNewerItems(
 			Item newerThanItem,
 			long channelId,
 			int maxItems,
+			boolean loadReadItems,
 			ItemLoader loader, 
 			ChannelLoader channelLoader) {
 		String selection = 
 			"(" + Items.UPDATE_TIME + ">? OR (" + Items.UPDATE_TIME + "=? AND (" + 
 				Items.PUB_DATE + ">? OR (" + Items.PUB_DATE + " =? AND " + Items.ID + "<?))))";
+		if (!loadReadItems) {
+			selection = selection + " AND " + Items.READ + "=0";
+		}
 		String[] selectionArgs = null;
 		if (channelId > 0) {
 			selection += " AND " + Items.CHANNEL_ID + "=?";
@@ -450,15 +471,21 @@ public class ContentManager {
 		cursor.close();
 		return unreadCounts;
 	}
-	
-	public static int countItems() {
-		return countItems(-1); 
-	}	
-	public static int countItems(long channelId) {
+		
+	public static int countItems(long channelId, boolean countReadItems) {
+		String selection = null;
+		String[] selectionArgs = null;
+		if (channelId > 0) {
+			selection = Items.CHANNEL_ID + "=?";
+			selectionArgs = new String[] { String.valueOf(channelId) };
+		}
+		if (!countReadItems) {
+			selection = Items.READ + "=0" + (selection != null ? " AND " + selection : "");
+		}
 		Cursor cursor = cr.query(Items.CONTENT_URI, 
 				new String[] { Items.COUNT }, 
-				(channelId > 0 ? Items.CHANNEL_ID + "=?" : null), 
-				(channelId > 0 ? new String[] { String.valueOf(channelId) } : null), 
+				selection, 
+				selectionArgs,
 				null);		
 		int count = 0;
 		if (cursor.moveToNext()) {					
@@ -468,10 +495,13 @@ public class ContentManager {
 		return count;
 	}
 	
-	public static int countNewerItems(Item item, long channelId) {
+	public static int countNewerItems(Item item, long channelId, boolean countReadItems) {
 		String selection = 
 			"(" + Items.UPDATE_TIME + ">? OR (" + Items.UPDATE_TIME + "=? AND (" + 
 				Items.PUB_DATE + ">? OR (" + Items.PUB_DATE + " =? AND " + Items.ID + "<?))))";
+		if (!countReadItems) {
+			selection = selection + " AND " + Items.READ + "=0";
+		}
 		String[] selectionArgs = null;
 		if (channelId > 0) {
 			selection += " AND " + Items.CHANNEL_ID + "=?";
@@ -547,7 +577,7 @@ public class ContentManager {
 					},
 					null,
 					null,
-					Images.ID + " DESC");
+					Images.ID + " ASC");
 			
 			while (cursor.moveToNext()) {			
 				images.add(cursor.getLong(0));

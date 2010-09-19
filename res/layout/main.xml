@@ -37,22 +37,7 @@
             android:layout_gravity="center"  
             android:layout_margin="2.0sp"            
             android:nextFocusRight="@id/refresh"
-            android:nextFocusDown="@+id/channelListView" />
-        <ImageButton
-            android:focusable="false"
-            android:background="@color/toolbarSeparator" 
-            android:layout_width="1.0px"
-            android:layout_height="fill_parent" />
-        <ImageButton
-            android:id="@+id/refresh"     
-            android:src="@drawable/ic_toolbar_refresh"        
-            android:background="@drawable/toolbar_button_selector" 
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"  
-            android:layout_margin="2.0sp"
-            android:nextFocusLeft="@id/edit"
-            android:nextFocusDown="@+id/settings" />
+            android:nextFocusDown="@+id/channelListView" />        
         <ImageButton
             android:focusable="false"
             android:background="@color/toolbarSeparator" 

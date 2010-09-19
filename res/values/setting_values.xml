@@ -35,5 +35,26 @@
     <string-array name="language_values">        
         <item>en</item>
         <item>vn</item>
+    </string-array>
+    <string-array name="font_titles">        
+        <item>Droid Sans</item>
+        <item>Droid Serif</item>
+        <item>Droid Sans Mono</item>        
+    </string-array>
+    <string-array name="font_values">        
+        <item>sans</item>
+        <item>serif</item>
+        <item>monospace</item>
+    </string-array>
+    
+    <string-array name="font_size_titles">        
+        <item>Smaller</item>
+        <item>Normal</item>
+        <item>Larger</item>        
+    </string-array>
+    <string-array name="font_size_values">        
+        <item>1.0em</item>
+        <item>1.1em</item>
+        <item>1.2em</item>
     </string-array>        
 </resources>
