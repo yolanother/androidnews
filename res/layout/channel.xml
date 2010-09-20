@@ -18,13 +18,13 @@
 		android:textStyle="bold"
 		android:textColor="@color/channelName"		
 		android:lines="4"
-		android:ellipsize="end"
+		android:ellipsize="none"
 		android:shadowColor="@color/shadow"
 		android:shadowDx="1.0"
 		android:shadowDy="1.0"
 		android:shadowRadius="1.0"
 		android:background="#55000000"
-		android:gravity="left|bottom" />
+		android:gravity="left|top" />
 	<TextView android:id="@+id/unreadCount"              
         android:layout_width="25px"
         android:layout_height="25px"        

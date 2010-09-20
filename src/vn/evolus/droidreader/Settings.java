@@ -3,8 +3,7 @@ package vn.evolus.droidreader;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-public class Settings {
-	public static final int MAX_ITEMS = 15;
+public class Settings {	
 	public static final String PREFS_NAME = "vn.evolus.droidreader_preferences";
 		
 	public static boolean getFirstTime(Context context) {

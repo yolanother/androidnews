@@ -37,8 +37,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.item_view);		
-		ImageLoader.initialize(this);
-		showReadItems = Settings.getShowRead(this);
+		ImageLoader.initialize(this);		
 		
 		title = (TextView)findViewById(R.id.title);
 		subTitle = (TextView)findViewById(R.id.subTitle);
@@ -80,7 +79,12 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 				ContentManager.FULL_ITEM_LOADER,
 				ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
 		
-		channelId = getIntent().getLongExtra("ChannelId", ContentManager.ALL_CHANNELS);			
+		channelId = getIntent().getLongExtra("ChannelId", ContentManager.ALL_CHANNELS);
+		if (channelId == ContentManager.ALL_CHANNELS) {
+			showReadItems = true;
+		} else {
+			showReadItems = Settings.getShowRead(this);
+		}
 		items = new ArrayList<Item>();
 		List<Item> newerItems = ContentManager.loadNewerItems(currentItem,
 				channelId,

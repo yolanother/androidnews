@@ -12,12 +12,12 @@ import vn.evolus.droidreader.util.ActiveList;
 import vn.evolus.droidreader.util.ImageCache;
 import vn.evolus.droidreader.util.ImageLoader;
 import vn.evolus.droidreader.widget.ItemListView;
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,9 +32,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import com.github.droidfu.concurrent.BetterAsyncTask;
 import com.github.droidfu.concurrent.BetterAsyncTaskCallable;
 
-public class LatestItemsActivity extends LocalizedActivity {
-	private static final int MAX_ITEMS = 15;
-	
+public class LatestItemsActivity extends LocalizedActivity {	
 	private static final int MENU_LOGOUT = 1;
 	private static final int MENU_SETTING = 2;
 	
@@ -74,7 +72,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 			public void onClick(View v) {
 				v.setSelected(!v.isSelected());
 				Settings.saveShowRead(LatestItemsActivity.this, v.isSelected());
-				loadLatestItems(MAX_ITEMS);
+				loadLatestItems(Constants.MAX_ITEMS);
 			}			
 		});		
 				
@@ -104,10 +102,12 @@ public class LatestItemsActivity extends LocalizedActivity {
 			Intent intent = new Intent(this, SubscriptionActivity.class);
 			startActivity(intent);
 		}
+		
+		cancelNotification();
 				
 		startSynchronizationService();
 		
-		loadLatestItems(MAX_ITEMS);
+		loadLatestItems(Constants.MAX_ITEMS);
 	}
 	
 	@Override
@@ -145,6 +145,12 @@ public class LatestItemsActivity extends LocalizedActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+	private void cancelNotification() {
+		NotificationManager notificationManager = 
+			(NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		notificationManager.cancel(Constants.NOTIFICATION_ID);
+	}
 
 	private void startSynchronizationService() {
 		if (ConnectivityReceiver.hasGoodEnoughNetworkConnection(this)) {
@@ -164,14 +170,12 @@ public class LatestItemsActivity extends LocalizedActivity {
 			if (pinfo.versionCode > versionCode) {
 				Settings.saveVersion(this, versionCode);
 				showWhatsNew();
-				// show what's new
 			}
 		} catch (android.content.pm.PackageManager.NameNotFoundException e) {			
 		}
 	}
 	
 	private void showWhatsNew() {
-		
 	}
 
 	private void logout() {
@@ -194,15 +198,14 @@ public class LatestItemsActivity extends LocalizedActivity {
 	protected void loadMoreItems(final Item lastItem) {
 		if (loading) return;
 		
-		loading = true;
-		Log.d("DEBUG", "Loading more item later than " + lastItem.title);
+		loading = true;		
 		this.setBusy();
 		BetterAsyncTask<Void, Void, List<Item>> loadMoreItemsTask = 
 			new BetterAsyncTask<Void, Void, List<Item>>(this) {			
 			protected void after(Context context, List<Item> items) {				
 				ItemAdapter adapter = (ItemAdapter)itemListView.getAdapter();				
 				adapter.addItems(items);
-				if (items.size() < MAX_ITEMS) {
+				if (items.size() < Constants.MAX_ITEMS) {
 					adapter.setItemRequestListener(null);
 				}
 				setIdle();
@@ -217,7 +220,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 		loadMoreItemsTask.setCallable(new BetterAsyncTaskCallable<Void, Void, List<Item>>() {
 			public List<Item> call(BetterAsyncTask<Void, Void, List<Item>> task) 
 				throws Exception {				
-				return ContentManager.loadOlderItems(lastItem, MAX_ITEMS,
+				return ContentManager.loadOlderItems(lastItem, Constants.MAX_ITEMS,
 						Settings.getShowRead(LatestItemsActivity.this),
 						ContentManager.LIGHTWEIGHT_ITEM_LOADER, 
 						ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);				
@@ -269,7 +272,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 		task.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
 			public Void call(BetterAsyncTask<Void, Void, Void> task) throws Exception {
 				startSynchronizationService();				
-				loadLatestItems(MAX_ITEMS);
+				loadLatestItems(Constants.MAX_ITEMS);
 				return null;
 			}    			
 		});
@@ -302,7 +305,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 		public void onNewItems() {			
 			runOnUiThread(new Runnable() {
 				public void run() {
-					loadLatestItems(MAX_ITEMS);
+					loadLatestItems(Constants.MAX_ITEMS);
 				}
 			});			
 		}    	

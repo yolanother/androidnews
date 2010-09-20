@@ -21,8 +21,7 @@
     <string name="auto_update_off">You must manually update your feeds</string>
     <string name="show_updated_channels_key">show_updated_channels</string>
     <string name="show_updated_channels_option_title">Show feeds</string>
-    <string name="show_updated_channels_on">which have unread items</string>
-    
+    <string name="show_updated_channels_on">which have unread items</string>    
     <string name="show_updated_channels_off">show all feeds</string>
     <string name="update_interval_key">update_interval</string>
     <string name="first_time_key">first_time</string>
@@ -36,7 +35,7 @@
     <string name="synchronization_options">Synchronization</string>        
     <string name="display_options">Display</string>
     <string name="notification_options">Notification</string>    
-    <string name="font_dialog_title">Fonts</string>
+    <string name="font_dialog_title">Font</string>
     <string name="font_dialog_message">Which font will be used to display articles?</string>
     <string name="font_size_dialog_title">Font size</string>
     <string name="font_size_dialog_message">How large article texts will be displayed?</string>
@@ -70,7 +69,7 @@
     
     <string name="share">Share</string>
     <string name="view_original">View original</string>
-    <string name="share_text">Hi,\n\nYour friend wants to share with you a nice article: {link}\n\nHave fun.</string>
+    <string name="share_text">Hi,\n\nCheck this article: {link}</string>
     
     <string name="authorize">Authorize</string>
     <string name="register">Register</string>
