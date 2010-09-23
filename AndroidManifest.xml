@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="vn.evolus.droidreader"
-      android:versionCode="4"
-      android:versionName="1.0b2">
+      android:versionCode="6"
+      android:versionName="1.0b3">
     <application 
         android:name="Application"
         android:icon="@drawable/icon" android:label="@string/applicationName"
@@ -36,13 +36,15 @@
             </intent-filter>
         </activity>
         
+        <service android:name=".services.SynchronizationService" />
+        <service android:name=".services.DownloadingService" />
         <service android:name=".services.ContentSynchronizationService" />
         <service android:name=".services.ImageDownloadingService" />
         
         <provider android:name=".providers.ImagesProvider"
-           android:authorities="vn.evolus.news.images" />
+           android:authorities="vn.evolus.droidreader.images" />
         <provider android:name=".providers.ContentsProvider"
-           android:authorities="vn.evolus.news.contents" />    
+           android:authorities="vn.evolus.droidreader.contents" />    
         
         <receiver android:name=".ConnectivityReceiver">
 		    <intent-filter>

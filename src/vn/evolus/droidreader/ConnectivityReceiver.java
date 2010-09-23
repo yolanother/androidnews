@@ -1,7 +1,7 @@
 package vn.evolus.droidreader;
 
-import vn.evolus.droidreader.services.ContentSynchronizationService;
-import vn.evolus.droidreader.services.ImageDownloadingService;
+import vn.evolus.droidreader.services.DownloadingService;
+import vn.evolus.droidreader.services.SynchronizationService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,8 +13,8 @@ import android.util.Log;
 public class ConnectivityReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Intent updatingService = new Intent(context, ContentSynchronizationService.class);
-		Intent downloadingService = new Intent(context, ImageDownloadingService.class);
+		Intent updatingService = new Intent(context, SynchronizationService.class);
+		Intent downloadingService = new Intent(context, DownloadingService.class);
 		
 		NetworkInfo info = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
 		if (hasGoodEnoughNetworkConnection(info, context)) {

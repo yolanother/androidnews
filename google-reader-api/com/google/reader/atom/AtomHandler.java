@@ -11,9 +11,12 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import vn.evolus.droidreader.util.Html;
 
+import com.google.reader.GoogleReader;
+
 public class AtomHandler extends DefaultHandler {
-	private static String NAMESPACE = "http://www.w3.org/2005/Atom";
-	private static String GOOGLE_READER_NAMESPACE = "http://www.google.com/schemas/reader/atom/";
+	private static final String NAMESPACE = "http://www.w3.org/2005/Atom";
+	private static final String GOOGLE_READER_NAMESPACE = "http://www.google.com/schemas/reader/atom/";
+	private static final String GOOGLE_READER_SCHEME="http://www.google.com/reader/";
 	private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
 	
 	private static final int ATOM_FEED = 1;	
@@ -59,10 +62,10 @@ public class AtomHandler extends DefaultHandler {
 		} else if (localName.equals("entry")) {
 			entry = new Entry();
 			currentState = ATOM_ENTRY;
-			String readState = attributes.getValue("gr:is-read-state-locked");
-			if (readState != null && "true".equals(readState)) {
-				entry.setRead(true);
-			}			
+//			String readState = attributes.getValue("gr:is-read-state-locked");
+//			if (readState != null && "true".equals(readState)) {
+//				entry.setRead(true);
+//			}			
 		} else if (localName.equals("source")) {			
 			String feedId = attributes.getValue(GOOGLE_READER_NAMESPACE, "stream-id");
 			if (currentState == ATOM_FEED) {
@@ -78,6 +81,22 @@ public class AtomHandler extends DefaultHandler {
 				} else if (currentState == ATOM_FEED) {
 					feed.setLink(href);
 				}
+			}
+		} else if (localName.equals("category")) {
+			String scheme = attributes.getValue("scheme");
+			if (currentState == ATOM_ENTRY && GOOGLE_READER_SCHEME.equals(scheme)) {
+				String term = attributes.getValue("term");
+				int pos = term.indexOf("/state/com.google/"); 				
+				if (pos > 0) {
+					String state = "user/-" + term.substring(pos);
+					if (GoogleReader.ITEM_STATE_READ.equals(state)) {
+						entry.setRead(true);
+					} else if (GoogleReader.ITEM_STATE_STARRED.equals(state)) {
+						entry.setStarred(true);
+					} else if (GoogleReader.ITEM_STATE_KEPT_UNREAD.equals(state)) {
+						entry.setKeptUnread(true);
+					}
+				}				
 			}
 		}
 	}

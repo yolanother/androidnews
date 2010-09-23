@@ -1,15 +1,16 @@
 TODO:
 * Keep scrolling position
-* Sync with Google Reader
-    * Mark as read/unread
-    * Star/unstar
 * Widgets
 * More languages
 * Offline article images?
 * Update subscriptions/blacklist from server
 * User define "Share" templates
+* Mobilize with Google GWT http://www.google.com/gwt/x?u=
 
 DONE:
+* Sync with Google Reader
+    * Mark as read/unread
+    * Star/unstar
 * Led/Vibrate/Sound options for notification
 * Fonts
 * Reading mode?

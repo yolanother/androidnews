@@ -10,7 +10,9 @@ public class Entry {
 	private String content;
 	private Date updated;
 	private boolean read = false;
-	private String feedId;
+	private boolean starred = false;
+	private boolean keptUnread = false;
+	private String feedId;	
 		
 	public String getId() {
 		return id;
@@ -53,6 +55,18 @@ public class Entry {
 	}
 	public void setRead(boolean read) {
 		this.read = read;
+	}	
+	public boolean getStarred() {
+		return starred;
+	}
+	public void setStarred(boolean starred) {
+		this.starred = starred;
+	}	
+	public boolean getKeptUnread() {
+		return keptUnread;
+	}
+	public void setKeptUnread(boolean keptUnread) {
+		this.keptUnread = keptUnread;
 	}
 	public String getFeedId() {
 		return feedId;

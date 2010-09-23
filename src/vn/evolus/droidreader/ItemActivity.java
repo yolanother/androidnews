@@ -22,7 +22,7 @@ import android.widget.TextView;
 
 public class ItemActivity extends LocalizedActivity implements OnScreenSelectedListener {
 	private TextView title;
-	private TextView subTitle;
+	private ImageButton starButton;
 	private ScrollView scrollView;
 	private ArrayList<Item> items;
 	private long channelId = ContentManager.ALL_CHANNELS;
@@ -30,17 +30,26 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 	private int totalItems = 0;
 	private int currentItemIndex = 0;	
 	private boolean showReadItems = true;
-	private Set<Long> readItems = new HashSet<Long>();
+	private Set<Item> readItems = new HashSet<Item>();	
+	private String article;
 		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {		
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.item_view);		
-		ImageLoader.initialize(this);		
+		ImageLoader.initialize(this);
+		article = getString(R.string.article);
 		
 		title = (TextView)findViewById(R.id.title);
-		subTitle = (TextView)findViewById(R.id.subTitle);
+		
+		starButton = (ImageButton)findViewById(R.id.star);
+		starButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				v.setSelected(!v.isSelected());								
+				changeCurrentItemAsStarredState(v.isSelected());				
+			}			
+		});
 		
 		ImageButton shareButton = (ImageButton)findViewById(R.id.share);
 		shareButton.setOnClickListener(new OnClickListener() {
@@ -80,7 +89,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 				ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
 		
 		channelId = getIntent().getLongExtra("ChannelId", ContentManager.ALL_CHANNELS);
-		if (channelId == ContentManager.ALL_CHANNELS) {
+		if (channelId != ContentManager.ALL_CHANNELS) {
 			showReadItems = true;
 		} else {
 			showReadItems = Settings.getShowRead(this);
@@ -113,8 +122,8 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 	@Override
 	protected void onPause() {		
 		if (readItems.size() > 0) {
-			for (Long itemId : readItems) {
-				ContentManager.markItemAsRead(itemId);
+			for (Item item : readItems) {
+				ContentManager.markItemAsRead(item);
 			}
 			readItems.clear();
 		}
@@ -129,7 +138,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 			if (item.equals(currentItem)) {
 				currentItemIndex = i;
 				itemView.setItem(currentItem);
-				readItems.add(currentItem.id);
+				readItems.add(currentItem);
 			}			
 			scrollView.addView(itemView);
 			i++;
@@ -160,6 +169,16 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 			itemView.setNightMode(nightMode);
 		}
 	}
+	
+	protected void changeCurrentItemAsStarredState(boolean starred) {
+		if (currentItem != null) {
+			if (starred) {
+				ContentManager.markItemAsStarred(currentItem);
+			} else {
+				ContentManager.unmarkItemAsStarred(currentItem);
+			}
+		}
+	}	
 
 	@Override
 	public void onSelected(int selectedIndex) {		
@@ -175,18 +194,19 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		}
 		loadOlderItem(selectedIndex);
 		selectedIndex = loadNewerItem(selectedIndex, currentItem);		
-		
-		title.setText(currentItem.channel.title);
+				
 		totalItems = ContentManager.countItems(channelId, showReadItems);
 		currentItemIndex = ContentManager.countNewerItems(currentItem, channelId, showReadItems);		
-		subTitle.setText(String.valueOf(currentItemIndex + 1)
-				.concat("/")
-				.concat(String.valueOf(totalItems)));
+		title.setText(article.replace("{no}", 
+				String.valueOf(currentItemIndex + 1)
+					.concat("/")
+					.concat(String.valueOf(totalItems))));		
+		starButton.setSelected(currentItem.starred);
 	}
 
 	private void markItemAsRead(Item item) {
-		if (!item.read && !readItems.contains(item.id)) {
-			readItems.add(item.id);
+		if (!item.read && !readItems.contains(item)) {
+			readItems.add(item);
 		}
 	}
 
@@ -214,7 +234,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		if (selectedIndex == 0) {
 			List<Item> newerItems = ContentManager.loadNewerItems(item,
 						channelId,
-						1, 		
+						1,
 						showReadItems,
 						ContentManager.FULL_ITEM_LOADER, 
 						ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
@@ -226,7 +246,11 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 				ItemView itemView = new ItemView(this);
 				itemView.setNightMode(Settings.getNightReadingMode(this));
 				scrollView.prependView(itemView);
-				itemView.setItem(newerItem);
+				try {
+					itemView.setItem(newerItem);
+				} catch (Throwable t) {
+					t.printStackTrace();
+				}								
 			}
 		}
 		return selectedIndex;

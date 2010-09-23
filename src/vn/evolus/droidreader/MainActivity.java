@@ -6,8 +6,8 @@ import java.util.Map;
 import vn.evolus.droidreader.adapter.ChannelAdapter;
 import vn.evolus.droidreader.content.ContentManager;
 import vn.evolus.droidreader.model.Channel;
-import vn.evolus.droidreader.services.ContentSynchronizationService;
-import vn.evolus.droidreader.services.ImageDownloadingService;
+import vn.evolus.droidreader.services.DownloadingService;
+import vn.evolus.droidreader.services.SynchronizationService;
 import vn.evolus.droidreader.util.ActiveList;
 import vn.evolus.droidreader.util.ImageLoader;
 import android.app.AlertDialog;
@@ -80,10 +80,10 @@ public class MainActivity extends LocalizedActivity {
         });
                 
         if (ConnectivityReceiver.hasGoodEnoughNetworkConnection(this)) {
-        	Intent service = new Intent(this, ContentSynchronizationService.class);
+        	Intent service = new Intent(this, SynchronizationService.class);
         	startService(service);
         	
-        	Intent downloadService = new Intent(this, ImageDownloadingService.class);
+        	Intent downloadService = new Intent(this, DownloadingService.class);
         	startService(downloadService);
         }
     }	

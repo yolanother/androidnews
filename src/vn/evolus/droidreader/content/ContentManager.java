@@ -15,9 +15,12 @@ import vn.evolus.droidreader.content.processors.VideoItemProcessor;
 import vn.evolus.droidreader.model.Channel;
 import vn.evolus.droidreader.model.Image;
 import vn.evolus.droidreader.model.Item;
+import vn.evolus.droidreader.model.Job;
+import vn.evolus.droidreader.model.SyncItemTagJob;
 import vn.evolus.droidreader.model.Channel.Channels;
 import vn.evolus.droidreader.model.Image.Images;
 import vn.evolus.droidreader.model.Item.Items;
+import vn.evolus.droidreader.model.Job.Jobs;
 import vn.evolus.droidreader.providers.ContentsProvider;
 import vn.evolus.droidreader.util.ActiveList;
 import vn.evolus.droidreader.util.StreamUtils;
@@ -163,21 +166,21 @@ public class ContentManager {
 				Items.UPDATE_TIME + " DESC, " +
 				Items.PUB_DATE + " DESC, " +
 				Items.ID + " ASC");
-		while (cursor.moveToNext()) {
+		if (cursor.moveToNext()) {
 			long id = cursor.getLong(0);
 			long lastPubDate = cursor.getLong(1);
 			long updateTime = cursor.getLong(2);
+			String selection = Items.CHANNEL_ID + "=? AND (" + Items.UPDATE_TIME + "<? OR (" + Items.UPDATE_TIME + "=? AND (" + 
+				Items.PUB_DATE + "<? OR (" + Items.PUB_DATE + " =? AND " + Items.ID + ">?))))";
 			cr.delete(Items.CONTENT_URI,
-					Items.CHANNEL_ID + "=? AND "
-						+ Items.ID + ">? AND "
-						+ "(" + Items.UPDATE_TIME + "<? OR (" 
-						+ Items.UPDATE_TIME + "=? AND " + Items.PUB_DATE + "<=?))",
+					selection,
 					new String[] {
-						String.valueOf(channel.id),
-						String.valueOf(id),
+						String.valueOf(channel.id),						
 						String.valueOf(updateTime),
 						String.valueOf(updateTime),
-						String.valueOf(lastPubDate) });
+						String.valueOf(lastPubDate),
+						String.valueOf(lastPubDate),
+						String.valueOf(id) });
 		}		
 		cursor.close();
 	}
@@ -203,8 +206,11 @@ public class ContentManager {
 			values.put(Items.LINK, item.link);
 			values.put(Items.IMAGE_URL, item.imageUrl);
 			values.put(Items.READ, item.read);
+			values.put(Items.STARRRED, item.starred);
+			values.put(Items.KEPT, item.kept);
 			values.put(Items.CHANNEL_ID, item.channel.id);
-			values.put(Items.UPDATE_TIME, item.updateTime);
+			values.put(Items.UPDATE_TIME, item.updateTime);			
+			values.put(Items.ORIGINAL_ID, item.originalId);
 			Uri contentUri = cr.insert(Items.CONTENT_URI, values);
 			item.id = ContentUris.parseId(contentUri);
 		} else {
@@ -236,13 +242,62 @@ public class ContentManager {
 		cr.delete(Items.CONTENT_URI, Items.ID + "=?", new String[] { String.valueOf(item.id) });		
 	}
 	
-	public static void markItemAsRead(long itemId) {
+	public static void markItemAsRead(Item item) {
+		if (item.read) return;
+		
+		item.read = true;
 		ContentValues values = new ContentValues();
 		values.put(Items.READ, 1);
 		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
-				new String[] { String.valueOf(itemId) });		
-	}	
+				new String[] { String.valueOf(item.id) });
+		
+		SyncItemTagJob job = new SyncItemTagJob(SyncItemTagJob.ACTION_ADD, 
+					item.originalId, GoogleReader.ITEM_STATE_READ);
+		saveJob(job);		
+	}
 	
+	public static void markItemAsStarred(Item item) {
+		if (item.starred) return;
+		
+		// delete previous REMOVE tag job
+		SyncItemTagJob removeJob = new SyncItemTagJob(SyncItemTagJob.ACTION_REMOVE, 
+				item.originalId, GoogleReader.ITEM_STATE_READ);
+		deleteJob(removeJob.type, removeJob.params);
+		
+		// saving state to DB
+		item.starred = true;
+		ContentValues values = new ContentValues();
+		values.put(Items.STARRRED, 1);
+		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
+				new String[] { String.valueOf(item.id) });
+		
+		// create a new REMOVE tag job
+		SyncItemTagJob job = new SyncItemTagJob(SyncItemTagJob.ACTION_ADD, 
+				item.originalId, GoogleReader.ITEM_STATE_STARRED);
+		saveJob(job);
+	}
+	
+	public static void unmarkItemAsStarred(Item item) {
+		if (!item.starred) return;
+		
+		// delete previous ADD tag job
+		SyncItemTagJob addJob = new SyncItemTagJob(SyncItemTagJob.ACTION_REMOVE, 
+				item.originalId, GoogleReader.ITEM_STATE_READ);
+		deleteJob(addJob.type, addJob.params);
+		
+		// saving state to DB
+		item.starred = false;
+		ContentValues values = new ContentValues();
+		values.put(Items.STARRRED, 1);
+		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
+				new String[] { String.valueOf(item.id) });
+		
+		// create a new ADD tag job
+		SyncItemTagJob job = new SyncItemTagJob(SyncItemTagJob.ACTION_REMOVE, 
+				item.originalId, GoogleReader.ITEM_STATE_STARRED);
+		saveJob(job);
+	}
+
 	public static void processItem(Item item) {
 		for (ItemProcessor processor : itemProcessors) {
 			processor.process(item);
@@ -434,14 +489,26 @@ public class ContentManager {
 		return items;
 	}
 	
-	public static void markAllItemsOfChannelAsRead(Channel channel) {
-		ContentValues values = new ContentValues();
-		values.put(Items.READ, true);
-		cr.update(Items.CONTENT_URI, values, Items.CHANNEL_ID + "=?", 
-				new String[] { String.valueOf(channel.id) });
-		for (Item item : channel.getItems()) {
-			item.read = true;
+	public static void markAllItemsOfChannelAsRead(Channel channel) {		
+		Cursor cursor = cr.query(Items.CONTENT_URI,				
+				new String[] {
+					Items.ID,
+					Items.ORIGINAL_ID,
+				},				
+				Items.CHANNEL_ID + "=? AND " + Items.READ + "=0",
+				new String[] { String.valueOf(channel.id) },
+				null);
+		Item item = new Item();
+		while (cursor.moveToNext()) {
+			item.id = cursor.getLong(0);
+			item.read = false;
+			item.originalId = cursor.getString(1);
+			markItemAsRead(item);
 		}
+		for (Item channelItem : channel.getItems()) {
+			channelItem.read = true;
+		}
+		cursor.close();
 	}
 	
 	/**
@@ -655,7 +722,7 @@ public class ContentManager {
 		}
 	}
 	
-	public void delete(Image image) {		
+	public static void deleteImage(Image image) {		
 		cr.delete(Images.CONTENT_URI, ContentsProvider.WHERE_ID, new String[] { String.valueOf(image.id) });
 		image.id = 0;
 	}
@@ -667,6 +734,45 @@ public class ContentManager {
 		image = new Image(imageUrl, Image.IMAGE_STATUS_PENDING);
 		saveImage(image);		
 		return image.id;
+	}
+		
+	public static void saveJob(Job job) {
+		ContentValues values = new ContentValues();
+		values.put(Jobs.TYPE, job.type);		
+		values.put(Jobs.PARAMS, job.params);
+		cr.insert(Jobs.CONTENT_URI, values);
+	}
+	
+	public static List<Job> loadJobs(int maxItems) {
+		Cursor cursor = cr.query(Jobs.limit(maxItems), 
+				new String[] {		
+					Jobs.ID,
+					Jobs.TYPE,
+					Jobs.PARAMS
+				},
+				null,
+				null,
+				Jobs.ID);
+		List<Job> jobs = new ArrayList<Job>();
+		while (cursor.moveToNext()) {			
+			Job job = new Job();
+			job.id = cursor.getLong(0);
+			job.type = cursor.getString(1);
+			job.params = cursor.getString(2);
+			jobs.add(job);
+		}
+		cursor.close();
+		return jobs;
+	}
+	
+	public static void deleteJob(String type, String params) {
+		cr.delete(Jobs.CONTENT_URI, 
+				Jobs.TYPE + "=? AND " + Jobs.PARAMS + "=?", 
+				new String[] { type, params });			
+	}
+	
+	public static void deleteJob(long jobId) {		
+		cr.delete(Jobs.CONTENT_URI, ContentsProvider.WHERE_ID, new String[] { String.valueOf(jobId) });
 	}
 	
 	private static boolean isChannelInCache(long channelId) {

@@ -17,8 +17,11 @@ public class FullItemLoader implements ItemLoader {
 				Items.LINK,
 				Items.IMAGE_URL,
 				Items.READ,
+				Items.STARRRED,
+				Items.KEPT,
 				Items.CHANNEL_ID,
-				Items.UPDATE_TIME
+				Items.UPDATE_TIME,
+				Items.ORIGINAL_ID
 			};
 	}
 	public Item load(Cursor cursor) {
@@ -31,8 +34,11 @@ public class FullItemLoader implements ItemLoader {
 		item.link = cursor.getString(4);
 		item.imageUrl = cursor.getString(5);			
 		item.read = (cursor.getInt(6) != 0);
-		item.channel = new Channel(cursor.getInt(7));
-		item.updateTime = cursor.getLong(8);
+		item.starred = (cursor.getInt(7) != 0);
+		item.kept = (cursor.getInt(8) != 0);
+		item.channel = new Channel(cursor.getInt(9));
+		item.updateTime = cursor.getLong(10);
+		item.originalId = cursor.getString(11);
 		return item;
 	}
 }

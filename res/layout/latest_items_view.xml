@@ -12,16 +12,27 @@
         <TextView
             android:id="@+id/title" 
             android:text="@string/latest"
-            android:textSize="15.0sp" 
+            android:textSize="14.0sp" 
             android:textStyle="bold" 
             android:textColor="@color/channelName"
+            android:maxLines="1"
             android:gravity="left" 
             android:layout_gravity="center"              
             android:padding="5.0sp" 
             android:layout_width="fill_parent" 
             android:layout_height="wrap_content"            
             android:shadowColor="#ff333333" 
-            android:layout_weight="1.0" />            
+            android:layout_weight="1.0" />
+        <ImageButton
+            android:id="@+id/readingOptions"
+            android:src="@drawable/ic_toolbar_down_arrow"
+            android:background="@drawable/toolbar_button_selector" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"  
+            android:layout_margin="2.0sp"
+            android:nextFocusRight="@+id/refresh"
+            android:nextFocusDown="@+id/itemListView" />
         <ImageButton
             android:focusable="false" 
             android:background="@color/toolbarSeparator" 

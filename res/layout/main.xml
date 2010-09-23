@@ -62,7 +62,7 @@
         android:layout_weight="1.0"
         
         android:numColumns="auto_fit"
-        android:columnWidth="72dp"
+        android:columnWidth="@dimen/gridItemSize"
         android:stretchMode="spacingWidth"
         android:horizontalSpacing="5sp"
         android:verticalSpacing="5sp"        

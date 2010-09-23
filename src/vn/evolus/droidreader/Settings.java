@@ -22,6 +22,12 @@ public class Settings {
 		editor.putBoolean(context.getString(R.string.show_updated_channels_key), false);
 		editor.putString(context.getString(R.string.language_key), "en");
 		
+		editor.putString("font", "sans");
+		editor.putString("font_size", "1.0em");
+		editor.putBoolean("notification_sound", false);
+		editor.putBoolean("notification_vibrate", false);
+		editor.putBoolean("notification_light", true);
+		
 		editor.commit();
 	}
 	
@@ -68,9 +74,30 @@ public class Settings {
 		
 		editor.commit();
 	}
-
 	public static void clearGoogleReaderAccessTokenAndSecret(Context context) {
 		saveGoogleReaderAccessTokenAndSecret(context, null, null);
+	}
+	
+	public static String getGoogleReaderRequestToken(Context context) {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+		return prefs.getString("google_reader_request_token", null);
+	}
+	public static String getGoogleReaderRequestTokenSecret(Context context) {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+		return prefs.getString("google_reader_request_token_secret", null);
+	}
+	public static void saveGoogleReaderRequestTokenAndSecret(Context context, 
+			String requestToken, String requestTokenSecret) {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+		SharedPreferences.Editor editor = prefs.edit();
+		
+		editor.putString("google_reader_request_token", requestToken);
+		editor.putString("google_reader_request_token_secret", requestTokenSecret);
+		
+		editor.commit();
+	}
+	public static void clearGoogleReaderRequestTokenAndSecret(Context context) {
+		saveGoogleReaderRequestTokenAndSecret(context, null, null);
 	}
 
 	public static boolean isAuthenticated(Context context) {
@@ -103,11 +130,11 @@ public class Settings {
 
 	public static String getFont(Context context) {		
 		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
-		return prefs.getString("font", "serif");
+		return prefs.getString("font", "sans");
 	}
 	public static String getFontSize(Context context) {		
 		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
-		return prefs.getString("font_size", "1.1em");
+		return prefs.getString("font_size", "1.0em");
 	}
 	public static boolean getNightReadingMode(Context context) {		
 		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);

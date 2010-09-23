@@ -1,10 +1,15 @@
 package vn.evolus.droidreader;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URLEncoder;
 
 import oauth.signpost.OAuth;
 import oauth.signpost.exception.OAuthException;
-import vn.evolus.droidreader.services.ContentSynchronizationService;
+import vn.evolus.droidreader.services.SynchronizationService;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -47,11 +52,14 @@ public class AuthorizationActivity extends LocalizedActivity {
 		Uri uri = intent.getData();
 		if (uri != null && uri.toString().startsWith(CALLBACK_URL)) {
 		    String verificationCode = uri.getQueryParameter(OAuth.OAUTH_VERIFIER);		    
-		    try {
-				reader.authorize(verificationCode);
-				String accessToken = reader.getAccessToken();
-				String tokenSecret = reader.getTokenSecret();
-				Settings.saveGoogleReaderAccessTokenAndSecret(this, accessToken, tokenSecret);
+		    try {		    	
+				GoogleReader savedReader = getReader();
+				if (savedReader != null) {
+					savedReader.authorize(verificationCode);
+				}
+				String accessToken = savedReader.getAccessToken();
+				String tokenSecret = savedReader.getTokenSecret();
+				Settings.saveGoogleReaderAccessTokenAndSecret(this, accessToken, tokenSecret);				
 
 				startSyncProcess();
 			} catch (Exception e) {
@@ -61,8 +69,39 @@ public class AuthorizationActivity extends LocalizedActivity {
 		}
 	}
 	
+	private void saveReader(GoogleReader reader) {
+		FileOutputStream fis = null;
+		try {
+			fis = openFileOutput("oauth_consumer", MODE_PRIVATE);
+			ObjectOutputStream oos = new ObjectOutputStream(fis);
+			oos.writeObject(reader);			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private GoogleReader getReader() {				
+		FileInputStream is = null;
+		try {
+			is = openFileInput("oauth_consumer");
+			ObjectInputStream ois = new ObjectInputStream(is);
+			return (GoogleReader)ois.readObject();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (is != null) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
+	}
+
 	private void startSyncProcess() {
-		Intent service = new Intent(this, ContentSynchronizationService.class);
+		Intent service = new Intent(this, SynchronizationService.class);
     	startService(service);    	
     	Toast.makeText(this, R.string.synchorization_started, 100).show();
     	
@@ -75,6 +114,7 @@ public class AuthorizationActivity extends LocalizedActivity {
 	private void startAuthorizationProcess() {
 		try {			
 			String authorizationUrl = reader.getAuthorizationUrl(CALLBACK_URL);
+			saveReader(reader);
 			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(authorizationUrl)));
 		} catch (OAuthException e) {
 			e.printStackTrace();
@@ -84,6 +124,7 @@ public class AuthorizationActivity extends LocalizedActivity {
 	protected void startRegistrationProcess() {
 		try {
 			String authorizationUrl = reader.getAuthorizationUrl(CALLBACK_URL);
+			saveReader(reader);
 			startActivity(new Intent(Intent.ACTION_VIEW, 
 					Uri.parse("https://www.google.com/accounts/NewAccount?continue=" + 
 							URLEncoder.encode(authorizationUrl))));

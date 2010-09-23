@@ -7,12 +7,18 @@ import vn.evolus.droidreader.adapter.ItemAdapter.OnItemRequestListener;
 import vn.evolus.droidreader.content.ContentManager;
 import vn.evolus.droidreader.model.Item;
 import vn.evolus.droidreader.services.ContentSynchronizationService;
+import vn.evolus.droidreader.services.DownloadingService;
 import vn.evolus.droidreader.services.ImageDownloadingService;
+import vn.evolus.droidreader.services.SynchronizationService;
 import vn.evolus.droidreader.util.ActiveList;
 import vn.evolus.droidreader.util.ImageCache;
 import vn.evolus.droidreader.util.ImageLoader;
+import vn.evolus.droidreader.widget.ActionItem;
 import vn.evolus.droidreader.widget.ItemListView;
+import vn.evolus.droidreader.widget.QuickAction;
+import android.app.AlarmManager;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -37,8 +43,10 @@ public class LatestItemsActivity extends LocalizedActivity {
 	private static final int MENU_SETTING = 2;
 	
 	private boolean loading = false;
+	private TextView title;
 	private ItemListView itemListView;
 	private ViewSwitcher refreshOrProgress;
+	private ImageButton readOptionsButton;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,15 +56,23 @@ public class LatestItemsActivity extends LocalizedActivity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.latest_items_view);
 				
-		TextView title = (TextView)findViewById(R.id.title);
+		title = (TextView)findViewById(R.id.title);
         title.setText(title.getText().toString().toUpperCase());
+        
+        readOptionsButton = (ImageButton)findViewById(R.id.readingOptions);        
+        readOptionsButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				QuickAction readingOptions = createReadingOptions(readOptionsButton);
+				readingOptions.show();
+			}
+        });        
         
         ImageButton viewChannelsButton = (ImageButton)findViewById(R.id.channels);        
         viewChannelsButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				viewChannels();
 			}
-        });
+        });                
 		
 		refreshOrProgress = (ViewSwitcher)findViewById(R.id.refreshOrProgress);
 		ImageButton refresh = (ImageButton)findViewById(R.id.refresh);
@@ -84,8 +100,36 @@ public class LatestItemsActivity extends LocalizedActivity {
 			}
         });        
         
-        checkAndShowWhatsNew();        
+        checkAndShowWhatsNew(); 
+             
+//        try {
+//			copyFile(new File("/data/data/vn.evolus.droidreader/databases/droidnews.db"), 
+//					new File("/sdcard/droidnews.db"));
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}        
 	}
+	
+//	public static void copyFile(File sourceFile, File destFile) throws IOException {
+//		if(!destFile.exists()) {
+//			destFile.createNewFile();
+//		}
+//
+//		FileChannel source = null;
+//		FileChannel destination = null;
+//		try {
+//			source = new FileInputStream(sourceFile).getChannel();
+//			destination = new FileOutputStream(destFile).getChannel();
+//			destination.transferFrom(source, 0, source.size());
+//		} finally {
+//			if(source != null) {
+//				source.close();
+//			}
+//			if(destination != null) {
+//				destination.close();
+//			}
+//		}
+//	}
 	
 	@Override
 	protected void onStart() {	
@@ -154,10 +198,10 @@ public class LatestItemsActivity extends LocalizedActivity {
 
 	private void startSynchronizationService() {
 		if (ConnectivityReceiver.hasGoodEnoughNetworkConnection(this)) {
-        	Intent service = new Intent(this, ContentSynchronizationService.class);
+        	Intent service = new Intent(this, SynchronizationService.class);
         	startService(service);
         	
-        	Intent downloadService = new Intent(this, ImageDownloadingService.class);
+        	Intent downloadService = new Intent(this, DownloadingService.class);
         	startService(downloadService);
         }
 	}
@@ -176,6 +220,18 @@ public class LatestItemsActivity extends LocalizedActivity {
 	}
 	
 	private void showWhatsNew() {
+		try {
+			AlarmManager am = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+			Intent intent = new Intent(this, ImageDownloadingService.class);
+			PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
+			am.cancel(pendingIntent);
+			
+			intent = new Intent(this, ContentSynchronizationService.class);
+			pendingIntent = PendingIntent.getService(this, 0, intent, 0);
+			am.cancel(pendingIntent);
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
 	}
 
 	private void logout() {
@@ -280,7 +336,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 		task.execute();		       
 	}
 	
-	private void onItemsUpdated() {		
+	private void onItemsUpdated() {
 		this.setIdle();
 	}
 
@@ -291,7 +347,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 	
 	private void showItem(Item item) { 
 		Intent intent = new Intent(this, ItemActivity.class);		
-		intent.putExtra("ItemId", item.id);		
+		intent.putExtra("ItemId", item.id);
 		startActivity(intent);		
 	}		
 
@@ -310,4 +366,37 @@ public class LatestItemsActivity extends LocalizedActivity {
 			});			
 		}    	
     };
+    
+    private QuickAction createReadingOptions(View anchor) {
+    	final QuickAction quickAction = new QuickAction(anchor);
+    	
+    	ActionItem latest = new ActionItem();		
+		latest.setTitle(getResources().getString(R.string.latest));
+		latest.setIcon(getResources().getDrawable(R.drawable.latest));
+		latest.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				title.setText(getResources().getString(R.string.latest).toUpperCase());
+				quickAction.dismiss();				
+			}
+		});
+		
+		
+		ActionItem starred = new ActionItem();		
+		starred.setTitle(getResources().getString(R.string.starred));
+		starred.setIcon(getResources().getDrawable(R.drawable.star));
+		starred.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				title.setText(getResources().getString(R.string.starred).toUpperCase());
+				quickAction.dismiss();							
+			}
+		});
+				
+		quickAction.addActionItem(latest);
+		quickAction.addActionItem(starred);
+		quickAction.setAnimStyle(QuickAction.ANIM_AUTO);
+		
+		return quickAction;
+    }
 }

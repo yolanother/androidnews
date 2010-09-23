@@ -7,7 +7,7 @@ import com.google.reader.GoogleReader;
 
 public class GoogleReaderFactory {
 	private static final String CONSUMER_KEY = "droidreader.appspot.com";
-	private static final String CONSUMER_SECRET = "ZlhExrqtn1xX9muIbygRCzZt";
+	private static final String CONSUMER_SECRET = "ZlhExrqtn1xX9muIbygRCzZt";		
 	
 	private static Context context;
 	static {
