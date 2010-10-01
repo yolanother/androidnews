@@ -1,11 +1,15 @@
 package vn.evolus.droidreader;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import vn.evolus.droidreader.adapter.ChannelAdapter;
+import vn.evolus.droidreader.adapter.TagAdapter;
+import vn.evolus.droidreader.adapter.TagAdapter.TagItem;
 import vn.evolus.droidreader.content.ContentManager;
 import vn.evolus.droidreader.model.Channel;
+import vn.evolus.droidreader.model.Tag;
 import vn.evolus.droidreader.services.DownloadingService;
 import vn.evolus.droidreader.services.SynchronizationService;
 import vn.evolus.droidreader.util.ActiveList;
@@ -23,18 +27,27 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.github.droidfu.concurrent.BetterAsyncTask;
 import com.github.droidfu.concurrent.BetterAsyncTaskCallable;
+import com.google.reader.GoogleReader;
 
-public class MainActivity extends LocalizedActivity {		
+public class MainActivity extends LocalizedActivity {
+	private static final int GRID_MODE = 0;
+	//private static final int LIST_MODE = 1;
+	
 	private ArrayList<Channel> channels = null;
+	private ViewSwitcher viewSwitcher;
 	private GridView channelGridView;
-	private ChannelAdapter adapter;	
+	private ListView channelListView;
+	private ChannelAdapter channelAdapter;
+	private TagAdapter tagAdapter = null;
 			
 	public MainActivity() {
 	}
@@ -49,27 +62,19 @@ public class MainActivity extends LocalizedActivity {
         TextView title = (TextView)findViewById(R.id.toolbarTitle);
         title.setText(title.getText().toString().toUpperCase());
         
-        channelGridView = (GridView)findViewById(R.id.channelGridView);               
-        channelGridView.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-				Channel channel = (Channel)adapterView.getItemAtPosition(position);
-				MainActivity.this.showChannel(channel);
+        ImageButton viewModeButton = (ImageButton)findViewById(R.id.viewMode);        
+        viewModeButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				v.setSelected(!v.isSelected());
+				toggleViewMode();
 			}
-        });        
-        channelGridView.setOnItemLongClickListener(new OnItemLongClickListener() {
-			@Override
-			public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
-				Channel channel = (Channel)adapterView.getItemAtPosition(position);
-				showChannelOptions(channel);
-				return true;
-			}        	
-        });        
+        });
         
         ImageButton editButton = (ImageButton)findViewById(R.id.edit);        
         editButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				manageSubscriptions();
-			}        	
+			}
         });
         
         ImageButton settingsButton = (ImageButton)findViewById(R.id.settings);
@@ -77,6 +82,33 @@ public class MainActivity extends LocalizedActivity {
 			public void onClick(View v) {
 				startSettingsActivity();
 			}        	
+        });
+        
+        viewSwitcher = (ViewSwitcher)findViewById(R.id.viewSwitcher);        
+        channelGridView = (GridView)findViewById(R.id.channelGridView);               
+        channelGridView.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+				Channel channel = (Channel)adapterView.getItemAtPosition(position);
+				MainActivity.this.showChannel(channel);
+			}
+        });
+        channelGridView.setOnItemLongClickListener(new OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
+				Channel channel = (Channel)adapterView.getItemAtPosition(position);
+				showChannelOptions(channel);
+				return true;
+			}        	
+        });
+
+        channelListView = (ListView)findViewById(R.id.channelListView);               
+        channelListView.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+				TagItem tagItem = (TagItem)adapterView.getItemAtPosition(position);
+				Intent intent = new Intent(MainActivity.this, LatestItemsActivity.class);
+				intent.putExtra("TagId", tagItem.id);
+	        	startActivity(intent);
+			}
         });
                 
         if (ConnectivityReceiver.hasGoodEnoughNetworkConnection(this)) {
@@ -105,6 +137,70 @@ public class MainActivity extends LocalizedActivity {
 		startActivity(intent);
 	}
 
+	private void startSubscriptionActivity() {
+		Intent intent = new Intent(this, SubscriptionActivity.class);
+		startActivity(intent);
+	}
+        
+	private void loadData() {
+		if (getViewMode() == GRID_MODE) {
+			if (channelAdapter == null) {
+		    	loadChannels();    	
+		    	channelAdapter = new ChannelAdapter(this, channels);
+		    	channelGridView.setAdapter(channelAdapter);
+			}
+		} else {
+			if (tagAdapter == null) {
+				tagAdapter = new TagAdapter(this, loadTags());
+				channelListView.setAdapter(tagAdapter);
+			}
+		}
+    }
+	
+	private ArrayList<TagItem> loadTags() {
+		List<Tag> tags = ContentManager.loadAllTags();
+		ArrayList<TagItem> tagItems = new ArrayList<TagItem>();
+		
+		// Starred items
+		TagItem item = new TagItem();
+		item.title = getString(R.string.starred);
+		item.unreadCount = 100;			
+		tagItems.add(item);
+		
+		// Shared items
+		item = new TagItem();
+		item.title = getString(R.string.shared);
+		item.unreadCount = 100;			
+		tagItems.add(item);
+		
+		for (Tag tag : tags) {
+			if (tag.type == Tag.STATE) {
+				if (GoogleReader.STARRED.equals(tag.name)) {
+					tagItems.get(0).id = tag.id;
+				} else if (GoogleReader.SHARED.equals(tag.name)) {
+					tagItems.get(1).id = tag.id;
+				}
+				continue;
+			}
+			
+			item = new TagItem();
+			item.id = tag.id;
+			item.title = tag.name;
+			item.unreadCount = 1000;			
+			tagItems.add(item);			
+		}
+		return tagItems;
+	}
+
+	private int getViewMode() {		
+		return viewSwitcher.getDisplayedChild();
+	}
+
+	private void toggleViewMode() {		
+		viewSwitcher.setDisplayedChild((viewSwitcher.getDisplayedChild() + 1) % 2);
+		loadData();
+	}
+	
 	private void loadChannels() {
 		channels = ContentManager.loadAllChannels(ContentManager.WITH_IMAGE_CHANNEL_LOADER);
 		if (channels == null || channels.isEmpty()) {
@@ -113,17 +209,6 @@ public class MainActivity extends LocalizedActivity {
 			startSubscriptionActivity();
 		}		
 	}
-
-	private void startSubscriptionActivity() {
-		Intent intent = new Intent(this, SubscriptionActivity.class);
-		startActivity(intent);
-	}
-        
-	private void loadData() {
-    	loadChannels();
-    	adapter = new ChannelAdapter(this, channels);
-    	channelGridView.setAdapter(adapter);
-    }
 	
 	private ArrayList<Channel> getUnreadChannels() {
 		ArrayList<Channel> unreadChannels = new ActiveList<Channel>();
@@ -143,13 +228,13 @@ public class MainActivity extends LocalizedActivity {
 			protected void after(Context context, Void arg1) {
 				if (Settings.getShowUpdatedChannels(context)) {					
 					ArrayList<Channel> unreadChannels = getUnreadChannels();				
-					adapter.setChannels(unreadChannels);
+					channelAdapter.setChannels(unreadChannels);
 					if (unreadChannels.size() == 0) {
 						Toast.makeText(context, context.getString(R.string.no_channel_has_new_items), 100)
 							.show();
 					}
 				} else {					
-					adapter.setChannels(channels);
+					channelAdapter.setChannels(channels);
 				}
 			}
 			@Override
@@ -160,7 +245,7 @@ public class MainActivity extends LocalizedActivity {
     	refreshTask.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
 			public Void call(BetterAsyncTask<Void, Void, Void> arg0)
 					throws Exception {
-				Map<Long, Integer> unreadCounts = ContentManager.countUnreadItemsForEachChannel();
+				Map<Integer, Integer> unreadCounts = ContentManager.countUnreadItemsForEachChannel();
 				for (Channel channel : channels) {
 					try {				
 						if (unreadCounts.containsKey(channel.id)) {							

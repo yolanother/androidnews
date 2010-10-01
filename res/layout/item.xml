@@ -10,7 +10,7 @@
        android:layout_height="fill_parent"
        android:layout_weight="0"
        android:layout_gravity="center_vertical"
-       android:background="@color/unreadIndicator" />
+       android:background="@color/unreadIndicator" />           
 	<LinearLayout	           
 	    android:orientation="vertical"
 	    android:layout_width="fill_parent"
@@ -26,13 +26,27 @@
 			android:textColor="@color/itemTitle"
 			android:maxLines="2"
 			android:ellipsize="end" />
-		<TextView android:id="@+id/itemDate"
-		    android:text="June 17th, 1980"
-			android:textColor="@color/itemDate"
-			android:textSize="11sp"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginRight="5dp" />						
+		<LinearLayout            
+	        android:orientation="horizontal"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content">
+	        <ImageView
+				android:id="@+id/starred"
+				android:background="@drawable/star_selector"
+				android:layout_width="14sp"
+				android:layout_height="14sp"
+				android:layout_weight="0"				
+				android:layout_marginRight="5sp"
+				android:layout_gravity="center_vertical" />		
+			<TextView android:id="@+id/itemDate"
+			    android:text="June 17th, 1980"
+				android:textColor="@color/itemDate"
+				android:textSize="11sp"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginRight="5dp"
+				android:layout_gravity="center_vertical" />
+        </LinearLayout>										
 	</LinearLayout>
 	<ImageView
        android:id="@+id/itemImage"

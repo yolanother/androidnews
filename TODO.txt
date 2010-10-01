@@ -1,4 +1,7 @@
 TODO:
+* Keep unread 
+* Delete item tags (cascade delete?)
+* View items by tag
 * Keep scrolling position
 * Widgets
 * More languages

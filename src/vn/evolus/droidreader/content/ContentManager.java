@@ -10,17 +10,27 @@ import java.util.Map;
 
 import vn.evolus.droidreader.Application;
 import vn.evolus.droidreader.GoogleReaderFactory;
-import vn.evolus.droidreader.content.processors.ImageItemProcessor;
-import vn.evolus.droidreader.content.processors.VideoItemProcessor;
+import vn.evolus.droidreader.content.loader.ChannelLoader;
+import vn.evolus.droidreader.content.loader.FullChannelLoader;
+import vn.evolus.droidreader.content.loader.FullItemLoader;
+import vn.evolus.droidreader.content.loader.IdOnlyItemLoader;
+import vn.evolus.droidreader.content.loader.LightweightChannelLoader;
+import vn.evolus.droidreader.content.loader.LightweightItemLoader;
+import vn.evolus.droidreader.content.loader.WithImageChannelLoader;
+import vn.evolus.droidreader.content.processor.ImageItemProcessor;
+import vn.evolus.droidreader.content.processor.VideoItemProcessor;
 import vn.evolus.droidreader.model.Channel;
 import vn.evolus.droidreader.model.Image;
 import vn.evolus.droidreader.model.Item;
 import vn.evolus.droidreader.model.Job;
 import vn.evolus.droidreader.model.SyncItemTagJob;
+import vn.evolus.droidreader.model.Tag;
 import vn.evolus.droidreader.model.Channel.Channels;
 import vn.evolus.droidreader.model.Image.Images;
 import vn.evolus.droidreader.model.Item.Items;
 import vn.evolus.droidreader.model.Job.Jobs;
+import vn.evolus.droidreader.model.Tag.Tags;
+import vn.evolus.droidreader.model.Tag.TagsOfItems;
 import vn.evolus.droidreader.providers.ContentsProvider;
 import vn.evolus.droidreader.util.ActiveList;
 import vn.evolus.droidreader.util.StreamUtils;
@@ -33,13 +43,21 @@ import android.net.Uri;
 import com.google.reader.GoogleReader;
 
 public class ContentManager {
-	public static final long ALL_CHANNELS = -1;
+	public static final int ALL_CHANNELS = -1;
+		
+	public static final int ITEM_TYPE_CHANNEL = 1;
+	public static final int ITEM_TYPE_ITEM = 2;
+	
 	public static final ChannelLoader FULL_CHANNEL_LOADER = new FullChannelLoader();
 	public static final ChannelLoader LIGHTWEIGHT_CHANNEL_LOADER = new LightweightChannelLoader();
 	public static final ChannelLoader WITH_IMAGE_CHANNEL_LOADER = new WithImageChannelLoader();
 	public static final ItemLoader FULL_ITEM_LOADER = new FullItemLoader();
 	public static final ItemLoader LIGHTWEIGHT_ITEM_LOADER = new LightweightItemLoader();
 	public static final ItemLoader ID_ONLY_ITEM_LOADER = new IdOnlyItemLoader();
+	
+	private static final Map<Integer, WeakReference<Channel>> channelCache = 
+		new HashMap<Integer, WeakReference<Channel>>();
+	private static final Map<Tag, Integer> tagCache = new HashMap<Tag, Integer>();
 	
 	private static List<ItemProcessor> itemProcessors;
 	
@@ -56,10 +74,7 @@ public class ContentManager {
 		}
 		itemProcessors.add(new ImageItemProcessor(StreamUtils.readLines(is, "UTF-8")));
 		itemProcessors.add(new VideoItemProcessor());
-	}
-	
-	private static final Map<Long, WeakReference<Channel>> channelCache = 
-		new HashMap<Long, WeakReference<Channel>>();	
+	}			
 	
 	public static ArrayList<Channel> loadAllChannels(ChannelLoader loader) {
 		Cursor cursor = cr.query(Channels.CONTENT_URI,
@@ -98,7 +113,7 @@ public class ContentManager {
 		values.put(Channels.IMAGE_URL, channel.imageUrl);
 		if (channel.id == 0) {
 			Uri contentUri = cr.insert(Channels.CONTENT_URI, values);
-			channel.id = ContentUris.parseId(contentUri);
+			channel.id = (int)ContentUris.parseId(contentUri);
 		} else {
 			cr.update(Channels.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
 					new String[] { String.valueOf(channel.id) });
@@ -112,7 +127,7 @@ public class ContentManager {
 		}
 	}
 	
-	public static Channel loadChannel(long id, ChannelLoader loader) {
+	public static Channel loadChannel(int id, ChannelLoader loader) {
 		Channel channel = getChannelFromCache(id);
 		if (channel != null) return channel;
 		
@@ -212,7 +227,11 @@ public class ContentManager {
 			values.put(Items.UPDATE_TIME, item.updateTime);			
 			values.put(Items.ORIGINAL_ID, item.originalId);
 			Uri contentUri = cr.insert(Items.CONTENT_URI, values);
-			item.id = ContentUris.parseId(contentUri);
+			item.id = (int)ContentUris.parseId(contentUri);
+			
+			if (item.tags != null) {
+				saveItemTags(item);
+			}
 		} else {
 			values.put(Items.READ, item.read);
 			cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
@@ -221,7 +240,21 @@ public class ContentManager {
 		return true;
 	}
 	
-	public static Item loadItem(long id, ItemLoader loader, ChannelLoader channelLoader) {		
+	private static void saveItemTags(Item item) {
+		// TODO: using bulkInsert to improve performance?
+		for (String tag : item.tags) {					
+			int tagId = getTagId(tag);
+			if (tagId > 0) {
+				ContentValues values = new ContentValues();
+				values.put(TagsOfItems.ITEM_TYPE, ITEM_TYPE_ITEM);
+				values.put(TagsOfItems.ITEM_ID, item.id);
+				values.put(TagsOfItems.TAG_ID, tagId);
+				cr.insert(TagsOfItems.CONTENT_URI, values);
+			}
+		}		
+	}
+
+	public static Item loadItem(int id, ItemLoader loader, ChannelLoader channelLoader) {		
 		Cursor cursor = cr.query(Items.CONTENT_URI,
 				loader.getProjection(),
 				Items.ID + "=?", 
@@ -251,18 +284,11 @@ public class ContentManager {
 		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
 				new String[] { String.valueOf(item.id) });
 		
-		SyncItemTagJob job = new SyncItemTagJob(SyncItemTagJob.ACTION_ADD, 
-					item.originalId, GoogleReader.ITEM_STATE_READ);
-		saveJob(job);		
+		addTagToItem(item, GoogleReader.ITEM_STATE_READ);
 	}
 	
 	public static void markItemAsStarred(Item item) {
 		if (item.starred) return;
-		
-		// delete previous REMOVE tag job
-		SyncItemTagJob removeJob = new SyncItemTagJob(SyncItemTagJob.ACTION_REMOVE, 
-				item.originalId, GoogleReader.ITEM_STATE_READ);
-		deleteJob(removeJob.type, removeJob.params);
 		
 		// saving state to DB
 		item.starred = true;
@@ -271,31 +297,44 @@ public class ContentManager {
 		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
 				new String[] { String.valueOf(item.id) });
 		
-		// create a new REMOVE tag job
-		SyncItemTagJob job = new SyncItemTagJob(SyncItemTagJob.ACTION_ADD, 
-				item.originalId, GoogleReader.ITEM_STATE_STARRED);
-		saveJob(job);
+		addTagToItem(item, GoogleReader.ITEM_STATE_STARRED);
 	}
 	
 	public static void unmarkItemAsStarred(Item item) {
 		if (!item.starred) return;
 		
-		// delete previous ADD tag job
-		SyncItemTagJob addJob = new SyncItemTagJob(SyncItemTagJob.ACTION_REMOVE, 
-				item.originalId, GoogleReader.ITEM_STATE_READ);
-		deleteJob(addJob.type, addJob.params);
-		
 		// saving state to DB
 		item.starred = false;
 		ContentValues values = new ContentValues();
-		values.put(Items.STARRRED, 1);
+		values.put(Items.STARRRED, 0);
 		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
 				new String[] { String.valueOf(item.id) });
 		
+		removeTagFromItem(item, GoogleReader.ITEM_STATE_STARRED);		
+	}
+	
+	public static void addTagToItem(Item item, String tag) {
+		// delete previous REMOVE tag job
+		SyncItemTagJob removeJob = new SyncItemTagJob(SyncItemTagJob.ACTION_REMOVE, 
+				item.originalId, tag);
+		deleteJob(removeJob.type, removeJob.params);
+				
 		// create a new ADD tag job
-		SyncItemTagJob job = new SyncItemTagJob(SyncItemTagJob.ACTION_REMOVE, 
-				item.originalId, GoogleReader.ITEM_STATE_STARRED);
-		saveJob(job);
+		SyncItemTagJob addJob = new SyncItemTagJob(SyncItemTagJob.ACTION_ADD, 
+				item.originalId, tag);
+		saveJob(addJob);
+	}
+	
+	public static void removeTagFromItem(Item item, String tag) {
+		// delete previous ADD tag job
+		SyncItemTagJob addJob = new SyncItemTagJob(SyncItemTagJob.ACTION_ADD, 
+				item.originalId, tag);
+		deleteJob(addJob.type, addJob.params);
+				
+		// create a new REMOVE tag job
+		SyncItemTagJob removeJob = new SyncItemTagJob(SyncItemTagJob.ACTION_REMOVE, 
+				item.originalId, tag);
+		saveJob(removeJob);
 	}
 
 	public static void processItem(Item item) {
@@ -331,7 +370,7 @@ public class ContentManager {
 				Items.ID + " ASC");
 		ActiveList<Item> items = channel.getItems();
 		items.clear();
-		while (cursor.moveToNext()) {						
+		while (cursor.moveToNext()) {
 			Item item = loader.load(cursor);
 			item.channel = channel;			
 			items.add(item);
@@ -339,11 +378,18 @@ public class ContentManager {
 		cursor.close();
 	}
 	
-	public static ActiveList<Item> loadLatestItems(int maxItems, boolean showRead,
-			ItemLoader loader, ChannelLoader channelLoader) {
-		String selection = null;		
+	public static List<Item> loadLatestItems(
+			int maxItems, 
+			boolean showRead, 
+			boolean loadStarredOnly,
+			ItemLoader loader, 
+			ChannelLoader channelLoader) {
+		String selection = null;
 		if (!showRead) {
 			selection = Items.READ + "=0";			
+		}
+		if (loadStarredOnly) {
+			selection = Items.STARRRED + "=1" + (selection != null ? " AND " + selection : "");
 		}
 		Cursor cursor = cr.query(Items.limit(maxItems),
 				loader.getProjection(),
@@ -352,7 +398,7 @@ public class ContentManager {
 				Items.UPDATE_TIME + " DESC, " +
 				Items.PUB_DATE + " DESC, " +
 				Items.ID + " ASC");
-		ActiveList<Item> items = new ActiveList<Item>();
+		List<Item> items = new ArrayList<Item>();
 		items.clear();
 		while (cursor.moveToNext()) {						
 			Item item = loader.load(cursor);
@@ -369,9 +415,10 @@ public class ContentManager {
 			Item olderThanItem,
 			int maxItems,
 			boolean showRead,
+			boolean loadStarredOnly,
 			ItemLoader loader, 
 			ChannelLoader channelLoader) {
-		return loadOlderItems(olderThanItem, ALL_CHANNELS, maxItems, showRead, loader, channelLoader);
+		return loadOlderItems(olderThanItem, ALL_CHANNELS, maxItems, showRead, loadStarredOnly, loader, channelLoader);
 	}
 	
 	public static List<Item> loadOlderItems(
@@ -379,6 +426,7 @@ public class ContentManager {
 			long channelId,
 			int maxItems,
 			boolean showRead,
+			boolean loadStarredOnly,
 			ItemLoader loader, 
 			ChannelLoader channelLoader) {
 		String selection = 
@@ -387,10 +435,13 @@ public class ContentManager {
 		if (!showRead) {
 			selection = selection + " AND " + Items.READ + "=0";
 		}
+		if (loadStarredOnly) {
+			selection = selection + " AND " + Items.STARRRED + "=1";
+		}
 		String[] selectionArgs = null;
 		if (channelId > 0) {
 			selection += " AND " + Items.CHANNEL_ID + "=?";
-			selectionArgs = new String[] {				
+			selectionArgs = new String[] {
 				String.valueOf(olderThanItem.updateTime),
 				String.valueOf(olderThanItem.updateTime),
 				String.valueOf(olderThanItem.pubDate.getTime()),
@@ -431,9 +482,10 @@ public class ContentManager {
 			Item newerThanItem,			
 			int maxItems,
 			boolean loadReadItems,
+			boolean loadStarredOnly,
 			ItemLoader loader, 
 			ChannelLoader channelLoader) {
-		return loadNewerItems(newerThanItem, ALL_CHANNELS, maxItems, loadReadItems, loader, channelLoader);
+		return loadNewerItems(newerThanItem, ALL_CHANNELS, maxItems, loadReadItems, loadStarredOnly, loader, channelLoader);
 	}
 	
 	public static List<Item> loadNewerItems(
@@ -441,6 +493,7 @@ public class ContentManager {
 			long channelId,
 			int maxItems,
 			boolean loadReadItems,
+			boolean loadStarredOnly,
 			ItemLoader loader, 
 			ChannelLoader channelLoader) {
 		String selection = 
@@ -448,6 +501,9 @@ public class ContentManager {
 				Items.PUB_DATE + ">? OR (" + Items.PUB_DATE + " =? AND " + Items.ID + "<?))))";
 		if (!loadReadItems) {
 			selection = selection + " AND " + Items.READ + "=0";
+		}
+		if (loadStarredOnly) {
+			selection = selection + " AND " + Items.STARRRED + "=1";
 		}
 		String[] selectionArgs = null;
 		if (channelId > 0) {
@@ -489,6 +545,25 @@ public class ContentManager {
 		return items;
 	}
 	
+	public static List<Item> loadItems(ItemCriteria criteria, ItemLoader loader, ChannelLoader channelLoader) {
+		Cursor cursor = cr.query(criteria.getContentUri(),
+				loader.getProjection(),
+				criteria.getSelection(),
+				criteria.getSelectionArgs(),
+				criteria.getOrderBy());
+		List<Item> items = new ArrayList<Item>();
+		items.clear();
+		while (cursor.moveToNext()) {
+			Item item = loader.load(cursor);
+			if (channelLoader != null) {
+				item.channel = loadChannel(item.channel.id, channelLoader);
+			}
+			items.add(item);			
+		}
+		cursor.close();
+		return items;
+	}
+	
 	public static void markAllItemsOfChannelAsRead(Channel channel) {		
 		Cursor cursor = cr.query(Items.CONTENT_URI,				
 				new String[] {
@@ -500,7 +575,7 @@ public class ContentManager {
 				null);
 		Item item = new Item();
 		while (cursor.moveToNext()) {
-			item.id = cursor.getLong(0);
+			item.id = cursor.getInt(0);
 			item.read = false;
 			item.originalId = cursor.getString(1);
 			markItemAsRead(item);
@@ -516,13 +591,13 @@ public class ContentManager {
 	 * @param cr
 	 * @return a map of ChannelId <-> Unread count
 	 */
-	public static Map<Long, Integer> countUnreadItemsForEachChannel() {
+	public static Map<Integer, Integer> countUnreadItemsForEachChannel() {
 		Cursor cursor = cr.query(Items.countUnread(), 
 				new String[] { Items.CHANNEL_ID, Items.UNREAD_COUNT }, 
 				Items.READ + "=?", new String[] { "0" }, null);
-		Map<Long, Integer> unreadCounts = new HashMap<Long, Integer>();
+		Map<Integer, Integer> unreadCounts = new HashMap<Integer, Integer>();
 		while (cursor.moveToNext()) {					
-			unreadCounts.put(cursor.getLong(0), cursor.getInt(1));
+			unreadCounts.put(cursor.getInt(0), cursor.getInt(1));
 		}
 		cursor.close();
 		return unreadCounts;
@@ -540,7 +615,10 @@ public class ContentManager {
 		return unreadCounts;
 	}
 		
-	public static int countItems(long channelId, boolean countReadItems) {
+	public static int countItems(
+			long channelId, 
+			boolean countReadItems,
+			boolean countStarredItemsOnly) {
 		String selection = null;
 		String[] selectionArgs = null;
 		if (channelId > 0) {
@@ -550,11 +628,14 @@ public class ContentManager {
 		if (!countReadItems) {
 			selection = Items.READ + "=0" + (selection != null ? " AND " + selection : "");
 		}
+		if (countStarredItemsOnly) {
+			selection = Items.STARRRED + "=1" + (selection != null ? " AND " + selection : "");
+		}
 		Cursor cursor = cr.query(Items.CONTENT_URI, 
 				new String[] { Items.COUNT }, 
-				selection, 
+				selection,
 				selectionArgs,
-				null);		
+				null);
 		int count = 0;
 		if (cursor.moveToNext()) {					
 			count = cursor.getInt(0);
@@ -563,12 +644,19 @@ public class ContentManager {
 		return count;
 	}
 	
-	public static int countNewerItems(Item item, long channelId, boolean countReadItems) {
+	public static int countNewerItems(
+			Item item, 
+			long channelId, 
+			boolean countReadItems,
+			boolean countStarredItemsOnly) {
 		String selection = 
 			"(" + Items.UPDATE_TIME + ">? OR (" + Items.UPDATE_TIME + "=? AND (" + 
 				Items.PUB_DATE + ">? OR (" + Items.PUB_DATE + " =? AND " + Items.ID + "<?))))";
 		if (!countReadItems) {
 			selection = selection + " AND " + Items.READ + "=0";
+		}
+		if (countStarredItemsOnly) {
+			selection = Items.STARRRED + "=1" + (selection != null ? " AND " + selection : "");
 		}
 		String[] selectionArgs = null;
 		if (channelId > 0) {
@@ -616,7 +704,7 @@ public class ContentManager {
 				Images.RETRIES + " DESC, " + Images.ID);
 		ArrayList<Image> images = new ArrayList<Image>();
 		while (cursor.moveToNext()) {			
-			Image image = new Image(cursor.getLong(0), cursor.getString(1), (byte)cursor.getInt(2));
+			Image image = new Image(cursor.getInt(0), cursor.getString(1), (byte)cursor.getInt(2));
 			image.retries = (byte)cursor.getInt(3);
 			images.add(image);
 		}
@@ -668,7 +756,7 @@ public class ContentManager {
 		return result;		
 	}
 	
-	public static Image loadImage(long id) {
+	public static Image loadImage(int id) {
 		Cursor cursor = cr.query(Images.CONTENT_URI, 
 				new String[] {
 					Images.ID,
@@ -680,7 +768,7 @@ public class ContentManager {
 				null);
 		Image image = null;
 		if (cursor.moveToFirst()) {			
-			image = new Image(cursor.getLong(0), cursor.getString(1), (byte)cursor.getInt(2));
+			image = new Image(cursor.getInt(0), cursor.getString(1), (byte)cursor.getInt(2));
 		}
 		cursor.close();
 		return image;
@@ -698,7 +786,7 @@ public class ContentManager {
 				null);
 		Image image = null;
 		if (cursor.moveToFirst()) {			
-			image = new Image(cursor.getLong(0), cursor.getString(1), (byte)cursor.getInt(2));			
+			image = new Image(cursor.getInt(0), cursor.getString(1), (byte)cursor.getInt(2));			
 		}
 		cursor.close();
 		return image;
@@ -713,7 +801,7 @@ public class ContentManager {
 			values.put(Images.STATUS, image.status);
 			values.put(Images.RETRIES, image.retries);
 			Uri contentUri = cr.insert(Images.CONTENT_URI, values);
-			image.id = ContentUris.parseId(contentUri);
+			image.id = (int)ContentUris.parseId(contentUri);
 		} else {
 			values.put(Images.STATUS, image.status);
 			values.put(Images.RETRIES, image.retries);
@@ -785,11 +873,84 @@ public class ContentManager {
 		}
 	}
 	
-	private static Channel getChannelFromCache(long id) {
+	private static Channel getChannelFromCache(int id) {
 		if (isChannelInCache(id)) {
 			WeakReference<Channel> channelRef = channelCache.get(id);
 			return channelRef.get();
 		}
 		return null;
-	}		
+	}
+
+	public static List<Tag> loadAllTags() {
+		Cursor cursor = cr.query(Tags.CONTENT_URI, 
+				new String[] {		
+					Tags.ID,
+					Tags.TYPE,
+					Tags.NAME
+				},
+				null,
+				null,
+				Tags.SORT_ID);
+		List<Tag> tags = new ArrayList<Tag>();
+		while (cursor.moveToNext()) {			
+			Tag tag = new Tag(cursor.getInt(0), (byte)cursor.getInt(1), cursor.getString(2));			
+			tags.add(tag);
+		}
+		cursor.close();
+		return tags;
+	}
+	
+	public static Tag loadTag(int tagId) {
+		Cursor cursor = cr.query(Tags.CONTENT_URI,
+				new String[] {		
+					Tags.ID,
+					Tags.TYPE,
+					Tags.NAME
+				},
+				ContentsProvider.WHERE_ID,
+				new String[] { String.valueOf(tagId) },
+				Tags.SORT_ID);
+		Tag tag = null;
+		while (cursor.moveToNext()) {			
+			tag = new Tag(cursor.getInt(0), (byte)cursor.getInt(1), cursor.getString(2));
+		}
+		cursor.close();
+		return tag;
+	}
+
+	public static void saveTag(Tag tag) {
+		ContentValues values = new ContentValues();
+		values.put(Tags.TYPE, tag.type);
+		values.put(Tags.NAME, tag.name);
+		values.put(Tags.SORT_ID, tag.sortId);
+		cr.insert(Tags.CONTENT_URI, values);
+	}
+
+	public static void deleteTag(int tagId) {
+		for (Tag tag : tagCache.keySet()) {
+			if (tag.id == tagId) {
+				tagCache.remove(tag);
+				break;
+			}
+		}
+		cr.delete(Tags.CONTENT_URI, ContentsProvider.WHERE_ID, new String[] { String.valueOf(tagId) });
+	}
+	
+	private static int getTagId(String tagName) {			
+		ensureTagCacheAvailable();
+		Tag tag = new Tag(tagName);
+		if (tagCache.containsKey(tag)) {
+			return tagCache.get(tag);
+		}
+		return 0;
+	}	
+	
+	private static void ensureTagCacheAvailable() {
+		if (tagCache.size() == 0) {
+			List<Tag> allTags = loadAllTags();
+			for (Tag tag : allTags) {
+				tagCache.put(tag, tag.id);
+			}
+		}
+	}
 }

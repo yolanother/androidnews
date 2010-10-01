@@ -5,6 +5,10 @@
         <item>15 minutes</item>
         <item>30 minutes</item>
         <item>1 hour</item>
+        <item>2 hours</item>
+        <item>3 hours</item>
+        <item>4 hours</item>
+        <item>5 hours</item>
         <item>1 day</item>
     </string-array>
     <string-array name="update_interval_values">        
@@ -12,6 +16,10 @@
         <item>15</item>
         <item>30</item>
         <item>60</item>
+        <item>120</item>
+        <item>180</item>
+        <item>240</item>
+        <item>300</item>
         <item>1440</item>
     </string-array>
     <string-array name="max_items_per_channel_titles">        

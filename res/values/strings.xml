@@ -51,6 +51,7 @@
     
     <string name="latest">Latest articles</string>
     <string name="starred">Starred articles</string>
+    <string name="shared">Shared articles</string>
     <string name="subscriptions">Subscriptions</string>
     <string name="subscribe_to">Subscribe to</string>
     <string name="your_subscriptions">Your subscriptions</string>
@@ -85,4 +86,6 @@
     <string name="source">Source: &lt;strong&gt;{source}&lt;/strong&gt;</string>
     <string name="published">Published: {on}</string>
     <string name="article">Article {no}</string>
+    
+    <string name="select_tag_dialog_title">Select a tag</string>
 </resources>

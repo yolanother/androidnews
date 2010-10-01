@@ -25,11 +25,12 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 	private ImageButton starButton;
 	private ScrollView scrollView;
 	private ArrayList<Item> items;
-	private long channelId = ContentManager.ALL_CHANNELS;
+	private int channelId = ContentManager.ALL_CHANNELS;
 	private Item currentItem;
 	private int totalItems = 0;
 	private int currentItemIndex = 0;	
-	private boolean showReadItems = true;
+	private boolean loadReadItems = true;
+	private boolean loadStarredOnly = false;
 	private Set<Item> readItems = new HashSet<Item>();	
 	private String article;
 		
@@ -76,29 +77,31 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		});
 						
 		scrollView = (ScrollView)findViewById(R.id.scrollView);	
-		scrollView.setOnItemSelectedListener(this);		
+		scrollView.setOnItemSelectedListener(this);
 					
-		long itemId = 0;
+		int itemId = 0;
 		if (savedInstanceState != null) {
-			itemId = savedInstanceState.getLong("ItemId");
+			itemId = savedInstanceState.getInt("ItemId");
 		} else {
-			itemId = getIntent().getLongExtra("ItemId", 0);
+			itemId = getIntent().getIntExtra("ItemId", 0);
 		}
 		currentItem = ContentManager.loadItem(itemId,
 				ContentManager.FULL_ITEM_LOADER,
 				ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
 		
-		channelId = getIntent().getLongExtra("ChannelId", ContentManager.ALL_CHANNELS);
+		loadStarredOnly = getIntent().getBooleanExtra("StarredOnly", false);
+		channelId = getIntent().getIntExtra("ChannelId", ContentManager.ALL_CHANNELS);
 		if (channelId != ContentManager.ALL_CHANNELS) {
-			showReadItems = true;
+			loadReadItems = true;			
 		} else {
-			showReadItems = Settings.getShowRead(this);
+			loadReadItems = Settings.getShowRead(this);
 		}
 		items = new ArrayList<Item>();
 		List<Item> newerItems = ContentManager.loadNewerItems(currentItem,
 				channelId,
 				1, // load only 1 items
-				showReadItems,
+				loadReadItems,
+				loadStarredOnly,
 				ContentManager.ID_ONLY_ITEM_LOADER, null);
 		items.addAll(newerItems);
 		items.add(currentItem);
@@ -106,7 +109,8 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		List<Item> olderItems = ContentManager.loadOlderItems(currentItem,
 				channelId,
 				1, // load only 1 items
-				showReadItems,
+				loadReadItems,
+				loadStarredOnly, 
 				ContentManager.ID_ONLY_ITEM_LOADER, null);
 		items.addAll(olderItems);
 						
@@ -115,7 +119,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putLong("ItemId", currentItem.id);
+		outState.putInt("ItemId", currentItem.id);
 		super.onSaveInstanceState(outState);
 	}
 	
@@ -195,8 +199,9 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		loadOlderItem(selectedIndex);
 		selectedIndex = loadNewerItem(selectedIndex, currentItem);		
 				
-		totalItems = ContentManager.countItems(channelId, showReadItems);
-		currentItemIndex = ContentManager.countNewerItems(currentItem, channelId, showReadItems);		
+		totalItems = ContentManager.countItems(channelId, loadReadItems, loadStarredOnly);
+		currentItemIndex = ContentManager.countNewerItems(currentItem, channelId, 
+				loadReadItems, loadStarredOnly);		
 		title.setText(article.replace("{no}", 
 				String.valueOf(currentItemIndex + 1)
 					.concat("/")
@@ -215,7 +220,8 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 			List<Item> olderItems = ContentManager.loadOlderItems(currentItem,
 						channelId,
 						1, 
-						showReadItems,
+						loadReadItems,
+						loadStarredOnly,
 						ContentManager.FULL_ITEM_LOADER, 
 						ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
 			if (olderItems.size() > 0) {				
@@ -235,7 +241,8 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 			List<Item> newerItems = ContentManager.loadNewerItems(item,
 						channelId,
 						1,
-						showReadItems,
+						loadReadItems,
+						loadStarredOnly,
 						ContentManager.FULL_ITEM_LOADER, 
 						ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
 			if (newerItems.size() > 0) {

@@ -24,17 +24,17 @@
             android:shadowColor="#ff333333" 
             android:layout_weight="1.0" />
         <ImageButton
-            android:id="@+id/readingOptions"
+            android:id="@+id/tags"
             android:src="@drawable/ic_toolbar_down_arrow"
             android:background="@drawable/toolbar_button_selector" 
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content"
             android:layout_gravity="center"  
-            android:layout_margin="2.0sp"
+            android:layout_margin="2.0sp"            
             android:nextFocusRight="@+id/refresh"
-            android:nextFocusDown="@+id/itemListView" />
+            android:nextFocusDown="@+id/itemListView" />        
         <ImageButton
-            android:focusable="false" 
+            android:focusable="false"
             android:background="@color/toolbarSeparator" 
             android:layout_width="1.0px" 
             android:layout_height="fill_parent" />

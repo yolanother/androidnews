@@ -85,10 +85,12 @@ public class AtomHandler extends DefaultHandler {
 		} else if (localName.equals("category")) {
 			String scheme = attributes.getValue("scheme");
 			if (currentState == ATOM_ENTRY && GOOGLE_READER_SCHEME.equals(scheme)) {
-				String term = attributes.getValue("term");
-				int pos = term.indexOf("/state/com.google/"); 				
+				String tag = attributes.getValue("term");
+				entry.getTags().add(tag);
+				
+				int pos = tag.indexOf("/state/com.google/"); 				
 				if (pos > 0) {
-					String state = "user/-" + term.substring(pos);
+					String state = "user/-" + tag.substring(pos);
 					if (GoogleReader.ITEM_STATE_READ.equals(state)) {
 						entry.setRead(true);
 					} else if (GoogleReader.ITEM_STATE_STARRED.equals(state)) {

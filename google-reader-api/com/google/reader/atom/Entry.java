@@ -1,6 +1,8 @@
 package com.google.reader.atom;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Entry {
 	private String id;
@@ -12,7 +14,8 @@ public class Entry {
 	private boolean read = false;
 	private boolean starred = false;
 	private boolean keptUnread = false;
-	private String feedId;	
+	private String feedId;
+	private List<String> tags;
 		
 	public String getId() {
 		return id;
@@ -67,6 +70,15 @@ public class Entry {
 	}
 	public void setKeptUnread(boolean keptUnread) {
 		this.keptUnread = keptUnread;
+	}	
+	public List<String> getTags() {
+		if (tags == null) {
+			tags = new ArrayList<String>();
+		}
+		return tags;
+	}
+	public void setTags(List<String> tags) {
+		this.tags = tags;
 	}
 	public String getFeedId() {
 		return feedId;

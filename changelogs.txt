@@ -1,12 +1,17 @@
+2010-09-24:
+    * Apps2SD
+    * Synchronize read/starred state
+    * Latest/Starred view    
+    * Improved UI    
+
 2010-09-19:
-* Fonts
-* Reading mode (Night/Day)
-* Read/Unread toggle
-* Notification options
-* Auto update latest items to LatestItemsActivity
-* Fix bugs
-    * ImageCache bug
-    * 
+    * Fonts
+    * Reading mode (Night/Day)
+    * Read/Unread toggle
+    * Notification options
+    * Auto update latest items to LatestItemsActivity
+    * Fix bugs
+        * ImageCache bug 
 
 2010-09-15:
 Google Reader support

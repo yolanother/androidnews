@@ -22,7 +22,22 @@
             android:text="@string/applicationName" 
             android:shadowColor="#ff333333" 
             android:layout_weight="1.0"
-            android:focusable="false" />                               
+            android:focusable="false" />
+        <ImageButton
+            android:focusable="false" 
+            android:background="@color/toolbarSeparator" 
+            android:layout_width="1.0px" 
+            android:layout_height="fill_parent" />
+        <ImageButton 
+            android:id="@+id/viewMode"
+            android:src="@drawable/view_mode_toggle_selector"
+            android:background="@drawable/toolbar_button_selector"  
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"  
+            android:layout_margin="2.0sp"            
+            android:nextFocusRight="@+id/edit"
+            android:nextFocusDown="@+id/channelListView" />
         <ImageButton
             android:focusable="false" 
             android:background="@color/toolbarSeparator" 
@@ -53,20 +68,34 @@
             android:layout_margin="2.0sp"
             android:nextFocusLeft="@id/edit"
             android:nextFocusDown="@+id/channelListView" />                    
-    </LinearLayout>    
-    <GridView 
-        android:id="@+id/channelGridView"
-        android:background="#000000" 
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1.0"
-        
-        android:numColumns="auto_fit"
-        android:columnWidth="@dimen/gridItemSize"
-        android:stretchMode="spacingWidth"
-        android:horizontalSpacing="5sp"
-        android:verticalSpacing="5sp"        
-        android:nextFocusUp="@+id/edit" />
+    </LinearLayout>
+    <ViewSwitcher 
+            android:layout_gravity="center" 
+            android:id="@+id/viewSwitcher" 
+            android:layout_width="fill_parent" 
+            android:layout_height="fill_parent" 
+            android:layout_weight="1.0">
+		    <GridView 
+		        android:id="@+id/channelGridView"
+		        android:background="#000000" 
+		        android:layout_width="fill_parent"
+		        android:layout_height="fill_parent"
+		        
+		        android:numColumns="auto_fit"
+		        android:columnWidth="@dimen/gridItemSize"
+		        android:stretchMode="spacingWidth"
+		        android:horizontalSpacing="5sp"
+		        android:verticalSpacing="5sp"
+		        android:nextFocusUp="@+id/edit" />
+             <ListView 
+                android:id="@+id/channelListView"
+                android:divider="@android:drawable/divider_horizontal_bright"
+                android:background="@color/itemBackground"
+                android:cacheColorHint="@color/itemBackground"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"                                                       
+                android:nextFocusUp="@+id/edit" />		        
+    </ViewSwitcher>		        
     <!-- 
     <com.admob.android.ads.AdView
         android:id="@+id/ad"        

@@ -61,7 +61,7 @@ public class ChannelActivity extends LocalizedActivity {
 			}
         });
         
-        long channelId = getIntent().getLongExtra("ChannelId", 0);
+        int channelId = getIntent().getIntExtra("ChannelId", 0);
         channelName.setText(getIntent().getStringExtra("ChannelTitle"));
         channel = new Channel(channelId);
 	}
@@ -80,7 +80,7 @@ public class ChannelActivity extends LocalizedActivity {
 		refreshOrProgress.setDisplayedChild(0);
 	}	
 	
-	private void showChannel(final long channelId) {
+	private void showChannel(final int channelId) {
 		this.setBusy();
 		
 		BetterAsyncTask<Channel, Void, Channel> task = new BetterAsyncTask<Channel, Void, Channel>(this) {			

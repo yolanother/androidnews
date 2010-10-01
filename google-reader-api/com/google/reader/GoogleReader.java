@@ -63,10 +63,15 @@ public class GoogleReader implements Serializable {
     
     private static final String ITEM_STATE = "user/-/state/com.google";
     public static final String ITEM_LABEL = "user/-/label";
+    
+    public static final String STARRED = "starred";
+    public static final String SHARED = "broadcast";
+    
     public static final String ITEM_STATE_KEPT_UNREAD = ITEM_STATE + "/kept-unread";
     public static final String ITEM_STATE_READ = ITEM_STATE + "/read";
-    public static final String ITEM_STATE_STARRED = ITEM_STATE + "/starred";
-    private static final String ITEM_STATE_READING = ITEM_STATE + "/reading-list";
+    public static final String ITEM_STATE_STARRED = ITEM_STATE + "/" + STARRED;
+    public static final String ITEM_STATE_SHARED = ITEM_STATE + "/" + SHARED;
+    private static final String ITEM_STATE_READING = ITEM_STATE + "/reading-list";       
     
     private String accessToken = null;
     private String tokenSecret = null;
