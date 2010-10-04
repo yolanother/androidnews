@@ -9,25 +9,41 @@ import vn.evolus.droidreader.model.Item;
 import vn.evolus.droidreader.model.Item.Items;
 import android.net.Uri;
 
-public class ItemOfTag implements ItemCriteria {
+public class LatestItems implements ItemCriteria {
 	public static final int ALL_TAGS = -1;
+	public static final int ALL_CHANNELS = -1;
 	
+	public static final byte NONE = 0;
 	public static final byte OLDER = 1;
 	public static final byte NEWER = 2;
 	
 	public int tagId = ALL_TAGS;
+	public int channelId = ALL_CHANNELS;
 	public boolean onlyUnreadItems = false;
 	public Item compareToItem = null;
 	public byte comparision = OLDER;
 	public int maxItems = Constants.MAX_ITEMS;
 	
-	public ItemOfTag(int tagId, boolean onlyUnreadItems) {
+	public LatestItems(int tagId, boolean onlyUnreadItems) {
 		this(tagId, onlyUnreadItems, null, OLDER, Constants.MAX_ITEMS);
 	}
 	
-	public ItemOfTag(int tagId, boolean onlyUnreadItems, Item compareToItem,
+	public LatestItems(int tagId, boolean onlyUnreadItems, Item compareToItem, byte comparision) {
+		this(tagId, onlyUnreadItems, compareToItem, comparision, Constants.MAX_ITEMS);
+	}
+	
+	public LatestItems(int channelId, int tagId, boolean onlyUnreadItems, Item compareToItem, byte comparision) {
+		this(channelId, tagId, onlyUnreadItems, compareToItem, comparision, Constants.MAX_ITEMS);
+	}
+	
+	public LatestItems(int tagId, boolean onlyUnreadItems, Item compareToItem,
 			byte comparision, int maxItems) {
-		super();
+		this(ALL_CHANNELS, tagId, onlyUnreadItems, compareToItem, comparision, maxItems);
+	}
+	
+	public LatestItems(int channelId, int tagId, boolean onlyUnreadItems, Item compareToItem,
+			byte comparision, int maxItems) {		
+		this.channelId = channelId;
 		this.tagId = tagId;
 		this.onlyUnreadItems = onlyUnreadItems;
 		this.compareToItem = compareToItem;
@@ -38,12 +54,18 @@ public class ItemOfTag implements ItemCriteria {
 	@Override
 	public String getSelection() {
 		StringBuilder sb = new StringBuilder();
+		if (channelId != ALL_CHANNELS) {
+			sb.append(Items.CHANNEL_ID + "=?");
+		}
 		if (tagId != ALL_TAGS) {
+			if (sb.length() > 0) {
+				sb.append(" AND ");
+			}
 			sb.append(Items.TAG_ID + "=?");
 		}		
 		if (onlyUnreadItems) {
 			if (sb.length() > 0) {
-				sb.append(" AND ");				
+				sb.append(" AND ");
 			}
 			sb.append(Items.READ + "=0");
 		}
@@ -65,11 +87,14 @@ public class ItemOfTag implements ItemCriteria {
 
 	@Override
 	public String[] getSelectionArgs() {
-		List<String> args = new ArrayList<String>();		
+		List<String> args = new ArrayList<String>();
+		
+		if (channelId != ALL_CHANNELS) {
+			args.add(String.valueOf(channelId));
+		}		
 		if (tagId != ALL_TAGS) {
 			args.add(String.valueOf(tagId));
 		}
-		
 		if (compareToItem != null) {
 			args.add(String.valueOf(compareToItem.updateTime));
 			args.add(String.valueOf(compareToItem.updateTime));

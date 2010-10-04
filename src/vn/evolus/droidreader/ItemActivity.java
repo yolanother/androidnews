@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import vn.evolus.droidreader.content.ContentManager;
+import vn.evolus.droidreader.content.criteria.LatestItems;
 import vn.evolus.droidreader.model.Item;
 import vn.evolus.droidreader.util.ImageLoader;
 import vn.evolus.droidreader.widget.ItemView;
@@ -28,9 +29,9 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 	private int channelId = ContentManager.ALL_CHANNELS;
 	private Item currentItem;
 	private int totalItems = 0;
-	private int currentItemIndex = 0;	
+	private int currentItemIndex = 0;
 	private boolean loadReadItems = true;
-	private boolean loadStarredOnly = false;
+	private int tagId = LatestItems.ALL_TAGS;
 	private Set<Item> readItems = new HashSet<Item>();	
 	private String article;
 		
@@ -84,12 +85,16 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 			itemId = savedInstanceState.getInt("ItemId");
 		} else {
 			itemId = getIntent().getIntExtra("ItemId", 0);
+		}		
+		if (savedInstanceState != null) {
+			tagId = savedInstanceState.getInt("TagId");
+		} else {
+			tagId = getIntent().getIntExtra("TagId", LatestItems.ALL_TAGS);
 		}
 		currentItem = ContentManager.loadItem(itemId,
 				ContentManager.FULL_ITEM_LOADER,
 				ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
-		
-		loadStarredOnly = getIntent().getBooleanExtra("StarredOnly", false);
+				
 		channelId = getIntent().getIntExtra("ChannelId", ContentManager.ALL_CHANNELS);
 		if (channelId != ContentManager.ALL_CHANNELS) {
 			loadReadItems = true;			
@@ -97,21 +102,30 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 			loadReadItems = Settings.getShowRead(this);
 		}
 		items = new ArrayList<Item>();
-		List<Item> newerItems = ContentManager.loadNewerItems(currentItem,
-				channelId,
-				1, // load only 1 items
-				loadReadItems,
-				loadStarredOnly,
-				ContentManager.ID_ONLY_ITEM_LOADER, null);
+		List<Item> newerItems = ContentManager.loadItems(
+				new LatestItems(
+						channelId,
+						tagId, 
+						!loadReadItems, 
+						currentItem,
+						LatestItems.NEWER,
+						1), 
+				ContentManager.FULL_ITEM_LOADER,
+				ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);		
 		items.addAll(newerItems);
+		
 		items.add(currentItem);
 		
-		List<Item> olderItems = ContentManager.loadOlderItems(currentItem,
-				channelId,
-				1, // load only 1 items
-				loadReadItems,
-				loadStarredOnly, 
-				ContentManager.ID_ONLY_ITEM_LOADER, null);
+		List<Item> olderItems = ContentManager.loadItems(
+				new LatestItems(
+						channelId,
+						tagId, 
+						!loadReadItems, 
+						currentItem,
+						LatestItems.OLDER,
+						1), 
+				ContentManager.FULL_ITEM_LOADER,
+				ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
 		items.addAll(olderItems);
 						
 		loadItems();
@@ -120,6 +134,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putInt("ItemId", currentItem.id);
+		outState.putInt("TagId", tagId);
 		super.onSaveInstanceState(outState);
 	}
 	
@@ -199,9 +214,20 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		loadOlderItem(selectedIndex);
 		selectedIndex = loadNewerItem(selectedIndex, currentItem);		
 				
-		totalItems = ContentManager.countItems(channelId, loadReadItems, loadStarredOnly);
-		currentItemIndex = ContentManager.countNewerItems(currentItem, channelId, 
-				loadReadItems, loadStarredOnly);		
+		totalItems = ContentManager.countItems(
+				new LatestItems(
+						channelId,
+						tagId,
+						!loadReadItems, 
+						null,
+						LatestItems.NONE));
+		currentItemIndex = ContentManager.countItems(
+				new LatestItems(
+						channelId,
+						tagId,
+						!loadReadItems,
+						currentItem,
+						LatestItems.NEWER));		
 		title.setText(article.replace("{no}", 
 				String.valueOf(currentItemIndex + 1)
 					.concat("/")
@@ -217,13 +243,16 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 
 	private void loadOlderItem(int selectedIndex) {
 		if (selectedIndex == (items.size() - 1)) {			
-			List<Item> olderItems = ContentManager.loadOlderItems(currentItem,
-						channelId,
-						1, 
-						loadReadItems,
-						loadStarredOnly,
-						ContentManager.FULL_ITEM_LOADER, 
-						ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
+			List<Item> olderItems = ContentManager.loadItems(
+					new LatestItems(
+							channelId,
+							tagId, 
+							!loadReadItems, 
+							currentItem,
+							LatestItems.OLDER,
+							1), 
+					ContentManager.FULL_ITEM_LOADER,
+					ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
 			if (olderItems.size() > 0) {				
 				Item olderItem = olderItems.get(0);
 				items.add(items.size(), olderItem);
@@ -238,13 +267,16 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 
 	private int loadNewerItem(int selectedIndex, Item item) {
 		if (selectedIndex == 0) {
-			List<Item> newerItems = ContentManager.loadNewerItems(item,
-						channelId,
-						1,
-						loadReadItems,
-						loadStarredOnly,
-						ContentManager.FULL_ITEM_LOADER, 
-						ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
+			List<Item> newerItems = ContentManager.loadItems(
+					new LatestItems(
+							channelId,
+							tagId, 
+							!loadReadItems, 
+							item,
+							LatestItems.NEWER,
+							1), 
+					ContentManager.FULL_ITEM_LOADER,
+					ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
 			if (newerItems.size() > 0) {
 				Item newerItem = newerItems.get(0);
 				items.add(0, newerItem);

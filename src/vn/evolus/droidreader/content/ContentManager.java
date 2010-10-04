@@ -378,173 +378,6 @@ public class ContentManager {
 		cursor.close();
 	}
 	
-	public static List<Item> loadLatestItems(
-			int maxItems, 
-			boolean showRead, 
-			boolean loadStarredOnly,
-			ItemLoader loader, 
-			ChannelLoader channelLoader) {
-		String selection = null;
-		if (!showRead) {
-			selection = Items.READ + "=0";			
-		}
-		if (loadStarredOnly) {
-			selection = Items.STARRRED + "=1" + (selection != null ? " AND " + selection : "");
-		}
-		Cursor cursor = cr.query(Items.limit(maxItems),
-				loader.getProjection(),
-				selection,
-				null,
-				Items.UPDATE_TIME + " DESC, " +
-				Items.PUB_DATE + " DESC, " +
-				Items.ID + " ASC");
-		List<Item> items = new ArrayList<Item>();
-		items.clear();
-		while (cursor.moveToNext()) {						
-			Item item = loader.load(cursor);
-			if (channelLoader != null) {
-				item.channel = loadChannel(item.channel.id, channelLoader);
-			}
-			items.add(item);			
-		}
-		cursor.close();
-		return items;
-	}
-	
-	public static List<Item> loadOlderItems(
-			Item olderThanItem,
-			int maxItems,
-			boolean showRead,
-			boolean loadStarredOnly,
-			ItemLoader loader, 
-			ChannelLoader channelLoader) {
-		return loadOlderItems(olderThanItem, ALL_CHANNELS, maxItems, showRead, loadStarredOnly, loader, channelLoader);
-	}
-	
-	public static List<Item> loadOlderItems(
-			Item olderThanItem,
-			long channelId,
-			int maxItems,
-			boolean showRead,
-			boolean loadStarredOnly,
-			ItemLoader loader, 
-			ChannelLoader channelLoader) {
-		String selection = 
-			"(" + Items.UPDATE_TIME + "<? OR (" + Items.UPDATE_TIME + "=? AND (" + 
-				Items.PUB_DATE + "<? OR (" + Items.PUB_DATE + " =? AND " + Items.ID + ">?))))";
-		if (!showRead) {
-			selection = selection + " AND " + Items.READ + "=0";
-		}
-		if (loadStarredOnly) {
-			selection = selection + " AND " + Items.STARRRED + "=1";
-		}
-		String[] selectionArgs = null;
-		if (channelId > 0) {
-			selection += " AND " + Items.CHANNEL_ID + "=?";
-			selectionArgs = new String[] {
-				String.valueOf(olderThanItem.updateTime),
-				String.valueOf(olderThanItem.updateTime),
-				String.valueOf(olderThanItem.pubDate.getTime()),
-				String.valueOf(olderThanItem.pubDate.getTime()),
-				String.valueOf(olderThanItem.id),
-				String.valueOf(channelId)
-			};
-		} else {
-			selectionArgs = new String[] {
-				String.valueOf(olderThanItem.updateTime),
-				String.valueOf(olderThanItem.updateTime),
-				String.valueOf(olderThanItem.pubDate.getTime()),
-				String.valueOf(olderThanItem.pubDate.getTime()),
-				String.valueOf(olderThanItem.id)
-			};
-		}	
-		Cursor cursor = cr.query(Items.limit(maxItems),
-				loader.getProjection(),
-				selection,
-				selectionArgs,
-				Items.UPDATE_TIME + " DESC, " +
-				Items.PUB_DATE + " DESC, " +
-				Items.ID + " ASC");
-		List<Item> items = new ArrayList<Item>();
-		items.clear();
-		while (cursor.moveToNext()) {						
-			Item item = loader.load(cursor);
-			if (channelLoader != null) {
-				item.channel = loadChannel(item.channel.id, channelLoader);
-			}
-			items.add(item);			
-		}
-		cursor.close();
-		return items;
-	}
-	
-	public static List<Item> loadNewerItems(
-			Item newerThanItem,			
-			int maxItems,
-			boolean loadReadItems,
-			boolean loadStarredOnly,
-			ItemLoader loader, 
-			ChannelLoader channelLoader) {
-		return loadNewerItems(newerThanItem, ALL_CHANNELS, maxItems, loadReadItems, loadStarredOnly, loader, channelLoader);
-	}
-	
-	public static List<Item> loadNewerItems(
-			Item newerThanItem,
-			long channelId,
-			int maxItems,
-			boolean loadReadItems,
-			boolean loadStarredOnly,
-			ItemLoader loader, 
-			ChannelLoader channelLoader) {
-		String selection = 
-			"(" + Items.UPDATE_TIME + ">? OR (" + Items.UPDATE_TIME + "=? AND (" + 
-				Items.PUB_DATE + ">? OR (" + Items.PUB_DATE + " =? AND " + Items.ID + "<?))))";
-		if (!loadReadItems) {
-			selection = selection + " AND " + Items.READ + "=0";
-		}
-		if (loadStarredOnly) {
-			selection = selection + " AND " + Items.STARRRED + "=1";
-		}
-		String[] selectionArgs = null;
-		if (channelId > 0) {
-			selection += " AND " + Items.CHANNEL_ID + "=?";
-			selectionArgs = new String[] {				
-				String.valueOf(newerThanItem.updateTime),
-				String.valueOf(newerThanItem.updateTime),
-				String.valueOf(newerThanItem.pubDate.getTime()),
-				String.valueOf(newerThanItem.pubDate.getTime()),
-				String.valueOf(newerThanItem.id),
-				String.valueOf(channelId)
-			};
-		} else {
-			selectionArgs = new String[] {
-				String.valueOf(newerThanItem.updateTime),
-				String.valueOf(newerThanItem.updateTime),
-				String.valueOf(newerThanItem.pubDate.getTime()),
-				String.valueOf(newerThanItem.pubDate.getTime()),
-				String.valueOf(newerThanItem.id)
-			};
-		}
-		Cursor cursor = cr.query(Items.limit(maxItems),
-				loader.getProjection(),
-				selection,
-				selectionArgs,
-				Items.UPDATE_TIME + " ASC," +				
-				Items.PUB_DATE + " ASC, " + 
-				Items.ID +  " DESC");
-		List<Item> items = new ArrayList<Item>();
-		items.clear();
-		while (cursor.moveToNext()) {
-			Item item = loader.load(cursor);
-			if (channelLoader != null) {
-				item.channel = loadChannel(item.channel.id, channelLoader);
-			}
-			items.add(item);			
-		}
-		cursor.close();
-		return items;
-	}
-	
 	public static List<Item> loadItems(ItemCriteria criteria, ItemLoader loader, ChannelLoader channelLoader) {
 		Cursor cursor = cr.query(criteria.getContentUri(),
 				loader.getProjection(),
@@ -592,9 +425,9 @@ public class ContentManager {
 	 * @return a map of ChannelId <-> Unread count
 	 */
 	public static Map<Integer, Integer> countUnreadItemsForEachChannel() {
-		Cursor cursor = cr.query(Items.countUnread(), 
+		Cursor cursor = cr.query(Items.countUnreadEachChannel(), 
 				new String[] { Items.CHANNEL_ID, Items.UNREAD_COUNT }, 
-				Items.READ + "=?", new String[] { "0" }, null);
+				Items.READ + "=0", null, null);
 		Map<Integer, Integer> unreadCounts = new HashMap<Integer, Integer>();
 		while (cursor.moveToNext()) {					
 			unreadCounts.put(cursor.getInt(0), cursor.getInt(1));
@@ -606,7 +439,7 @@ public class ContentManager {
 	public static int countUnreadItems() {
 		Cursor cursor = cr.query(Items.countUnread(), 
 				new String[] { Items.UNREAD_COUNT }, 
-				Items.READ + "=?", new String[] { "0" }, null);		
+				Items.READ + "=0", null, null);		
 		int unreadCounts = 0;
 		if (cursor.moveToNext()) {					
 			unreadCounts = cursor.getInt(0);
@@ -615,73 +448,11 @@ public class ContentManager {
 		return unreadCounts;
 	}
 		
-	public static int countItems(
-			long channelId, 
-			boolean countReadItems,
-			boolean countStarredItemsOnly) {
-		String selection = null;
-		String[] selectionArgs = null;
-		if (channelId > 0) {
-			selection = Items.CHANNEL_ID + "=?";
-			selectionArgs = new String[] { String.valueOf(channelId) };
-		}
-		if (!countReadItems) {
-			selection = Items.READ + "=0" + (selection != null ? " AND " + selection : "");
-		}
-		if (countStarredItemsOnly) {
-			selection = Items.STARRRED + "=1" + (selection != null ? " AND " + selection : "");
-		}
-		Cursor cursor = cr.query(Items.CONTENT_URI, 
-				new String[] { Items.COUNT }, 
-				selection,
-				selectionArgs,
-				null);
-		int count = 0;
-		if (cursor.moveToNext()) {					
-			count = cursor.getInt(0);
-		}
-		cursor.close();
-		return count;
-	}
-	
-	public static int countNewerItems(
-			Item item, 
-			long channelId, 
-			boolean countReadItems,
-			boolean countStarredItemsOnly) {
-		String selection = 
-			"(" + Items.UPDATE_TIME + ">? OR (" + Items.UPDATE_TIME + "=? AND (" + 
-				Items.PUB_DATE + ">? OR (" + Items.PUB_DATE + " =? AND " + Items.ID + "<?))))";
-		if (!countReadItems) {
-			selection = selection + " AND " + Items.READ + "=0";
-		}
-		if (countStarredItemsOnly) {
-			selection = Items.STARRRED + "=1" + (selection != null ? " AND " + selection : "");
-		}
-		String[] selectionArgs = null;
-		if (channelId > 0) {
-			selection += " AND " + Items.CHANNEL_ID + "=?";
-			selectionArgs = new String[] {				
-				String.valueOf(item.updateTime),
-				String.valueOf(item.updateTime),
-				String.valueOf(item.pubDate.getTime()),
-				String.valueOf(item.pubDate.getTime()),
-				String.valueOf(item.id),
-				String.valueOf(channelId)
-			};
-		} else {
-			selectionArgs = new String[] {
-				String.valueOf(item.updateTime),
-				String.valueOf(item.updateTime),
-				String.valueOf(item.pubDate.getTime()),
-				String.valueOf(item.pubDate.getTime()),
-				String.valueOf(item.id)
-			};
-		}
-		Cursor cursor = cr.query(Items.CONTENT_URI, 
-				new String[] { Items.COUNT }, 
-				selection,
-				selectionArgs, 
+	public static int countItems(ItemCriteria criteria) {
+		Cursor cursor = cr.query(criteria.getContentUri(),
+				new String[] { Items.COUNT },
+				criteria.getSelection(),
+				criteria.getSelectionArgs(),
 				null);
 		int count = 0;
 		if (cursor.moveToNext()) {					
@@ -882,7 +653,17 @@ public class ContentManager {
 	}
 
 	public static List<Tag> loadAllTags() {
-		Cursor cursor = cr.query(Tags.CONTENT_URI, 
+		// count unread
+		Cursor cursor = cr.query(Items.countUnreadOfTag(), 
+				new String[] { Items.TAG_ID, Items.UNREAD_COUNT }, 
+				Items.READ + "=0", null, null);
+		Map<Integer, Integer> unreadCounts = new HashMap<Integer, Integer>();
+		while (cursor.moveToNext()) {					
+			unreadCounts.put(cursor.getInt(0), cursor.getInt(1));
+		}
+		cursor.close();	
+				
+		cursor = cr.query(Tags.CONTENT_URI, 
 				new String[] {		
 					Tags.ID,
 					Tags.TYPE,
@@ -893,7 +674,10 @@ public class ContentManager {
 				Tags.SORT_ID);
 		List<Tag> tags = new ArrayList<Tag>();
 		while (cursor.moveToNext()) {			
-			Tag tag = new Tag(cursor.getInt(0), (byte)cursor.getInt(1), cursor.getString(2));			
+			Tag tag = new Tag(cursor.getInt(0), (byte)cursor.getInt(1), cursor.getString(2));
+			if (unreadCounts.containsKey(tag.id)) {
+				tag.unreadCount = unreadCounts.get(tag.id); 
+			}
 			tags.add(tag);
 		}
 		cursor.close();
@@ -911,8 +695,8 @@ public class ContentManager {
 				new String[] { String.valueOf(tagId) },
 				Tags.SORT_ID);
 		Tag tag = null;
-		while (cursor.moveToNext()) {			
-			tag = new Tag(cursor.getInt(0), (byte)cursor.getInt(1), cursor.getString(2));
+		if (cursor.moveToNext()) {			
+			tag = new Tag(cursor.getInt(0), (byte)cursor.getInt(1), cursor.getString(2));			
 		}
 		cursor.close();
 		return tag;

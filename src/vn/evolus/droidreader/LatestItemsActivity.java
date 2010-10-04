@@ -8,7 +8,7 @@ import vn.evolus.droidreader.adapter.TagAdapter;
 import vn.evolus.droidreader.adapter.ItemAdapter.OnItemRequestListener;
 import vn.evolus.droidreader.adapter.TagAdapter.TagItem;
 import vn.evolus.droidreader.content.ContentManager;
-import vn.evolus.droidreader.content.criteria.ItemOfTag;
+import vn.evolus.droidreader.content.criteria.LatestItems;
 import vn.evolus.droidreader.model.Item;
 import vn.evolus.droidreader.model.Tag;
 import vn.evolus.droidreader.services.ContentSynchronizationService;
@@ -18,9 +18,7 @@ import vn.evolus.droidreader.services.SynchronizationService;
 import vn.evolus.droidreader.util.ActiveList;
 import vn.evolus.droidreader.util.ImageCache;
 import vn.evolus.droidreader.util.ImageLoader;
-import vn.evolus.droidreader.widget.ActionItem;
 import vn.evolus.droidreader.widget.ItemListView;
-import vn.evolus.droidreader.widget.QuickAction;
 import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.NotificationManager;
@@ -59,7 +57,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 	private ViewSwitcher refreshOrProgress;
 	private ImageView tagsButton;
 	
-	private int tagId = ItemOfTag.ALL_TAGS;	
+	private int tagId = LatestItems.ALL_TAGS;	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -152,17 +150,17 @@ public class LatestItemsActivity extends LocalizedActivity {
 	@Override
 	protected void onNewIntent(Intent intent) {	
 		super.onNewIntent(intent);		
-		tagId = intent.getIntExtra("TagId", ItemOfTag.ALL_TAGS);	
+		tagId = intent.getIntExtra("TagId", LatestItems.ALL_TAGS);	
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
 										
-		if (tagId == ItemOfTag.ALL_TAGS) {
-			tagId = getIntent().getIntExtra("TagId", ItemOfTag.ALL_TAGS);
+		if (tagId == LatestItems.ALL_TAGS) {
+			tagId = getIntent().getIntExtra("TagId", LatestItems.ALL_TAGS);
 		}
-		if (tagId != ItemOfTag.ALL_TAGS) {
+		if (tagId != LatestItems.ALL_TAGS) {
 			Tag tag = ContentManager.loadTag(tagId);
 			title.setText(tag.name.toUpperCase());
 		}
@@ -290,11 +288,11 @@ public class LatestItemsActivity extends LocalizedActivity {
 			public List<Item> call(BetterAsyncTask<Void, Void, List<Item>> task) 
 				throws Exception {							
 					return ContentManager.loadItems(
-							new ItemOfTag(
+							new LatestItems(
 									tagId, 
 									!Settings.getShowRead(LatestItemsActivity.this), 
 									lastItem,
-									ItemOfTag.OLDER,
+									LatestItems.OLDER,
 									Constants.MAX_ITEMS), 
 							ContentManager.LIGHTWEIGHT_ITEM_LOADER,
 							ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);				
@@ -324,7 +322,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 			public ActiveList<Item> call(BetterAsyncTask<Void, Void, ActiveList<Item>> task) 
 				throws Exception {
 				List<Item> items = ContentManager.loadItems(
-						new ItemOfTag(tagId, !Settings.getShowRead(LatestItemsActivity.this)), 
+						new LatestItems(tagId, !Settings.getShowRead(LatestItemsActivity.this)), 
 						ContentManager.LIGHTWEIGHT_ITEM_LOADER,
 						ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);				
 				ActiveList<Item> result = new ActiveList<Item>();
@@ -373,7 +371,8 @@ public class LatestItemsActivity extends LocalizedActivity {
 	
 	private void showItem(Item item) { 
 		Intent intent = new Intent(this, ItemActivity.class);		
-		intent.putExtra("ItemId", item.id);		
+		intent.putExtra("ItemId", item.id);
+		intent.putExtra("TagId", this.tagId);
 		startActivity(intent);		
 	}		
 
@@ -393,71 +392,6 @@ public class LatestItemsActivity extends LocalizedActivity {
 		}    	
     };        
 
-    private QuickAction createReadingOptions(View anchor) {
-    	final QuickAction quickAction = new QuickAction(anchor);
-    	
-    	OnClickListener onTagClickListener = new OnClickListener() {
-    		@Override
-    		public void onClick(View v) {
-    			Tag tag = (Tag)v.getTag();
-    			tagId = ItemOfTag.ALL_TAGS;
-    			if (tag != null) {
-    				tagId = tag.id;
-    				title.setText(tag.name.toUpperCase());
-    			} else {
-    				title.setText(getResources().getString(R.string.latest).toUpperCase());
-    			}
-    			quickAction.dismiss();
-    			loadItems();
-    		}
-    	};
-    	
-    	ActionItem latest = new ActionItem();		
-		latest.setTitle(getResources().getString(R.string.latest));
-		latest.setIcon(getResources().getDrawable(R.drawable.latest));
-		latest.setOnClickListener(onTagClickListener);		
-		
-		ActionItem starred = new ActionItem();		
-		starred.setTitle(getResources().getString(R.string.starred));
-		starred.setIcon(getResources().getDrawable(R.drawable.star));
-		starred.setOnClickListener(onTagClickListener);
-		
-		ActionItem shared = new ActionItem();		
-		shared.setTitle(getResources().getString(R.string.shared));
-		shared.setIcon(getResources().getDrawable(R.drawable.star));
-		shared.setOnClickListener(onTagClickListener);
-				
-		quickAction.addActionItem(latest);
-		quickAction.addActionItem(starred);
-		quickAction.addActionItem(shared);
-		
-		List<Tag> tags = ContentManager.loadAllTags();
-		for (Tag tag : tags) {
-			if (tag.type == Tag.STATE) {
-				if (GoogleReader.STARRED.equals(tag.name)) {
-					tag.name = starred.getTitle();
-					starred.setTag(tag);
-				} else if (GoogleReader.SHARED.equals(tag.name)) {
-					tag.name = shared.getTitle();
-					shared.setTag(tag);
-				}
-				continue;
-			}
-			
-			ActionItem tagItem = new ActionItem();
-			tagItem.setTitle(tag.name);
-			tagItem.setIcon(getResources().getDrawable(R.drawable.rss_tag));
-			tagItem.setOnClickListener(onTagClickListener);
-			tagItem.setTag(tag);
-						
-			quickAction.addActionItem(tagItem);			
-		}
-		
-		quickAction.setAnimStyle(QuickAction.ANIM_AUTO);
-		
-		return quickAction;
-    }
-    
     private void showTagsDialog() {
     	final Dialog dialog = new Dialog(this);
     	dialog.setTitle(R.string.select_tag_dialog_title);
@@ -469,8 +403,7 @@ public class LatestItemsActivity extends LocalizedActivity {
     		public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
 				TagItem tagItem = (TagItem)adapterView.getItemAtPosition(position);
 				tagId = tagItem.id;
-				title.setText(tag.name.toUpperCase());
-				
+				title.setText(tagItem.title.toUpperCase());				
 				loadItems();
 				dialog.dismiss();
 			}    		
@@ -488,22 +421,36 @@ public class LatestItemsActivity extends LocalizedActivity {
 		
 		// Starred items
 		TagItem item = new TagItem();
+		item.id = LatestItems.ALL_TAGS;
+		item.title = getString(R.string.latest);
+		item.icon = "" + R.drawable.latest;
+		item.unreadCount = ContentManager.countUnreadItems();			
+		tagItems.add(item);
+		
+		// Starred items
+		item = new TagItem();
 		item.title = getString(R.string.starred);
+		item.icon = "" + R.drawable.starred;
 		item.unreadCount = 100;			
 		tagItems.add(item);
 		
 		// Shared items
 		item = new TagItem();
 		item.title = getString(R.string.shared);
+		item.icon = "" + R.drawable.shared;
 		item.unreadCount = 100;			
 		tagItems.add(item);
 		
 		for (Tag tag : tags) {
 			if (tag.type == Tag.STATE) {
 				if (GoogleReader.STARRED.equals(tag.name)) {
-					tagItems.get(0).id = tag.id;
+					TagItem tagItem = tagItems.get(1);
+					tagItem.id = tag.id;
+					tagItem.unreadCount = tag.unreadCount;
 				} else if (GoogleReader.SHARED.equals(tag.name)) {
-					tagItems.get(1).id = tag.id;
+					TagItem tagItem = tagItems.get(2);
+					tagItem.id = tag.id;
+					tagItem.unreadCount = tag.unreadCount;
 				}
 				continue;
 			}
@@ -511,7 +458,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 			item = new TagItem();
 			item.id = tag.id;
 			item.title = tag.name;
-			item.unreadCount = 1000;			
+			item.unreadCount = tag.unreadCount;			
 			tagItems.add(item);			
 		}
 		return tagItems;
