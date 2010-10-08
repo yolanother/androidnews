@@ -29,7 +29,8 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 		}
 	}
 	
-	public static boolean hasGoodEnoughNetworkConnection(Context context) {
+	public static boolean hasGoodEnoughNetworkConnection() {
+		Context context = Application.getInstance();
 		NetworkInfo info = ((ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();		
 		return hasGoodEnoughNetworkConnection(info, context);
 	}

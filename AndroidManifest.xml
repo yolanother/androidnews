@@ -18,7 +18,7 @@
         </activity>
         <activity android:name=".MainActivity" />
         <activity android:name=".ChannelActivity" />
-        <activity android:name=".ItemActivity" />
+        <activity android:name=".ItemActivity"  android:launchMode="singleInstance"/>
         <activity android:name=".SubscriptionActivity" />
         <activity android:name=".NewSubscriptionActivity" />
         <activity android:name=".SettingsActivity">

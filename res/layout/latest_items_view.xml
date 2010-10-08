@@ -91,9 +91,22 @@
             android:nextFocusRight="@id/refresh"
             android:nextFocusDown="@+id/itemListView" />                
     </LinearLayout>
-    <vn.evolus.droidreader.widget.ItemListView 
-        android:id="@+id/itemListView" 
-        android:layout_width="fill_parent" 
-        android:layout_height="fill_parent" 
-    />
+    <ViewSwitcher 
+            android:layout_gravity="center" 
+            android:id="@+id/viewSwitcher" 
+            android:layout_width="fill_parent" 
+            android:layout_height="fill_parent" 
+            android:layout_weight="1.0">
+	    <vn.evolus.droidreader.widget.ItemListView 
+	        android:id="@+id/itemListView" 
+	        android:layout_width="fill_parent" 
+	        android:layout_height="fill_parent" />
+	    <TextView 
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center"
+            android:text="@string/no_unread_article"
+            android:textColor="@color/itemTitle"
+            android:background="@color/itemBackground" />
+    </ViewSwitcher>	    
 </LinearLayout>

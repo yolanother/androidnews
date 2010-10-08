@@ -71,7 +71,7 @@ public class GoogleReader implements Serializable {
     public static final String ITEM_STATE_READ = ITEM_STATE + "/read";
     public static final String ITEM_STATE_STARRED = ITEM_STATE + "/" + STARRED;
     public static final String ITEM_STATE_SHARED = ITEM_STATE + "/" + SHARED;
-    private static final String ITEM_STATE_READING = ITEM_STATE + "/reading-list";       
+    public static final String ITEM_STATE_READING = ITEM_STATE + "/reading-list";
     
     private String accessToken = null;
     private String tokenSecret = null;
@@ -159,24 +159,26 @@ public class GoogleReader implements Serializable {
 	    return StreamUtils.readAllText(is);
 	}
 	
-	public AtomFeed fetchFeed(String feedId, int maxItems) throws Exception {
-		return fetchFeed(feedId, maxItems, null);
+	public AtomFeed fetchEntriesOfFeed(String feedId, int maxItems) throws Exception {
+		return fetchEntriesOfFeed(feedId, maxItems, null, null);
 	}
 
-	public AtomFeed fetchFeed(String feedId, int maxItems,
+	public AtomFeed fetchEntriesOfFeed(String feedId, int maxItems, String continuation,
 			OnNewEntryCallback callback) throws Exception {
 		if (!feedId.startsWith("feed/")) {
 			feedId = "feed/" + feedId;
 		}		
-        InputStream is = get(ATOM_FEED_URL + URLEncoder.encode(feedId))
+        InputStream is = get(ATOM_FEED_URL + URLEncoder.encode(feedId) 
+        		+ "?n=" + maxItems
+        		+ (continuation != null ? "&c=" + continuation : "")) 
         	.getEntity().getContent();
         return AtomFeed.parse(is, maxItems, callback);
 	}
 	
-	public AtomFeed getReadingList(int maxItems, String continution, 
+	public AtomFeed fetchEntriesOfTag(String tag, int maxItems, String continuation, 
 			OnNewEntryCallback callback) throws Exception {		
-        InputStream is = get(ATOM_FEED_URL + "user/-" + ITEM_STATE_READING + "?n=" + maxItems
-        		+ (continution != null ? "&c=" + continution : ""))
+        InputStream is = get(ATOM_FEED_URL + tag + "?n=" + maxItems
+        		+ (continuation != null ? "&c=" + continuation : ""))
         	.getEntity().getContent();
         return AtomFeed.parse(is, maxItems, callback);
 	}

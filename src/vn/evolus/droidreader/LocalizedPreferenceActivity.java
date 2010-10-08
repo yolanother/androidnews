@@ -14,7 +14,7 @@ public class LocalizedPreferenceActivity extends PreferenceActivity {
 		Resources res = getResources();
         DisplayMetrics dm = res.getDisplayMetrics();
         Configuration conf = res.getConfiguration();
-        conf.locale = new Locale(Settings.getLocale(this));
+        conf.locale = new Locale(Settings.getLocale());
         res.updateConfiguration(conf, dm);
         
 		super.onCreate(savedInstanceState);		

@@ -1,7 +1,6 @@
 package vn.evolus.droidreader;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import vn.evolus.droidreader.adapter.ChannelAdapter;
@@ -9,9 +8,6 @@ import vn.evolus.droidreader.adapter.TagAdapter;
 import vn.evolus.droidreader.adapter.TagAdapter.TagItem;
 import vn.evolus.droidreader.content.ContentManager;
 import vn.evolus.droidreader.model.Channel;
-import vn.evolus.droidreader.model.Tag;
-import vn.evolus.droidreader.services.DownloadingService;
-import vn.evolus.droidreader.services.SynchronizationService;
 import vn.evolus.droidreader.util.ActiveList;
 import vn.evolus.droidreader.util.ImageLoader;
 import android.app.AlertDialog;
@@ -36,7 +32,6 @@ import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.github.droidfu.concurrent.BetterAsyncTask;
 import com.github.droidfu.concurrent.BetterAsyncTaskCallable;
-import com.google.reader.GoogleReader;
 
 public class MainActivity extends LocalizedActivity {
 	private static final int GRID_MODE = 0;
@@ -110,14 +105,6 @@ public class MainActivity extends LocalizedActivity {
 	        	startActivity(intent);
 			}
         });
-                
-        if (ConnectivityReceiver.hasGoodEnoughNetworkConnection(this)) {
-        	Intent service = new Intent(this, SynchronizationService.class);
-        	startService(service);
-        	
-        	Intent downloadService = new Intent(this, DownloadingService.class);
-        	startService(downloadService);
-        }
     }	
 	
 	@Override
@@ -151,47 +138,12 @@ public class MainActivity extends LocalizedActivity {
 			}
 		} else {
 			if (tagAdapter == null) {
-				tagAdapter = new TagAdapter(this, loadTags());
+				tagAdapter = new TagAdapter(this, LatestItemsActivity.loadTags(this));
 				channelListView.setAdapter(tagAdapter);
 			}
 		}
     }
 	
-	private ArrayList<TagItem> loadTags() {
-		List<Tag> tags = ContentManager.loadAllTags();
-		ArrayList<TagItem> tagItems = new ArrayList<TagItem>();
-		
-		// Starred items
-		TagItem item = new TagItem();
-		item.title = getString(R.string.starred);
-		item.unreadCount = 100;			
-		tagItems.add(item);
-		
-		// Shared items
-		item = new TagItem();
-		item.title = getString(R.string.shared);
-		item.unreadCount = 100;			
-		tagItems.add(item);
-		
-		for (Tag tag : tags) {
-			if (tag.type == Tag.STATE) {
-				if (GoogleReader.STARRED.equals(tag.name)) {
-					tagItems.get(0).id = tag.id;
-				} else if (GoogleReader.SHARED.equals(tag.name)) {
-					tagItems.get(1).id = tag.id;
-				}
-				continue;
-			}
-			
-			item = new TagItem();
-			item.id = tag.id;
-			item.title = tag.name;
-			item.unreadCount = 1000;			
-			tagItems.add(item);			
-		}
-		return tagItems;
-	}
-
 	private int getViewMode() {		
 		return viewSwitcher.getDisplayedChild();
 	}
@@ -226,7 +178,7 @@ public class MainActivity extends LocalizedActivity {
 		BetterAsyncTask<Void, Void, Void> refreshTask = new BetterAsyncTask<Void, Void, Void>(this) {
 			@Override
 			protected void after(Context context, Void arg1) {
-				if (Settings.getShowUpdatedChannels(context)) {					
+				if (Settings.getShowUpdatedChannels()) {					
 					ArrayList<Channel> unreadChannels = getUnreadChannels();				
 					channelAdapter.setChannels(unreadChannels);
 					if (unreadChannels.size() == 0) {
@@ -346,11 +298,5 @@ public class MainActivity extends LocalizedActivity {
     private void manageSubscriptions() {
     	Intent intent = new Intent(this, SubscriptionActivity.class);
     	startActivity(intent);
-    }
-    
-    @Override
-    public void finish() {
-    	super.finish();
-    }
-        
+    }    
 }

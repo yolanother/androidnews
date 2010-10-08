@@ -69,7 +69,12 @@
     <string name="failed_to_save_subscriptions">Following feeds cannot be subscribed/unsubscribed:\n</string>
     <string name="synchorization_started">Synchronization started...</string>
     
+    <string name="star">Add star</string>
+    <string name="unstar">Remove star</string>
     <string name="share">Share</string>
+    <string name="unshare">Unshare</string>
+    <string name="keep_unread">Keep unread</string>
+    <string name="mark_as_read">Mark as read</string>
     <string name="view_original">View original</string>
     <string name="share_text">Hi,\n\nCheck this article: {link}</string>
     
@@ -87,5 +92,6 @@
     <string name="published">Published: {on}</string>
     <string name="article">Article {no}</string>
     
-    <string name="select_tag_dialog_title">Select a tag</string>
+    <string name="select_tag_dialog_title">View articles by tag</string>
+    <string name="no_unread_article">No unread article.</string>
 </resources>

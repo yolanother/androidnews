@@ -13,6 +13,7 @@ public class Entry {
 	private Date updated;
 	private boolean read = false;
 	private boolean starred = false;
+	private boolean shared = false;
 	private boolean keptUnread = false;
 	private String feedId;
 	private List<String> tags;
@@ -64,7 +65,13 @@ public class Entry {
 	}
 	public void setStarred(boolean starred) {
 		this.starred = starred;
-	}	
+	}
+	public boolean getShared() {
+		return shared;
+	}
+	public void setShared(boolean shared) {
+		this.shared = shared;
+	}
 	public boolean getKeptUnread() {
 		return keptUnread;
 	}
@@ -86,4 +93,10 @@ public class Entry {
 	public void setFeedId(String feedId) {
 		this.feedId = feedId;
 	}	
+	public String getFeedUrl() {
+		if (this.feedId != null) {
+			return this.feedId.substring(5);
+		}
+		return null;
+	}
 }

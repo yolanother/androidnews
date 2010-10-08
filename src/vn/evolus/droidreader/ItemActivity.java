@@ -1,20 +1,21 @@
 package vn.evolus.droidreader;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import vn.evolus.droidreader.content.ContentManager;
 import vn.evolus.droidreader.content.criteria.LatestItems;
 import vn.evolus.droidreader.model.Item;
 import vn.evolus.droidreader.util.ImageLoader;
+import vn.evolus.droidreader.widget.ActionItem;
 import vn.evolus.droidreader.widget.ItemView;
+import vn.evolus.droidreader.widget.QuickAction;
 import vn.evolus.droidreader.widget.ScrollView;
 import vn.evolus.droidreader.widget.ScrollView.OnScreenSelectedListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
@@ -22,21 +23,26 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 public class ItemActivity extends LocalizedActivity implements OnScreenSelectedListener {
-	private TextView title;
-	private ImageButton starButton;
+	public static final String ITEM_ID_PARAM = "ItemId";
+	public static final String TAG_ID_PARAM = "TagId";
+	public static final String CHANNEL_ID_PARAM = "ChannelId";
+	
+	private TextView title;	
 	private ScrollView scrollView;
+	
 	private ArrayList<Item> items;
-	private int channelId = ContentManager.ALL_CHANNELS;
 	private Item currentItem;
 	private int totalItems = 0;
 	private int currentItemIndex = 0;
 	private boolean loadReadItems = true;
+	private int itemId = 0;
+	private int channelId = LatestItems.ALL_CHANNELS;
 	private int tagId = LatestItems.ALL_TAGS;
-	private Set<Item> readItems = new HashSet<Item>();	
 	private String article;
 		
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {		
+	protected void onCreate(Bundle savedInstanceState) {
+		Log.d("DEBUG", "onCreate(): " +  this.hashCode());
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.item_view);		
@@ -45,21 +51,13 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		
 		title = (TextView)findViewById(R.id.title);
 		
-		starButton = (ImageButton)findViewById(R.id.star);
-		starButton.setOnClickListener(new OnClickListener() {
+		ImageButton toolsButton = (ImageButton)findViewById(R.id.tools);
+		toolsButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				v.setSelected(!v.isSelected());								
-				changeCurrentItemAsStarredState(v.isSelected());				
+				showItemTools(v);
 			}			
 		});
-		
-		ImageButton shareButton = (ImageButton)findViewById(R.id.share);
-		shareButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				share();
-			}			
-		});
-		
+				
 		ImageButton viewOriginalButton = (ImageButton)findViewById(R.id.viewOriginal);
 		viewOriginalButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -68,38 +66,65 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		});
 		
 		ImageButton nightModeButton = (ImageButton)findViewById(R.id.nightMode);
-		nightModeButton.setSelected(Settings.getNightReadingMode(this));
+		nightModeButton.setSelected(Settings.getNightReadingMode());
 		nightModeButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				v.setSelected(!v.isSelected());
-				Settings.saveNightReadingMode(ItemActivity.this, v.isSelected());
+				Settings.saveNightReadingMode(v.isSelected());
 				changeReadingMode(v.isSelected());
 			}
 		});
 						
 		scrollView = (ScrollView)findViewById(R.id.scrollView);	
 		scrollView.setOnItemSelectedListener(this);
-					
-		int itemId = 0;
+							
 		if (savedInstanceState != null) {
-			itemId = savedInstanceState.getInt("ItemId");
+			itemId = savedInstanceState.getInt(ITEM_ID_PARAM);
 		} else {
-			itemId = getIntent().getIntExtra("ItemId", 0);
-		}		
-		if (savedInstanceState != null) {
-			tagId = savedInstanceState.getInt("TagId");
-		} else {
-			tagId = getIntent().getIntExtra("TagId", LatestItems.ALL_TAGS);
+			itemId = 0;
 		}
+		if (savedInstanceState != null) {
+			tagId = savedInstanceState.getInt(TAG_ID_PARAM);
+		} else {
+			tagId = LatestItems.ALL_TAGS;
+		}
+		if (savedInstanceState != null) {
+			channelId = savedInstanceState.getInt(CHANNEL_ID_PARAM);
+		} else {
+			channelId = LatestItems.ALL_CHANNELS;
+		}
+	}		
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putInt(ITEM_ID_PARAM, currentItem.id);
+		outState.putInt(TAG_ID_PARAM, tagId);
+		outState.putInt(CHANNEL_ID_PARAM, channelId);
+		super.onSaveInstanceState(outState);
+	}
+	
+	@Override
+	protected void onNewIntent(Intent intent) {		
+		super.onNewIntent(intent);
+		setIntent(intent);			
+	}
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+				
+		itemId = getIntent().getIntExtra(ITEM_ID_PARAM, itemId);
+		tagId = getIntent().getIntExtra(TAG_ID_PARAM, tagId);
+		channelId = getIntent().getIntExtra(CHANNEL_ID_PARAM, channelId);
+		
 		currentItem = ContentManager.loadItem(itemId,
 				ContentManager.FULL_ITEM_LOADER,
-				ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
-				
-		channelId = getIntent().getIntExtra("ChannelId", ContentManager.ALL_CHANNELS);
+				ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);				
+		
 		if (channelId != ContentManager.ALL_CHANNELS) {
 			loadReadItems = true;			
 		} else {
-			loadReadItems = Settings.getShowRead(this);
+			loadReadItems = Settings.getShowRead();
 		}
 		items = new ArrayList<Item>();
 		List<Item> newerItems = ContentManager.loadItems(
@@ -127,37 +152,84 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 				ContentManager.FULL_ITEM_LOADER,
 				ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
 		items.addAll(olderItems);
-						
+		
 		loadItems();
 	}
-	
+		
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		outState.putInt("ItemId", currentItem.id);
-		outState.putInt("TagId", tagId);
-		super.onSaveInstanceState(outState);
-	}
-	
-	@Override
-	protected void onPause() {		
-		if (readItems.size() > 0) {
-			for (Item item : readItems) {
-				ContentManager.markItemAsRead(item);
-			}
-			readItems.clear();
-		}
+	protected void onPause() {
+		ContentManager.markAllTemporarilyMarkedReadItemsAsRead();
 		super.onPause();
 	}
 	
+	protected void showItemTools(View anchor) {
+		final QuickAction quickAction = new QuickAction(anchor);
+    	
+    	ActionItem star = new ActionItem();
+    	if (currentItem.starred) {
+    		star.setTitle(getResources().getString(R.string.unstar));    	
+    		star.setIcon(getResources().getDrawable(R.drawable.ic_star));
+    	} else {
+	    	star.setTitle(getResources().getString(R.string.star));
+	    	star.setIcon(getResources().getDrawable(R.drawable.ic_star_empty));	    	
+    	}
+    	star.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				changeCurrentItemAsStarredState(true);
+				quickAction.dismiss();
+			}			
+		});						
+		
+		ActionItem share = new ActionItem();
+		if (currentItem.shared) {
+			share.setTitle(getResources().getString(R.string.unshare));
+			share.setIcon(getResources().getDrawable(R.drawable.shared));
+		} else {
+			share.setTitle(getResources().getString(R.string.share));
+			share.setIcon(getResources().getDrawable(R.drawable.ic_share));
+		}
+		share.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				share();
+				quickAction.dismiss();
+			}			
+		});
+		
+		ActionItem keepUnread = new ActionItem();
+		if (currentItem.isKeptUnread()) {
+			keepUnread.setTitle(getResources().getString(R.string.mark_as_read));
+			keepUnread.setIcon(getResources().getDrawable(R.drawable.ic_checkbox));
+		} else {
+			keepUnread.setTitle(getResources().getString(R.string.keep_unread));
+			keepUnread.setIcon(getResources().getDrawable(R.drawable.ic_checkbox_empty));			
+		}
+		keepUnread.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				toggleKeptUnread();
+				quickAction.dismiss();
+			}			
+		});
+						
+		quickAction.addActionItem(star);
+		quickAction.addActionItem(share);
+		quickAction.addActionItem(keepUnread);		
+				
+		quickAction.setAnimStyle(QuickAction.ANIM_AUTO);		
+		quickAction.show();
+	}
+	
 	private void loadItems() {
-		int i = 0, currentItemIndex = 0;
+		if (scrollView.getChildCount() > 0) {
+			scrollView.removeAllViews();
+		}
+		
+		int i = 0, currentItemIndex = 0;		
 		for (Item item : items) {
 			ItemView itemView = new ItemView(this);
-			itemView.setNightMode(Settings.getNightReadingMode(this));
+			itemView.setNightMode(Settings.getNightReadingMode());
 			if (item.equals(currentItem)) {
 				currentItemIndex = i;
-				itemView.setItem(currentItem);
-				readItems.add(currentItem);
+				itemView.setItem(currentItem);				
 			}			
 			scrollView.addView(itemView);
 			i++;
@@ -198,9 +270,23 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 			}
 		}
 	}	
+	
+	protected void toggleKeptUnread() {
+		if (currentItem.isKeptUnread()) {
+			ContentManager.unmarkItemAsKeptUnread(currentItem);
+		} else {
+			ContentManager.markItemAsKeptUnread(currentItem);
+		}		
+	}
 
+	private void markItemAsRead(Item item) {
+		if (!item.isRead() && !item.isKeptUnread()) {
+			ContentManager.saveItemReadState(item, Item.TEMPORARILY_MARKED_AS_READ);
+		}
+	}
+	
 	@Override
-	public void onSelected(int selectedIndex) {		
+	public void onSelected(int selectedIndex) {
 		currentItem = showItem(selectedIndex);
 					
 		markItemAsRead(currentItem);
@@ -231,14 +317,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		title.setText(article.replace("{no}", 
 				String.valueOf(currentItemIndex + 1)
 					.concat("/")
-					.concat(String.valueOf(totalItems))));		
-		starButton.setSelected(currentItem.starred);
-	}
-
-	private void markItemAsRead(Item item) {
-		if (!item.read && !readItems.contains(item)) {
-			readItems.add(item);
-		}
+					.concat(String.valueOf(totalItems))));
 	}
 
 	private void loadOlderItem(int selectedIndex) {
@@ -258,7 +337,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 				items.add(items.size(), olderItem);
 				
 				ItemView itemView = new ItemView(this);
-				itemView.setNightMode(Settings.getNightReadingMode(this));
+				itemView.setNightMode(Settings.getNightReadingMode());
 				scrollView.addView(itemView);
 				itemView.setItem(olderItem);
 			}
@@ -283,7 +362,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 				selectedIndex++;
 				
 				ItemView itemView = new ItemView(this);
-				itemView.setNightMode(Settings.getNightReadingMode(this));
+				itemView.setNightMode(Settings.getNightReadingMode());
 				scrollView.prependView(itemView);
 				try {
 					itemView.setItem(newerItem);

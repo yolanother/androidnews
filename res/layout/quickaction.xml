@@ -19,7 +19,7 @@
     <HorizontalScrollView
         android:id="@+id/scroll"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="wrap_content"        
         android:fadingEdgeLength="0dip"
         android:layout_below="@id/header2"
         android:background="@drawable/quickcontact_slider_background"
@@ -29,8 +29,8 @@
             android:id="@+id/tracks"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="4dip"
-            android:paddingBottom="4dip" 
+            android:layout_gravity="center_horizontal"
+            android:padding="4dip"            
             android:orientation="horizontal">
         
             <ImageView

@@ -29,7 +29,7 @@ public class LightweightItemLoader implements ItemLoader {
 		item.title = cursor.getString(1);//cursor.getColumnIndex(Items.TITLE));
 		item.pubDate = new Date(cursor.getLong(2));//cursor.getColumnIndex(Items.PUB_DATE));
 		item.imageUrl = cursor.getString(3);//cursor.getColumnIndex(Items.IMAGE_URL));
-		item.read = (cursor.getInt(4) != 0);//cursor.getColumnIndex(Items.READ));
+		item.read = cursor.getInt(4);//cursor.getColumnIndex(Items.READ));
 		item.starred = (cursor.getInt(5) != 0);//cursor.getColumnIndex(Items.READ));
 		item.channel = new Channel(cursor.getInt(6));
 		item.updateTime = cursor.getLong(7);

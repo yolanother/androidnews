@@ -53,7 +53,6 @@ public class AtomHandler extends DefaultHandler {
 	@Override
 	public void startElement(String uri, String localName, String name, Attributes attributes) 
 		throws SAXException {
-		//Log.d("DEBUG", "<" + localName + ">" + " - " + uri);
 		sb = new StringBuffer();
 		
 		if (localName.equals("feed")) {
@@ -62,14 +61,10 @@ public class AtomHandler extends DefaultHandler {
 		} else if (localName.equals("entry")) {
 			entry = new Entry();
 			currentState = ATOM_ENTRY;
-//			String readState = attributes.getValue("gr:is-read-state-locked");
-//			if (readState != null && "true".equals(readState)) {
-//				entry.setRead(true);
-//			}			
 		} else if (localName.equals("source")) {			
-			String feedId = attributes.getValue(GOOGLE_READER_NAMESPACE, "stream-id");
-			if (currentState == ATOM_FEED) {
-				entry.setFeedId(feedId);					
+			String feedId = attributes.getValue("gr:stream-id");
+			if (currentState == ATOM_ENTRY) {
+				entry.setFeedId(feedId);
 			}
 			currentState = ATOM_SOURCE;
 		} else if (localName.equals("link")) {
@@ -95,6 +90,8 @@ public class AtomHandler extends DefaultHandler {
 						entry.setRead(true);
 					} else if (GoogleReader.ITEM_STATE_STARRED.equals(state)) {
 						entry.setStarred(true);
+					} else if (GoogleReader.ITEM_STATE_SHARED.equals(state)) {
+						entry.setShared(true);
 					} else if (GoogleReader.ITEM_STATE_KEPT_UNREAD.equals(state)) {
 						entry.setKeptUnread(true);
 					}
@@ -105,10 +102,7 @@ public class AtomHandler extends DefaultHandler {
 	
 	@Override
 	public void endElement(String uri, String localName, String name)
-			throws SAXException {
-		//Log.d("DEBUG", sb.toString());
-		//Log.d("DEBUG", "</" + localName + ">" + " - " + uri);
-		
+			throws SAXException {		
 		if (localName.equals("id")) {			
 			String id = cleanUpText(sb);
 			if (currentState == ATOM_ENTRY) {
@@ -116,7 +110,7 @@ public class AtomHandler extends DefaultHandler {
 			} else if (currentState == ATOM_FEED) {
 				feed.setId(id);
 			}
-		} else if (localName.equals("title")) {			
+		} else if (localName.equals("title")) {
 			String title = Html.decode(cleanUpText(sb));
 			if (currentState == ATOM_ENTRY) {
 				entry.setTitle(title);
@@ -140,6 +134,7 @@ public class AtomHandler extends DefaultHandler {
 				try {
 					callback.onNewEntry(entry);
 				} catch (Throwable t) {
+					t.printStackTrace();
 					throw new SAXException(t.getMessage());
 				}
 			}
@@ -159,7 +154,7 @@ public class AtomHandler extends DefaultHandler {
 			if (currentState == ATOM_ENTRY) {
 				entry.setContent(sb.toString());
 			}
-		} else if (localName.equals("continution") && GOOGLE_READER_NAMESPACE.equals(uri)) {
+		} else if (localName.equals("continuation") && GOOGLE_READER_NAMESPACE.equals(uri)) {
 			if (currentState == ATOM_FEED) {
 				feed.setContinution(sb.toString());
 			}

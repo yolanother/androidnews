@@ -59,7 +59,7 @@ public class AuthorizationActivity extends LocalizedActivity {
 				}
 				String accessToken = savedReader.getAccessToken();
 				String tokenSecret = savedReader.getTokenSecret();
-				Settings.saveGoogleReaderAccessTokenAndSecret(this, accessToken, tokenSecret);				
+				Settings.saveGoogleReaderAccessTokenAndSecret(accessToken, tokenSecret);				
 
 				startSyncProcess();
 			} catch (Exception e) {

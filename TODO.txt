@@ -1,7 +1,4 @@
 TODO:
-* Keep unread 
-* Delete item tags (cascade delete?)
-* View items by tag
 * Keep scrolling position
 * Widgets
 * More languages
@@ -11,6 +8,9 @@ TODO:
 * Mobilize with Google GWT http://www.google.com/gwt/x?u=
 
 DONE:
+* Keep unread
+* View items by tag
+* Delete item tags (cascade delete?)
 * Sync with Google Reader
     * Mark as read/unread
     * Star/unstar

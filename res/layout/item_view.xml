@@ -26,11 +26,12 @@
             android:layout_height="wrap_content"            
             android:shadowColor="#ff333333" 
             android:layout_weight="1.0" />
+        <!--            
         <ImageButton
             android:focusable="false"
             android:background="@color/toolbarSeparator" 
             android:layout_width="1.0px"
-            android:layout_height="fill_parent" />
+            android:layout_height="fill_parent" />        
         <ImageButton
             android:id="@+id/star"
             android:src="@drawable/star_toggle_selector"
@@ -57,6 +58,17 @@
             android:layout_margin="1.0sp"            
             android:nextFocusRight="@id/refresh"
             android:nextFocusDown="@+id/viewOriginal" />
+         -->
+        <ImageButton 
+            android:id="@+id/tools"
+            android:src="@drawable/ic_toolbar_down_arrow"            
+            android:background="@drawable/toolbar_button_selector"  
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"  
+            android:layout_margin="1.0sp"            
+            android:nextFocusRight="@id/refresh"
+            android:nextFocusDown="@+id/viewOriginal" />                     
         <ImageButton
             android:focusable="false" 
             android:background="@color/toolbarSeparator" 

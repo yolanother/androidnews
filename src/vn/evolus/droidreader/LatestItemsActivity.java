@@ -8,6 +8,7 @@ import vn.evolus.droidreader.adapter.TagAdapter;
 import vn.evolus.droidreader.adapter.ItemAdapter.OnItemRequestListener;
 import vn.evolus.droidreader.adapter.TagAdapter.TagItem;
 import vn.evolus.droidreader.content.ContentManager;
+import vn.evolus.droidreader.content.SynchronizationManager;
 import vn.evolus.droidreader.content.criteria.LatestItems;
 import vn.evolus.droidreader.model.Item;
 import vn.evolus.droidreader.model.Tag;
@@ -52,6 +53,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 	
 	private boolean loading = false;
 	
+	private ViewSwitcher viewSwitcher;
 	private TextView title;
 	private ItemListView itemListView;
 	private ViewSwitcher refreshOrProgress;
@@ -66,16 +68,16 @@ public class LatestItemsActivity extends LocalizedActivity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.latest_items_view);
-				
+						
 		title = (TextView)findViewById(R.id.title);
         title.setText(title.getText().toString().toUpperCase());
+        
+        viewSwitcher = (ViewSwitcher)findViewById(R.id.viewSwitcher);
         
         tagsButton = (ImageButton)findViewById(R.id.tags);        
         tagsButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				showTagsDialog();
-//				QuickAction readingOptions = createReadingOptions(tagsButton);
-//				readingOptions.show();
 			}
         });
                 
@@ -95,11 +97,11 @@ public class LatestItemsActivity extends LocalizedActivity {
 		});
 		
 		ImageButton showReadToggle = (ImageButton)findViewById(R.id.showRead);
-		showReadToggle.setSelected(Settings.getShowRead(this));
+		showReadToggle.setSelected(Settings.getShowRead());
 		showReadToggle.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				v.setSelected(!v.isSelected());
-				Settings.saveShowRead(LatestItemsActivity.this, v.isSelected());
+				Settings.saveShowRead(v.isSelected());
 				loadItems();
 			}			
 		});		
@@ -112,26 +114,19 @@ public class LatestItemsActivity extends LocalizedActivity {
 			}
         });        
         
-        checkAndShowWhatsNew(); 
-             
-//        try {
-//			FileUtils.copyFile(new File("/data/data/vn.evolus.droidreader/databases/droidnews.db"), 
-//					new File("/sdcard/droidnews.db"));
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}        
+        checkAndShowWhatsNew();
 	}	
 	
 	@Override
 	protected void onStart() {	
 		super.onStart();
 		
-		if (!Settings.isAuthenticated(this)) {			
+		if (!Settings.isAuthenticated()) {			
 			Intent intent = new Intent(this, AuthorizationActivity.class);
 			startActivity(intent);			
 			finish();
-		} else if (Settings.getFirstTime(this)) {
-			Settings.saveFirstTime(this);
+		} else if (Settings.getFirstTime()) {
+			Settings.saveFirstTime();
 			
 			onFirstItem();
 		}
@@ -208,7 +203,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 	}
 
 	private void startSynchronizationService() {
-		if (ConnectivityReceiver.hasGoodEnoughNetworkConnection(this)) {
+		if (ConnectivityReceiver.hasGoodEnoughNetworkConnection()) {
         	Intent service = new Intent(this, SynchronizationService.class);
         	startService(service);
         	
@@ -218,12 +213,12 @@ public class LatestItemsActivity extends LocalizedActivity {
 	}
 	
 	private void checkAndShowWhatsNew() {		
-		int versionCode = Settings.getVersion(this);
+		int versionCode = Settings.getVersion();
 		try {
 			ComponentName comp = new ComponentName(this, LatestItemsActivity.class);
 			PackageInfo pinfo = this.getPackageManager().getPackageInfo(comp.getPackageName(), 0);
 			if (pinfo.versionCode > versionCode) {
-				Settings.saveVersion(this, versionCode);
+				Settings.saveVersion(versionCode);
 				showWhatsNew();
 			}
 		} catch (android.content.pm.PackageManager.NameNotFoundException e) {			
@@ -246,7 +241,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 	}
 
 	private void logout() {
-		Settings.clearGoogleReaderAccessTokenAndSecret(this);
+		Settings.clearGoogleReaderAccessTokenAndSecret();
 	}
 	
 	private void showSettings() {
@@ -290,7 +285,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 					return ContentManager.loadItems(
 							new LatestItems(
 									tagId, 
-									!Settings.getShowRead(LatestItemsActivity.this), 
+									!Settings.getShowRead(), 
 									lastItem,
 									LatestItems.OLDER,
 									Constants.MAX_ITEMS), 
@@ -308,8 +303,13 @@ public class LatestItemsActivity extends LocalizedActivity {
 				new BetterAsyncTask<Void, Void, ActiveList<Item>>(this) {			
 			protected void after(Context context, ActiveList<Item> items) {
 				ItemAdapter adapter = (ItemAdapter)itemListView.getAdapter();
-		        adapter.setItemRequestListener(onItemRequestListener);
-				itemListView.setItems(items);				
+		        adapter.setItemRequestListener(onItemRequestListener);		        
+				itemListView.setItems(items);
+				if (items == null || items.size() == 0) {
+					viewSwitcher.setDisplayedChild(1);
+				} else {
+					viewSwitcher.setDisplayedChild(0);
+				}
 				
 				onItemsUpdated();
 			}			
@@ -322,7 +322,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 			public ActiveList<Item> call(BetterAsyncTask<Void, Void, ActiveList<Item>> task) 
 				throws Exception {
 				List<Item> items = ContentManager.loadItems(
-						new LatestItems(tagId, !Settings.getShowRead(LatestItemsActivity.this)), 
+						new LatestItems(tagId, !Settings.getShowRead()), 
 						ContentManager.LIGHTWEIGHT_ITEM_LOADER,
 						ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);				
 				ActiveList<Item> result = new ActiveList<Item>();
@@ -337,17 +337,19 @@ public class LatestItemsActivity extends LocalizedActivity {
 	private void refresh() {
 		this.setBusy();		
 		BetterAsyncTask<Void, Void, Void> task = new BetterAsyncTask<Void, Void, Void>(this) {			
-			protected void after(Context context, Void args) {				
-				onItemsUpdated();				
+			protected void after(Context context, Void args) {
+				if (!SynchronizationManager.getInstance().isSynchronizing()) {
+					onItemsUpdated();
+				}
 			}			
-			protected void handleError(Context context, Exception e) {				
+			protected void handleError(Context context, Exception e) {
 				setIdle();
 			}			
 		};
 		task.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
 			public Void call(BetterAsyncTask<Void, Void, Void> task) throws Exception {
-				startSynchronizationService();				
-				loadItems();
+				setBusy();
+				SynchronizationManager.getInstance().startSynchronizing();				
 				return null;
 			}    			
 		});
@@ -371,8 +373,8 @@ public class LatestItemsActivity extends LocalizedActivity {
 	
 	private void showItem(Item item) { 
 		Intent intent = new Intent(this, ItemActivity.class);		
-		intent.putExtra("ItemId", item.id);
-		intent.putExtra("TagId", this.tagId);
+		intent.putExtra(ItemActivity.ITEM_ID_PARAM, item.id);
+		intent.putExtra(ItemActivity.TAG_ID_PARAM, this.tagId);
 		startActivity(intent);		
 	}		
 
@@ -409,36 +411,34 @@ public class LatestItemsActivity extends LocalizedActivity {
 			}    		
     	});
 		
-    	TagAdapter tagAdapter = new TagAdapter(this, loadTags());
+    	TagAdapter tagAdapter = new TagAdapter(this, loadTags(this));
     	tagListView.setAdapter(tagAdapter);
     	dialog.setContentView(tagListView);
     	dialog.show();
     }
     
-    private ArrayList<TagItem> loadTags() {
+    public static ArrayList<TagItem> loadTags(Context context) {
 		List<Tag> tags = ContentManager.loadAllTags();
 		ArrayList<TagItem> tagItems = new ArrayList<TagItem>();
 		
 		// Starred items
 		TagItem item = new TagItem();
 		item.id = LatestItems.ALL_TAGS;
-		item.title = getString(R.string.latest);
+		item.title = context.getString(R.string.latest);
 		item.icon = "" + R.drawable.latest;
-		item.unreadCount = ContentManager.countUnreadItems();			
+		item.unreadCount = ContentManager.countUnreadItems();
 		tagItems.add(item);
 		
 		// Starred items
 		item = new TagItem();
-		item.title = getString(R.string.starred);
-		item.icon = "" + R.drawable.starred;
-		item.unreadCount = 100;			
+		item.title = context.getString(R.string.starred);
+		item.icon = "" + R.drawable.starred;		
 		tagItems.add(item);
 		
 		// Shared items
 		item = new TagItem();
-		item.title = getString(R.string.shared);
+		item.title = context.getString(R.string.shared);
 		item.icon = "" + R.drawable.shared;
-		item.unreadCount = 100;			
 		tagItems.add(item);
 		
 		for (Tag tag : tags) {

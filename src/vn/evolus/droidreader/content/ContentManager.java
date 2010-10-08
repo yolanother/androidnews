@@ -172,6 +172,33 @@ public class ContentManager {
 		return result;
 	}
 	
+	public static void cleanUp(int keepMaxItems) {
+		Cursor cursor = cr.query(Items.limitAndStartAt(1, keepMaxItems - 1),
+				new String[] { Items.ID, Items.PUB_DATE, Items.UPDATE_TIME },
+				null,
+				null,
+				Items.UPDATE_TIME + " DESC, " +
+				Items.PUB_DATE + " DESC, " +
+				Items.ID + " ASC");
+		if (cursor.moveToNext()) {
+			cursor.close();
+			long id = cursor.getLong(0);
+			long lastPubDate = cursor.getLong(1);
+			long updateTime = cursor.getLong(2);
+			String selection = Items.KEPT + "=0 AND ("				
+				+ Items.UPDATE_TIME + "<? OR (" + Items.UPDATE_TIME + "=? AND (" 
+				+ Items.PUB_DATE + "<? OR (" + Items.PUB_DATE + " =? AND " + Items.ID + ">?))))";
+			cr.delete(Items.CONTENT_URI,
+					selection,
+					new String[] {											
+						String.valueOf(updateTime),
+						String.valueOf(updateTime),
+						String.valueOf(lastPubDate),
+						String.valueOf(lastPubDate),
+						String.valueOf(id) });
+		}				
+	}
+	
 	public static void cleanChannel(Channel channel, int keepMaxItems) {
 		// delete old items
 		Cursor cursor = cr.query(Items.limitAndStartAt(1, keepMaxItems - 1),
@@ -185,8 +212,10 @@ public class ContentManager {
 			long id = cursor.getLong(0);
 			long lastPubDate = cursor.getLong(1);
 			long updateTime = cursor.getLong(2);
-			String selection = Items.CHANNEL_ID + "=? AND (" + Items.UPDATE_TIME + "<? OR (" + Items.UPDATE_TIME + "=? AND (" + 
-				Items.PUB_DATE + "<? OR (" + Items.PUB_DATE + " =? AND " + Items.ID + ">?))))";
+			String selection = Items.KEPT + "=0 AND " 
+				+ Items.CHANNEL_ID + "=? AND (" 
+				+ Items.UPDATE_TIME + "<? OR (" + Items.UPDATE_TIME + "=? AND (" 
+				+ Items.PUB_DATE + "<? OR (" + Items.PUB_DATE + " =? AND " + Items.ID + ">?))))";
 			cr.delete(Items.CONTENT_URI,
 					selection,
 					new String[] {
@@ -215,6 +244,7 @@ public class ContentManager {
 		if (item.id == 0) {
 			if (existItem(item)) return false;
 						
+			ContentManager.processItem(item);			
 			values.put(Items.TITLE, item.title);
 			values.put(Items.DESCRIPTION, item.description);
 			values.put(Items.PUB_DATE, item.pubDate.getTime());
@@ -240,18 +270,71 @@ public class ContentManager {
 		return true;
 	}
 	
-	private static void saveItemTags(Item item) {
-		// TODO: using bulkInsert to improve performance?
+	public static void saveItemTags(Item item) {
+		deleteAllTagsOfItem(item.id);
 		for (String tag : item.tags) {					
-			int tagId = getTagId(tag);
-			if (tagId > 0) {
-				ContentValues values = new ContentValues();
-				values.put(TagsOfItems.ITEM_TYPE, ITEM_TYPE_ITEM);
-				values.put(TagsOfItems.ITEM_ID, item.id);
-				values.put(TagsOfItems.TAG_ID, tagId);
-				cr.insert(TagsOfItems.CONTENT_URI, values);
-			}
+			saveItemTag(item, tag, false);
 		}		
+	}
+
+	private static void saveItemTag(Item item, String tag) {
+		saveItemTag(item, tag, true);
+	}
+	
+	private static void saveItemTag(Item item, String tag, boolean checkExist) {
+		int tagId = getTagId(tag);
+		if (tagId > 0) {
+			if (checkExist && existItemTag(item.id, tag)) return;
+			
+			ContentValues values = new ContentValues();
+			values.put(TagsOfItems.ITEM_TYPE, ITEM_TYPE_ITEM);
+			values.put(TagsOfItems.ITEM_ID, item.id);
+			values.put(TagsOfItems.TAG_ID, tagId);
+			cr.insert(TagsOfItems.CONTENT_URI, values);
+		}
+	}
+	
+	private static void deleteItemTag(int itemId, String tag) {
+		int tagId = getTagId(tag);
+		cr.delete(TagsOfItems.CONTENT_URI, 				
+				TagsOfItems.ITEM_TYPE + "=? AND " +
+				TagsOfItems.ITEM_ID + "=? AND " +
+				TagsOfItems.TAG_ID + "=?", 
+				new String[] {
+					String.valueOf(ITEM_TYPE_ITEM),
+					String.valueOf(itemId),
+					String.valueOf(tagId)
+				});
+	}
+	
+	private static void deleteAllTagsOfItem(int itemId) {		
+		cr.delete(TagsOfItems.CONTENT_URI, 				
+				TagsOfItems.ITEM_TYPE + "=? AND " +
+				TagsOfItems.ITEM_ID + "=?", 
+				new String[] {
+					String.valueOf(ITEM_TYPE_ITEM),
+					String.valueOf(itemId)					
+				});
+	}
+	
+	private static boolean existItemTag(int itemId, String tag) {
+		int tagId = getTagId(tag);
+		Cursor cursor = cr.query(TagsOfItems.CONTENT_URI, 
+				new String[] { TagsOfItems.ID }, 
+				TagsOfItems.ITEM_TYPE + "=? AND " +
+				TagsOfItems.ITEM_ID + "=? AND " +
+				TagsOfItems.TAG_ID + "=?", 
+				new String[] {
+					String.valueOf(ITEM_TYPE_ITEM),
+					String.valueOf(itemId),
+					String.valueOf(tagId)
+				}, null);
+		boolean result = false;
+		if (cursor.moveToNext()) {
+			result = true;
+		}
+		cursor.close();
+		return result;
 	}
 
 	public static Item loadItem(int id, ItemLoader loader, ChannelLoader channelLoader) {		
@@ -276,15 +359,25 @@ public class ContentManager {
 	}
 	
 	public static void markItemAsRead(Item item) {
-		if (item.read) return;
+		saveItemReadState(item, Item.READ);
+	}
+	
+	public static void saveItemReadState(Item item, int readState) {
+		if (item.isRead()) return;
 		
-		item.read = true;
+		item.read = Item.READ;
 		ContentValues values = new ContentValues();
-		values.put(Items.READ, 1);
-		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
+		values.put(Items.READ, readState);
+		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID,
 				new String[] { String.valueOf(item.id) });
-		
+				
 		addTagToItem(item, GoogleReader.ITEM_STATE_READ);
+	}		
+	
+	public static void markAllTemporarilyMarkedReadItemsAsRead() {
+		ContentValues values = new ContentValues();
+		values.put(Items.READ, Item.READ);
+		cr.update(Items.CONTENT_URI, values, Items.READ + "=" + Item.TEMPORARILY_MARKED_AS_READ, null);
 	}
 	
 	public static void markItemAsStarred(Item item) {
@@ -292,8 +385,10 @@ public class ContentManager {
 		
 		// saving state to DB
 		item.starred = true;
+		item.kept = true;		
 		ContentValues values = new ContentValues();
 		values.put(Items.STARRRED, 1);
+		values.put(Items.KEPT, 1);
 		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
 				new String[] { String.valueOf(item.id) });
 		
@@ -305,12 +400,62 @@ public class ContentManager {
 		
 		// saving state to DB
 		item.starred = false;
+		item.kept = false;
 		ContentValues values = new ContentValues();
 		values.put(Items.STARRRED, 0);
+		values.put(Items.KEPT, 0);
 		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
 				new String[] { String.valueOf(item.id) });
 		
 		removeTagFromItem(item, GoogleReader.ITEM_STATE_STARRED);		
+	}
+	
+	public static void markItemAsSharred(Item item) {
+		// saving state to DB
+		item.kept = true;		
+		ContentValues values = new ContentValues();		
+		values.put(Items.KEPT, 1);
+		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
+				new String[] { String.valueOf(item.id) });
+		
+		addTagToItem(item, GoogleReader.ITEM_STATE_STARRED);
+	}
+	
+	public static void unmarkItemAsSharred(Item item) {
+		// saving state to DB
+		item.kept = false;
+		ContentValues values = new ContentValues();		
+		values.put(Items.KEPT, 0);
+		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
+				new String[] { String.valueOf(item.id) });
+		
+		removeTagFromItem(item, GoogleReader.ITEM_STATE_SHARED);		
+	}
+	
+	public static void markItemAsKeptUnread(Item item) {
+		// saving state to DB
+		item.kept = true;
+		item.read = Item.KEPT_UNREAD;
+		ContentValues values = new ContentValues();		
+		values.put(Items.KEPT, item.kept);
+		values.put(Items.READ, item.read);
+		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
+				new String[] { String.valueOf(item.id) });
+		
+		addTagToItem(item, GoogleReader.ITEM_STATE_KEPT_UNREAD);		
+	}
+	
+	public static void unmarkItemAsKeptUnread(Item item) {
+		// saving state to DB
+		item.kept = false;
+		item.read = Item.READ;
+		ContentValues values = new ContentValues();
+		values.put(Items.KEPT, item.kept);
+		values.put(Items.READ, item.read);
+		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
+				new String[] { String.valueOf(item.id) });
+		
+		removeTagFromItem(item, GoogleReader.ITEM_STATE_KEPT_UNREAD);		
 	}
 	
 	public static void addTagToItem(Item item, String tag) {
@@ -318,6 +463,8 @@ public class ContentManager {
 		SyncItemTagJob removeJob = new SyncItemTagJob(SyncItemTagJob.ACTION_REMOVE, 
 				item.originalId, tag);
 		deleteJob(removeJob.type, removeJob.params);
+		
+		saveItemTag(item, tag);
 				
 		// create a new ADD tag job
 		SyncItemTagJob addJob = new SyncItemTagJob(SyncItemTagJob.ACTION_ADD, 
@@ -330,6 +477,8 @@ public class ContentManager {
 		SyncItemTagJob addJob = new SyncItemTagJob(SyncItemTagJob.ACTION_ADD, 
 				item.originalId, tag);
 		deleteJob(addJob.type, addJob.params);
+		
+		deleteItemTag(item.id, tag);
 				
 		// create a new REMOVE tag job
 		SyncItemTagJob removeJob = new SyncItemTagJob(SyncItemTagJob.ACTION_REMOVE, 
@@ -409,12 +558,12 @@ public class ContentManager {
 		Item item = new Item();
 		while (cursor.moveToNext()) {
 			item.id = cursor.getInt(0);
-			item.read = false;
+			item.read = Item.UNREAD;
 			item.originalId = cursor.getString(1);
 			markItemAsRead(item);
 		}
 		for (Item channelItem : channel.getItems()) {
-			channelItem.read = true;
+			channelItem.read = Item.READ;
 		}
 		cursor.close();
 	}
@@ -427,7 +576,9 @@ public class ContentManager {
 	public static Map<Integer, Integer> countUnreadItemsForEachChannel() {
 		Cursor cursor = cr.query(Items.countUnreadEachChannel(), 
 				new String[] { Items.CHANNEL_ID, Items.UNREAD_COUNT }, 
-				Items.READ + "=0", null, null);
+				Items.READ + "=? OR " + Items.READ + "=?", 
+				new String[] { String.valueOf(Item.UNREAD), String.valueOf(Item.KEPT_UNREAD)},
+				null);
 		Map<Integer, Integer> unreadCounts = new HashMap<Integer, Integer>();
 		while (cursor.moveToNext()) {					
 			unreadCounts.put(cursor.getInt(0), cursor.getInt(1));
@@ -439,7 +590,9 @@ public class ContentManager {
 	public static int countUnreadItems() {
 		Cursor cursor = cr.query(Items.countUnread(), 
 				new String[] { Items.UNREAD_COUNT }, 
-				Items.READ + "=0", null, null);		
+				Items.READ + "=? OR " + Items.READ + "=?", 
+				new String[] { String.valueOf(Item.UNREAD), String.valueOf(Item.KEPT_UNREAD)},
+				null);
 		int unreadCounts = 0;
 		if (cursor.moveToNext()) {					
 			unreadCounts = cursor.getInt(0);
@@ -656,7 +809,9 @@ public class ContentManager {
 		// count unread
 		Cursor cursor = cr.query(Items.countUnreadOfTag(), 
 				new String[] { Items.TAG_ID, Items.UNREAD_COUNT }, 
-				Items.READ + "=0", null, null);
+				Items.READ + "=? OR " + Items.READ + "=?", 
+				new String[] { String.valueOf(Item.UNREAD), String.valueOf(Item.KEPT_UNREAD)}, 
+				null);
 		Map<Integer, Integer> unreadCounts = new HashMap<Integer, Integer>();
 		while (cursor.moveToNext()) {					
 			unreadCounts.put(cursor.getInt(0), cursor.getInt(1));

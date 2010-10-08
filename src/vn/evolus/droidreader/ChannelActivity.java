@@ -114,7 +114,7 @@ public class ChannelActivity extends LocalizedActivity {
 	
 	private void refresh() {
 		this.setBusy();
-		final int maxItemsPerChannel = Settings.getMaxItemsPerChannel(this);
+		final int maxItemsPerChannel = Settings.getMaxItemsPerChannel();
 		BetterAsyncTask<Void, Void, Void> task = new BetterAsyncTask<Void, Void, Void>(this) {			
 			protected void after(Context context, Void args) {				
 				onChannelUpdated(channel);				
@@ -142,8 +142,8 @@ public class ChannelActivity extends LocalizedActivity {
 
 	private void showItem(Item item) { 
 		Intent intent = new Intent(this, ItemActivity.class);		
-		intent.putExtra("ItemId", item.id);
-		intent.putExtra("ChannelId", this.channel.id);		
+		intent.putExtra(ItemActivity.ITEM_ID_PARAM, item.id);
+		intent.putExtra(ItemActivity.CHANNEL_ID_PARAM, this.channel.id);		
 		startActivity(intent);		
 	}	
 }

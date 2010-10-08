@@ -67,7 +67,7 @@ public class LatestItems implements ItemCriteria {
 			if (sb.length() > 0) {
 				sb.append(" AND ");
 			}
-			sb.append(Items.READ + "=0");
+			sb.append(Items.READ + "!=" + Item.READ);
 		}
 		if (compareToItem != null) {
 			if (sb.length() > 0) {

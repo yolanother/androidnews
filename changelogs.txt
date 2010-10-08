@@ -1,8 +1,9 @@
 2010-09-24:
     * Apps2SD
     * Synchronize read/starred state
-    * Latest/Starred view    
-    * Improved UI    
+    * View items by tag
+    * Improved UI
+    * More storage options
 
 2010-09-19:
     * Fonts
