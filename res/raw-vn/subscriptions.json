@@ -70,6 +70,12 @@
         ]
     },
     { 
+        "title": "Tin công nghệ trong nước", 
+        "channels": [
+            { "title": "Tinh tế", "url": "http://feeds.feedburner.com/androidnews/tinhte" }
+        ]
+    },    
+    { 
         "title": "Tin công nghệ nước ngoài", 
         "channels": [
             { "title": "Engadget", "url": "http://feeds.feedburner.com/androidnews/engadget" },      
@@ -84,8 +90,7 @@
             { "title": "The Design Blog", "url": "http://feeds.feedburner.com/thedesignblog/ntLw" },
             { "title": "Smashing Magazine", "url": "http://feeds.feedburner.com/androidnews/smashingmagazine" }
         ]
-    },
-    { 
+    },{ 
         "title": "Tin về Android", 
         "channels": [
             { "title": "Android and Me", "url": "http://feeds.feedburner.com/androidandme" },        

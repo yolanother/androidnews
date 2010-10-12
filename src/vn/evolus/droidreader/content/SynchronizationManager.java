@@ -165,8 +165,15 @@ public class SynchronizationManager {
 			continution = feed.getContinution();
 			numberOfFetchedItems += feed.getEntries().size();
 			if (numberOfFetchedItems >= maxItems || 
-					feed.getEntries().size() < Constants.MAX_ITEMS_PER_FETCH) {
+					feed.getEntries().size() < Constants.MAX_ITEMS_PER_FETCH || continution == null) {
 				break;
+			}
+			
+			try {
+				Thread.yield();
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}	
 		return totalNewItems;

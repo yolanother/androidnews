@@ -63,9 +63,9 @@ public class LatestItemsActivity extends LocalizedActivity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		ImageLoader.initialize(this);
-		
 		super.onCreate(savedInstanceState);
+		
+		ImageLoader.initialize(this);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.latest_items_view);
 						
@@ -115,7 +115,14 @@ public class LatestItemsActivity extends LocalizedActivity {
         });        
         
         checkAndShowWhatsNew();
-	}	
+        
+//      try {
+//		FileUtils.copyFile(new File("/data/data/vn.evolus.droidreader/databases/droidnews.db"), 
+//					new File("/sdcard/droidnews.db"));
+//      } catch (IOException e) {
+//    	  e.printStackTrace();
+//      }
+	}
 	
 	@Override
 	protected void onStart() {	
@@ -128,14 +135,14 @@ public class LatestItemsActivity extends LocalizedActivity {
 		} else if (Settings.getFirstTime()) {
 			Settings.saveFirstTime();
 			
-			onFirstItem();
+			onFirstTime();
 		}
 		
 		cancelNotification();				
 		startSynchronizationService();				
 	}
 
-	private void onFirstItem() {
+	private void onFirstTime() {
 		ImageCache.clearCacheFolder();
 		
 		Intent intent = new Intent(this, SubscriptionActivity.class);

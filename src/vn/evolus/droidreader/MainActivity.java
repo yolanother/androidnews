@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import vn.evolus.droidreader.adapter.ChannelAdapter;
-import vn.evolus.droidreader.adapter.TagAdapter;
-import vn.evolus.droidreader.adapter.TagAdapter.TagItem;
 import vn.evolus.droidreader.content.ContentManager;
 import vn.evolus.droidreader.model.Channel;
 import vn.evolus.droidreader.util.ActiveList;
@@ -23,10 +21,8 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ViewSwitcher;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 
@@ -34,36 +30,22 @@ import com.github.droidfu.concurrent.BetterAsyncTask;
 import com.github.droidfu.concurrent.BetterAsyncTaskCallable;
 
 public class MainActivity extends LocalizedActivity {
-	private static final int GRID_MODE = 0;
-	//private static final int LIST_MODE = 1;
-	
 	private ArrayList<Channel> channels = null;
-	private ViewSwitcher viewSwitcher;
-	private GridView channelGridView;
-	private ListView channelListView;
-	private ChannelAdapter channelAdapter;
-	private TagAdapter tagAdapter = null;
+	private GridView channelGridView;	
+	private ChannelAdapter channelAdapter;	
 			
 	public MainActivity() {
 	}
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
-		ImageLoader.initialize(this);
-		
         super.onCreate(savedInstanceState);
+        
+        ImageLoader.initialize(this);        
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
         TextView title = (TextView)findViewById(R.id.toolbarTitle);
         title.setText(title.getText().toString().toUpperCase());
-        
-        ImageButton viewModeButton = (ImageButton)findViewById(R.id.viewMode);        
-        viewModeButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				v.setSelected(!v.isSelected());
-				toggleViewMode();
-			}
-        });
         
         ImageButton editButton = (ImageButton)findViewById(R.id.edit);        
         editButton.setOnClickListener(new OnClickListener() {
@@ -78,8 +60,7 @@ public class MainActivity extends LocalizedActivity {
 				startSettingsActivity();
 			}        	
         });
-        
-        viewSwitcher = (ViewSwitcher)findViewById(R.id.viewSwitcher);        
+                       
         channelGridView = (GridView)findViewById(R.id.channelGridView);               
         channelGridView.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
@@ -94,16 +75,6 @@ public class MainActivity extends LocalizedActivity {
 				showChannelOptions(channel);
 				return true;
 			}        	
-        });
-
-        channelListView = (ListView)findViewById(R.id.channelListView);               
-        channelListView.setOnItemClickListener(new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-				TagItem tagItem = (TagItem)adapterView.getItemAtPosition(position);
-				Intent intent = new Intent(MainActivity.this, LatestItemsActivity.class);
-				intent.putExtra("TagId", tagItem.id);
-	        	startActivity(intent);
-			}
         });
     }	
 	
@@ -130,29 +101,11 @@ public class MainActivity extends LocalizedActivity {
 	}
         
 	private void loadData() {
-		if (getViewMode() == GRID_MODE) {
-			if (channelAdapter == null) {
-		    	loadChannels();    	
-		    	channelAdapter = new ChannelAdapter(this, channels);
-		    	channelGridView.setAdapter(channelAdapter);
-			}
-		} else {
-			if (tagAdapter == null) {
-				tagAdapter = new TagAdapter(this, LatestItemsActivity.loadTags(this));
-				channelListView.setAdapter(tagAdapter);
-			}
-		}
+    	loadChannels();    	
+    	channelAdapter = new ChannelAdapter(this, channels);
+    	channelGridView.setAdapter(channelAdapter);
     }
-	
-	private int getViewMode() {		
-		return viewSwitcher.getDisplayedChild();
-	}
-
-	private void toggleViewMode() {		
-		viewSwitcher.setDisplayedChild((viewSwitcher.getDisplayedChild() + 1) % 2);
-		loadData();
-	}
-	
+		
 	private void loadChannels() {
 		channels = ContentManager.loadAllChannels(ContentManager.WITH_IMAGE_CHANNEL_LOADER);
 		if (channels == null || channels.isEmpty()) {

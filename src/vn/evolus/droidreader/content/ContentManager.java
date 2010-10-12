@@ -180,11 +180,12 @@ public class ContentManager {
 				Items.UPDATE_TIME + " DESC, " +
 				Items.PUB_DATE + " DESC, " +
 				Items.ID + " ASC");
-		if (cursor.moveToNext()) {
-			cursor.close();
+		if (cursor.moveToNext()) {			
 			long id = cursor.getLong(0);
 			long lastPubDate = cursor.getLong(1);
 			long updateTime = cursor.getLong(2);
+			cursor.close();
+			
 			String selection = Items.KEPT + "=0 AND ("				
 				+ Items.UPDATE_TIME + "<? OR (" + Items.UPDATE_TIME + "=? AND (" 
 				+ Items.PUB_DATE + "<? OR (" + Items.PUB_DATE + " =? AND " + Items.ID + ">?))))";
@@ -813,7 +814,7 @@ public class ContentManager {
 				new String[] { String.valueOf(Item.UNREAD), String.valueOf(Item.KEPT_UNREAD)}, 
 				null);
 		Map<Integer, Integer> unreadCounts = new HashMap<Integer, Integer>();
-		while (cursor.moveToNext()) {					
+		while (cursor.moveToNext()) {
 			unreadCounts.put(cursor.getInt(0), cursor.getInt(1));
 		}
 		cursor.close();	

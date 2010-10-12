@@ -21,8 +21,8 @@ public class Settings {
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putBoolean(context.getString(R.string.first_time_key), false);
 		
-		editor.putString(context.getString(R.string.update_interval_key), "5");
-		editor.putString(context.getString(R.string.max_items_per_channel_key), "20");
+		editor.putString(context.getString(R.string.update_interval_key), "15");
+		editor.putString(context.getString(R.string.max_items_per_channel_key), "50");
 		editor.putBoolean(context.getString(R.string.auto_update_key), true);
 		editor.putBoolean(context.getString(R.string.show_updated_channels_key), false);
 		editor.putString(context.getString(R.string.language_key), "en");

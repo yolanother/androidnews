@@ -15,7 +15,6 @@ import vn.evolus.droidreader.widget.ScrollView.OnScreenSelectedListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
@@ -41,8 +40,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 	private String article;
 		
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		Log.d("DEBUG", "onCreate(): " +  this.hashCode());
+	protected void onCreate(Bundle savedInstanceState) {		
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.item_view);		
@@ -175,7 +173,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
     	}
     	star.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				changeCurrentItemAsStarredState(true);
+				toggleStarred();
 				quickAction.dismiss();
 			}			
 		});						
@@ -261,12 +259,12 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		}
 	}
 	
-	protected void changeCurrentItemAsStarredState(boolean starred) {
+	protected void toggleStarred() {
 		if (currentItem != null) {
-			if (starred) {
-				ContentManager.markItemAsStarred(currentItem);
-			} else {
+			if (currentItem.starred) {
 				ContentManager.unmarkItemAsStarred(currentItem);
+			} else {
+				ContentManager.markItemAsStarred(currentItem);				
 			}
 		}
 	}	
@@ -276,7 +274,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 			ContentManager.unmarkItemAsKeptUnread(currentItem);
 		} else {
 			ContentManager.markItemAsKeptUnread(currentItem);
-		}		
+		}
 	}
 
 	private void markItemAsRead(Item item) {
