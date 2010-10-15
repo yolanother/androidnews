@@ -45,9 +45,16 @@
     <string name="on">On</string>
     <string name="off">Off</string>
     
+    <string name="download_images_option_title">Download images?</string>
+    <string name="download_images_on">Download articles images for offline reading (slow!)</string>
+    <string name="download_images_off">Do not download article images</string>
+    
     <string name="max_items_per_channel_key">max_items_per_channel</string>
     <string name="max_items_per_channel_dialog_title">Max items per feed?</string>
     <string name="max_items_per_channel_dialog_message">How many items should we keep per feed?</string>
+        
+    <string name="keep_max_items_dialog_title">Keep maximum articles?</string>
+    <string name="keep_max_items_dialog_message">How much articles should we keep?</string>
     
     <string name="latest">Latest articles</string>
     <string name="starred">Starred articles</string>
@@ -94,4 +101,9 @@
     
     <string name="select_tag_dialog_title">View articles by tag</string>
     <string name="no_unread_article">No unread article.</string>
+    
+    <string name="item_starred">This article has been starred.</string>
+    <string name="item_unstarred">This article has been unstarred.</string>
+    <string name="item_kept_unread">This article has been kept unread.</string>
+    <string name="item_marked_as_read">This article has been marked as read.</string>
 </resources>

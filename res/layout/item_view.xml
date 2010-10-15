@@ -42,7 +42,8 @@
             android:layout_margin="2.0sp"
             android:nextFocusLeft="@+id/refresh"
             android:nextFocusRight="@+id/channels"
-            android:nextFocusDown="@+id/itemListView" />                
+            android:nextFocusDown="@+id/itemListView" />
+        -->                            
         <ImageButton
             android:focusable="false" 
             android:background="@color/toolbarSeparator" 
@@ -57,18 +58,7 @@
             android:layout_gravity="center"  
             android:layout_margin="1.0sp"            
             android:nextFocusRight="@id/refresh"
-            android:nextFocusDown="@+id/viewOriginal" />
-         -->
-        <ImageButton 
-            android:id="@+id/tools"
-            android:src="@drawable/ic_toolbar_down_arrow"            
-            android:background="@drawable/toolbar_button_selector"  
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"  
-            android:layout_margin="1.0sp"            
-            android:nextFocusRight="@id/refresh"
-            android:nextFocusDown="@+id/viewOriginal" />                     
+            android:nextFocusDown="@+id/viewOriginal" />        
         <ImageButton
             android:focusable="false" 
             android:background="@color/toolbarSeparator" 
@@ -98,7 +88,22 @@
             android:layout_gravity="center"  
             android:layout_margin="1.0sp"            
             android:nextFocusRight="@id/refresh"
-            android:nextFocusDown="@+id/channelListView" />                    
+            android:nextFocusDown="@+id/channelListView" />                        
+        <ImageButton
+            android:focusable="false" 
+            android:background="@color/toolbarSeparator" 
+            android:layout_width="1.0px" 
+            android:layout_height="fill_parent" />            
+        <ImageButton 
+            android:id="@+id/tools"
+            android:src="@drawable/ic_toolbar_down_arrow"            
+            android:background="@drawable/toolbar_button_selector"  
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"  
+            android:layout_margin="1.0sp"            
+            android:nextFocusRight="@id/refresh"
+            android:nextFocusDown="@+id/viewOriginal" />        
     </LinearLayout>    
     <vn.evolus.droidreader.widget.ScrollView
         android:id="@+id/scrollView"

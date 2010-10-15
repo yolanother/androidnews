@@ -1,5 +1,6 @@
 package vn.evolus.droidreader.content;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -31,15 +32,16 @@ public class SynchronizationManager {
 	private boolean synchronizing = false;
 	private Map<String, Channel> channelMap;
 	private Map<String, JobExecutor> jobExecutors;
+	private List<SynchronizationListener> synchronizationListeners;
 	
 	static {
 		instance = new SynchronizationManager();
 	}
 	
-	public SynchronizationManager() {
-		Log.d(TAG, "SynchronizationManager() is called.");
+	public SynchronizationManager() {		
 		jobExecutors = new HashMap<String, JobExecutor>();
 		registerJobExecutor(new SyncItemTagJobExecutor(GoogleReaderFactory.getGoogleReader()));
+		synchronizationListeners = new ArrayList<SynchronizationListener>();
 	}
 	
 	public static SynchronizationManager getInstance() {
@@ -55,11 +57,13 @@ public class SynchronizationManager {
 	public int startSynchronizing() {
 		synchronized (synRoot) {
 			if (synchronizing) {
-				Log.d(TAG, "Synchronizing... return now.");
+				Log.i(TAG, "Synchronizing... return now.");
 				return 0;
 			}
 			synchronizing = true;
 		}
+		
+		onSynchronizationStart();		
 		int totalNewItems = 0;
 		if (ConnectivityReceiver.hasGoodEnoughNetworkConnection()) {
 			Log.i(TAG, "Start synchronization at " + new Date());
@@ -82,14 +86,41 @@ public class SynchronizationManager {
 		
 		synchronized (synRoot) {
 			synchronizing = false;
-		}
+		}		
+		onSynchronizationFinish(totalNewItems);
 		
 		return totalNewItems;
 	}
 	
 	public void stopSynchronizing() {
 		synchronized (synRoot) {
-			synchronizing = false;			
+			synchronizing = false;
+		}
+	}
+	
+	public synchronized void registerSynchronizationListener(SynchronizationListener listener) {
+		if (!synchronizationListeners.contains(listener)) {
+			synchronizationListeners.add(listener);
+		}
+	}
+	
+	public synchronized void unregisterSynchronizationListener(SynchronizationListener listener) {
+		if (synchronizationListeners.contains(listener)) {
+			synchronizationListeners.remove(listener);
+		}
+	}
+	
+	protected void onSynchronizationStart() {
+		for (SynchronizationListener listener : synchronizationListeners) {
+			listener.onStart();
+		}
+	}
+	
+	protected void onSynchronizationFinish(int totalNewItems) {
+		if (totalNewItems == 0) return;
+		
+		for (SynchronizationListener listener : synchronizationListeners) {
+			listener.onFinish(totalNewItems);
 		}
 	}
 
@@ -119,7 +150,7 @@ public class SynchronizationManager {
 		// clean up memory
 		channels.clear();
 		channels = null;
-				
+		
 		return totalNewItems;
 	}
 	

@@ -2,12 +2,14 @@ TODO:
 * Keep scrolling position
 * Widgets
 * More languages
-* Offline article images?
 * Update subscriptions/blacklist from server
 * User define "Share" templates
-* Mobilize with Google GWT http://www.google.com/gwt/x?u=
+* Mobilize with
+    * Readability 
+    * Google GWT http://www.google.com/gwt/x?u=    
 
 DONE:
+* Offline article images?
 * Keep unread
 * View items by tag
 * Delete item tags (cascade delete?)

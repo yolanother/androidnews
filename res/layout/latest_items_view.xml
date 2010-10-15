@@ -22,22 +22,7 @@
             android:layout_width="fill_parent" 
             android:layout_height="wrap_content"            
             android:shadowColor="#ff333333" 
-            android:layout_weight="1.0" />
-        <ImageButton
-            android:focusable="false"
-            android:background="@color/toolbarSeparator" 
-            android:layout_width="1.0px" 
-            android:layout_height="fill_parent" />            
-        <ImageButton
-            android:id="@+id/tags"
-            android:src="@drawable/ic_toolbar_tag"
-            android:background="@drawable/toolbar_button_selector" 
-            android:layout_width="wrap_content" 
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"  
-            android:layout_margin="2.0sp"            
-            android:nextFocusRight="@+id/refresh"
-            android:nextFocusDown="@+id/itemListView" />        
+            android:layout_weight="1.0" />                
         <ImageButton
             android:focusable="false"
             android:background="@color/toolbarSeparator" 
@@ -68,6 +53,21 @@
         <ImageButton
             android:focusable="false"
             android:background="@color/toolbarSeparator" 
+            android:layout_width="1.0px" 
+            android:layout_height="fill_parent" />            
+        <ImageButton
+            android:id="@+id/tags"
+            android:src="@drawable/ic_toolbar_tag"
+            android:background="@drawable/toolbar_button_selector" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"  
+            android:layout_margin="2.0sp"            
+            android:nextFocusRight="@+id/refresh"
+            android:nextFocusDown="@+id/itemListView" />
+        <ImageButton
+            android:focusable="false"
+            android:background="@color/toolbarSeparator" 
             android:layout_width="1.0px"
             android:layout_height="fill_parent" />
         <ImageButton
@@ -80,24 +80,41 @@
             android:layout_margin="2.0sp"
             android:nextFocusLeft="@+id/refresh"
             android:nextFocusRight="@+id/channels"
-            android:nextFocusDown="@+id/itemListView" />            
-        <ImageButton 
+            android:nextFocusDown="@+id/itemListView" />
+        <ImageButton
+            android:focusable="false"
             android:background="@color/toolbarSeparator" 
             android:layout_width="1.0px" 
-            android:layout_height="fill_parent" />
-        <ImageButton 
-            android:id="@+id/channels"
-            android:src="@drawable/ic_toolbar_feeds"            
-            android:background="@drawable/toolbar_button_selector"  
+            android:layout_height="fill_parent" />            
+        <ImageButton
+            android:id="@+id/feeds"
+            android:src="@drawable/ic_toolbar_feeds"
+            android:background="@drawable/toolbar_button_selector" 
             android:layout_width="wrap_content" 
             android:layout_height="wrap_content"
             android:layout_gravity="center"  
-            android:layout_margin="1.0sp"            
-            android:nextFocusRight="@id/refresh"
-            android:nextFocusDown="@+id/itemListView" />                
+            android:layout_margin="2.0sp"            
+            android:nextFocusRight="@+id/refresh"
+            android:nextFocusDown="@+id/itemListView" />               
     </LinearLayout>
+    <!--
+    <TextView
+            android:id="@+id/title"
+            android:text="@string/latest"
+            android:textSize="10.0sp" 
+            android:textStyle="bold"
+            android:textColor="@color/channelName"
+            android:maxLines="1"
+            android:gravity="left"
+            android:layout_gravity="center"
+            android:padding="5.0sp" 
+            android:layout_width="fill_parent" 
+            android:layout_height="wrap_content"            
+            android:shadowColor="#ff333333"
+            android:background="@android:drawable/title_bar" />
+    -->            
     <ViewSwitcher 
-            android:layout_gravity="center" 
+            android:layout_gravity="center"
             android:id="@+id/viewSwitcher" 
             android:layout_width="fill_parent" 
             android:layout_height="fill_parent" 

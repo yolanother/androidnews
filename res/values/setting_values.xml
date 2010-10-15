@@ -21,35 +21,31 @@
         <item>240</item>
         <item>300</item>
         <item>1440</item>
-    </string-array>
-    <string-array name="max_items_per_channel_titles">        
-        <item>10</item>
-        <item>15</item>
-        <item>20</item>
-        <item>25</item>
-        <item>30</item>
-        <item>50</item>
-        <item>100</item>
-        <item>200</item>
+    </string-array>    
+    <string-array name="keep_max_items_titles">        
         <item>500</item>
+        <item>1000</item>
+        <item>1500</item>
+        <item>2000</item>
+        <item>2500</item>
+        <item>3000</item>
     </string-array>
-    <string-array name="max_items_per_channel_values">        
-         <item>10</item>
-        <item>15</item>
-        <item>20</item>
-        <item>25</item>
-        <item>30</item>
-        <item>50</item>
-        <item>100</item>
-        <item>200</item>
+    <string-array name="keep_max_items_values">        
         <item>500</item>
+        <item>1000</item>
+        <item>1500</item>
+        <item>2000</item>
+        <item>2500</item>
+        <item>3000</item>
     </string-array>
     <string-array name="language_titles">        
         <item>English</item>
-        <item>Tiếng Việt</item>        
+        <!-- <item>Français</item>  -->
+        <item>Tiếng Việt</item>                
     </string-array>
     <string-array name="language_values">        
         <item>en</item>
+        <!-- <item>fr</item> -->
         <item>vn</item>
     </string-array>
     <string-array name="font_titles">        

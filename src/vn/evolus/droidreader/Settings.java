@@ -5,14 +5,18 @@ import android.content.SharedPreferences;
 
 public class Settings {
 	public static final String PREFS_NAME = "vn.evolus.droidreader_preferences";
+	public static final String AUTO_UPDATE_KEY = "auto_update";
+	public static final String DOWNLOAD_IMAGES_KEY = "download_images";
+	public static final String UPDATE_INTERVAL_KEY = "update_interval";
+	public static final String KEEP_MAX_ITEMS_KEY = "keep_max_items";
 	private static Context context;
 	
 	static {
-		context = Application.getInstance();
+		context = Application.getInstance();		
 	}
 		
 	public static boolean getFirstTime() {
-		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);		
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
 		return prefs.getBoolean(context.getString(R.string.first_time_key), true);
 	}
 	
@@ -22,7 +26,7 @@ public class Settings {
 		editor.putBoolean(context.getString(R.string.first_time_key), false);
 		
 		editor.putString(context.getString(R.string.update_interval_key), "15");
-		editor.putString(context.getString(R.string.max_items_per_channel_key), "50");
+		editor.putString(context.getString(R.string.max_items_per_channel_key), "100");
 		editor.putBoolean(context.getString(R.string.auto_update_key), true);
 		editor.putBoolean(context.getString(R.string.show_updated_channels_key), false);
 		editor.putString(context.getString(R.string.language_key), "en");
@@ -33,7 +37,8 @@ public class Settings {
 		editor.putBoolean("notification_vibrate", false);
 		editor.putBoolean("notification_light", true);
 		
-		editor.putInt("keep_max_items", 1000);
+		editor.putString(KEEP_MAX_ITEMS_KEY, "2000");
+		editor.putBoolean(DOWNLOAD_IMAGES_KEY, false);
 		
 		editor.commit();
 	}
@@ -166,9 +171,16 @@ public class Settings {
 		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
 		return prefs.getBoolean("notification_light", false);
 	}
-
 	public static int getKeepMaxItems() {
 		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
-		return prefs.getInt("keep_max_items", 1000);
+		return Integer.parseInt(prefs.getString(KEEP_MAX_ITEMS_KEY, "2000"));
 	}
+	public static boolean getDownloadImages() {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+		return prefs.getBoolean(DOWNLOAD_IMAGES_KEY, false);
+	}
+
+	public static int getKeepMaxImages() {
+		return 2000;
+	}		
 }

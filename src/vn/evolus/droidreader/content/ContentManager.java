@@ -197,7 +197,8 @@ public class ContentManager {
 						String.valueOf(lastPubDate),
 						String.valueOf(lastPubDate),
 						String.valueOf(id) });
-		}				
+		}
+		cursor.close();
 	}
 	
 	public static void cleanChannel(Channel channel, int keepMaxItems) {
@@ -245,7 +246,7 @@ public class ContentManager {
 		if (item.id == 0) {
 			if (existItem(item)) return false;
 						
-			ContentManager.processItem(item);			
+			ContentManager.processItem(item);
 			values.put(Items.TITLE, item.title);
 			values.put(Items.DESCRIPTION, item.description);
 			values.put(Items.PUB_DATE, item.pubDate.getTime());
@@ -617,6 +618,10 @@ public class ContentManager {
 	}
 	
 	public static ArrayList<Image> loadAllQueuedImages() {
+		return loadImages(Image.IMAGE_STATUS_QUEUED);
+	}
+	
+	public static ArrayList<Image> loadImages(int status) {
 		Cursor cursor = cr.query(Images.CONTENT_URI, 
 				new String[] {
 					Images.ID,
@@ -625,8 +630,9 @@ public class ContentManager {
 					Images.RETRIES
 				},
 				Images.STATUS + "=?",
-				new String[] { String.valueOf(Image.IMAGE_STATUS_QUEUED) },
-				Images.RETRIES + " DESC, " + Images.ID);
+				new String[] { String.valueOf(status) },
+				Images.UPDATE_TIME + " DESC, " +
+				Images.RETRIES + " ASC, " + Images.ID);
 		ArrayList<Image> images = new ArrayList<Image>();
 		while (cursor.moveToNext()) {			
 			Image image = new Image(cursor.getInt(0), cursor.getString(1), (byte)cursor.getInt(2));
@@ -637,7 +643,7 @@ public class ContentManager {
 		return images;
 	}
 	
-	public static List<Long> loadOldestImageIds(int keepMaxItems) {
+	public static List<Integer> loadOldestImageIds(int keepMaxItems) {
 		Cursor cursor = cr.query(Images.CONTENT_URI, 
 				new String[] {
 					Images.COUNT
@@ -650,9 +656,9 @@ public class ContentManager {
 			totalImages = cursor.getInt(0);
 		}
 		cursor.close();
-		ArrayList<Long> images = new ArrayList<Long>();
+		ArrayList<Integer> images = new ArrayList<Integer>();
 		if (totalImages - keepMaxItems > 0) {
-			cursor = cr.query(Images.limit(totalImages - keepMaxItems), 
+			cursor = cr.query(Images.limit(totalImages - keepMaxItems),
 					new String[] {
 						Images.ID
 					},
@@ -660,8 +666,8 @@ public class ContentManager {
 					null,
 					Images.ID + " ASC");
 			
-			while (cursor.moveToNext()) {			
-				images.add(cursor.getLong(0));
+			while (cursor.moveToNext()) {
+				images.add(cursor.getInt(0));
 			}
 			cursor.close();
 		}
@@ -724,6 +730,7 @@ public class ContentManager {
 			
 			values.put(Images.URL, image.url);
 			values.put(Images.STATUS, image.status);
+			values.put(Images.UPDATE_TIME, image.updateTime);
 			values.put(Images.RETRIES, image.retries);
 			Uri contentUri = cr.insert(Images.CONTENT_URI, values);
 			image.id = (int)ContentUris.parseId(contentUri);
@@ -735,16 +742,16 @@ public class ContentManager {
 		}
 	}
 	
-	public static void deleteImage(Image image) {		
-		cr.delete(Images.CONTENT_URI, ContentsProvider.WHERE_ID, new String[] { String.valueOf(image.id) });
-		image.id = 0;
+	public static void deleteImage(int imageId) {
+		cr.delete(Images.CONTENT_URI, ContentsProvider.WHERE_ID, new String[] { String.valueOf(imageId) });		
 	}
 	
-	public static long queueImage(String imageUrl) {
+	public static long queueImage(String imageUrl, long updateTime) {
 		Image image = loadImage(imageUrl);
 		if (image != null) return image.id;		
 		
-		image = new Image(imageUrl, Image.IMAGE_STATUS_PENDING);
+		image = new Image(imageUrl, Image.IMAGE_STATUS_QUEUED);
+		image.updateTime = updateTime;
 		saveImage(image);		
 		return image.id;
 	}

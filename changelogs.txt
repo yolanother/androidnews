@@ -1,4 +1,5 @@
 2010-09-24:
+    * Offline images
     * Apps2SD
     * Synchronize read/starred state
     * View items by tag

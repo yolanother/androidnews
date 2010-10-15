@@ -20,8 +20,9 @@ import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class ItemActivity extends LocalizedActivity implements OnScreenSelectedListener {
+public class ItemActivity extends LocalizedActivity implements OnScreenSelectedListener {	
 	public static final String ITEM_ID_PARAM = "ItemId";
 	public static final String TAG_ID_PARAM = "TagId";
 	public static final String CHANNEL_ID_PARAM = "ChannelId";
@@ -49,13 +50,13 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		
 		title = (TextView)findViewById(R.id.title);
 		
-		ImageButton toolsButton = (ImageButton)findViewById(R.id.tools);
-		toolsButton.setOnClickListener(new OnClickListener() {
+		ImageButton shareButton = (ImageButton)findViewById(R.id.share);
+		shareButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				showItemTools(v);
-			}			
+				share();
+			}
 		});
-				
+		
 		ImageButton viewOriginalButton = (ImageButton)findViewById(R.id.viewOriginal);
 		viewOriginalButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -63,6 +64,13 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 			}
 		});
 		
+		ImageButton toolsButton = (ImageButton)findViewById(R.id.tools);
+		toolsButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				showItemTools(v);
+			}
+		});
+				
 		ImageButton nightModeButton = (ImageButton)findViewById(R.id.nightMode);
 		nightModeButton.setSelected(Settings.getNightReadingMode());
 		nightModeButton.setOnClickListener(new OnClickListener() {
@@ -178,21 +186,6 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 			}			
 		});						
 		
-		ActionItem share = new ActionItem();
-		if (currentItem.shared) {
-			share.setTitle(getResources().getString(R.string.unshare));
-			share.setIcon(getResources().getDrawable(R.drawable.shared));
-		} else {
-			share.setTitle(getResources().getString(R.string.share));
-			share.setIcon(getResources().getDrawable(R.drawable.ic_share));
-		}
-		share.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				share();
-				quickAction.dismiss();
-			}			
-		});
-		
 		ActionItem keepUnread = new ActionItem();
 		if (currentItem.isKeptUnread()) {
 			keepUnread.setTitle(getResources().getString(R.string.mark_as_read));
@@ -205,12 +198,11 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 			public void onClick(View v) {
 				toggleKeptUnread();
 				quickAction.dismiss();
-			}			
+			}
 		});
-						
-		quickAction.addActionItem(star);
-		quickAction.addActionItem(share);
-		quickAction.addActionItem(keepUnread);		
+		
+		quickAction.addActionItem(star);		
+		quickAction.addActionItem(keepUnread);
 				
 		quickAction.setAnimStyle(QuickAction.ANIM_AUTO);		
 		quickAction.show();
@@ -263,8 +255,10 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		if (currentItem != null) {
 			if (currentItem.starred) {
 				ContentManager.unmarkItemAsStarred(currentItem);
+				Toast.makeText(this, R.string.item_unstarred, Toast.LENGTH_SHORT).show();
 			} else {
-				ContentManager.markItemAsStarred(currentItem);				
+				ContentManager.markItemAsStarred(currentItem);
+				Toast.makeText(this, R.string.item_starred, Toast.LENGTH_SHORT).show();
 			}
 		}
 	}	
@@ -272,8 +266,10 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 	protected void toggleKeptUnread() {
 		if (currentItem.isKeptUnread()) {
 			ContentManager.unmarkItemAsKeptUnread(currentItem);
+			Toast.makeText(this, R.string.item_marked_as_read, Toast.LENGTH_SHORT).show();
 		} else {
 			ContentManager.markItemAsKeptUnread(currentItem);
+			Toast.makeText(this, R.string.item_kept_unread, Toast.LENGTH_SHORT).show();
 		}
 	}
 

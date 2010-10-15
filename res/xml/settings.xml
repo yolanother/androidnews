@@ -6,21 +6,26 @@
 	        android:key="@string/auto_update_key"
 	        android:title="@string/auto_update_option_title" 
 	        android:summaryOff="@string/auto_update_off" 
-	        android:summaryOn="@string/auto_update_on" />    
+	        android:summaryOn="@string/auto_update_on" />
 	    <ListPreference
 	        android:key="@string/update_interval_key"
 	        android:title="@string/update_interval_dialog_title"
 	        android:summary="@string/update_interval_dialog_message"        
 	        android:entryValues="@array/update_interval_values"
 	        android:entries="@array/update_interval_titles"
-	        android:dialogTitle="@string/update_interval_dialog_title" />            
-	    <ListPreference
-	        android:key="@string/max_items_per_channel_key"
-	        android:title="@string/max_items_per_channel_dialog_title" 
-	        android:summary="@string/max_items_per_channel_dialog_message"
-	        android:dialogTitle="@string/max_items_per_channel_dialog_title"         
-	        android:entryValues="@array/max_items_per_channel_values" 
-	        android:entries="@array/max_items_per_channel_titles" />
+	        android:dialogTitle="@string/update_interval_dialog_title" />
+        <CheckBoxPreference
+            android:key="download_images"
+            android:title="@string/download_images_option_title" 
+            android:summaryOff="@string/download_images_off" 
+            android:summaryOn="@string/download_images_on" />	        
+        <ListPreference
+            android:key="keep_max_items"
+            android:title="@string/keep_max_items_dialog_title" 
+            android:summary="@string/keep_max_items_dialog_message"
+            android:dialogTitle="@string/keep_max_items_dialog_title"         
+            android:entryValues="@array/keep_max_items_values" 
+            android:entries="@array/keep_max_items_titles" />
     </PreferenceCategory>
     <PreferenceCategory        
         android:title="@string/display_options">        

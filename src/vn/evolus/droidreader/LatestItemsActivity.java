@@ -8,6 +8,7 @@ import vn.evolus.droidreader.adapter.TagAdapter;
 import vn.evolus.droidreader.adapter.ItemAdapter.OnItemRequestListener;
 import vn.evolus.droidreader.adapter.TagAdapter.TagItem;
 import vn.evolus.droidreader.content.ContentManager;
+import vn.evolus.droidreader.content.SynchronizationListener;
 import vn.evolus.droidreader.content.SynchronizationManager;
 import vn.evolus.droidreader.content.criteria.LatestItems;
 import vn.evolus.droidreader.model.Item;
@@ -36,7 +37,6 @@ import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
@@ -57,7 +57,6 @@ public class LatestItemsActivity extends LocalizedActivity {
 	private TextView title;
 	private ItemListView itemListView;
 	private ViewSwitcher refreshOrProgress;
-	private ImageView tagsButton;
 	
 	private int tagId = LatestItems.ALL_TAGS;	
 	
@@ -70,21 +69,21 @@ public class LatestItemsActivity extends LocalizedActivity {
 		setContentView(R.layout.latest_items_view);
 						
 		title = (TextView)findViewById(R.id.title);
-        title.setText(title.getText().toString().toUpperCase());
-        
+		title.setText(title.getText().toString().toUpperCase());
+		        
         viewSwitcher = (ViewSwitcher)findViewById(R.id.viewSwitcher);
         
-        tagsButton = (ImageButton)findViewById(R.id.tags);        
+        ImageButton tagsButton = (ImageButton)findViewById(R.id.tags);        
         tagsButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				showTagsDialog();
 			}
         });
-                
-        ImageButton viewChannelsButton = (ImageButton)findViewById(R.id.channels);        
-        viewChannelsButton.setOnClickListener(new OnClickListener() {
+        
+        ImageButton feedsButton = (ImageButton)findViewById(R.id.feeds);        
+        feedsButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				viewChannels();
+				showChannels();
 			}
         });                
 		
@@ -103,25 +102,20 @@ public class LatestItemsActivity extends LocalizedActivity {
 				v.setSelected(!v.isSelected());
 				Settings.saveShowRead(v.isSelected());
 				loadItems();
-			}			
+			}
 		});		
 				
-        itemListView = (ItemListView)findViewById(R.id.itemListView);
+        itemListView = (ItemListView)findViewById(R.id.itemListView);        
         itemListView.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
 				Item item = (Item)adapterView.getItemAtPosition(position);				
 				showItem(item);
 			}
-        });        
+        });
+        
+        startSynchronizationService();
         
         checkAndShowWhatsNew();
-        
-//      try {
-//		FileUtils.copyFile(new File("/data/data/vn.evolus.droidreader/databases/droidnews.db"), 
-//					new File("/sdcard/droidnews.db"));
-//      } catch (IOException e) {
-//    	  e.printStackTrace();
-//      }
 	}
 	
 	@Override
@@ -138,8 +132,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 			onFirstTime();
 		}
 		
-		cancelNotification();				
-		startSynchronizationService();				
+		cancelNotification();
 	}
 
 	private void onFirstTime() {
@@ -150,7 +143,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 	}
 	
 	@Override
-	protected void onNewIntent(Intent intent) {	
+	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);		
 		tagId = intent.getIntExtra("TagId", LatestItems.ALL_TAGS);	
 	}
@@ -168,13 +161,13 @@ public class LatestItemsActivity extends LocalizedActivity {
 		}
 		loadItems();
 		
-		Application.getInstance().registerOnNewItemsListener(onNewItemsListener);
+		SynchronizationManager.getInstance().registerSynchronizationListener(synchronizationListener);
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
-		Application.getInstance().unregisterOnNewItemsListener(onNewItemsListener);
+		SynchronizationManager.getInstance().unregisterSynchronizationListener(synchronizationListener);
 	}
 
 	@Override
@@ -234,6 +227,8 @@ public class LatestItemsActivity extends LocalizedActivity {
 	
 	private void showWhatsNew() {
 		try {
+			
+			
 			AlarmManager am = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 			Intent intent = new Intent(this, ImageDownloadingService.class);
 			PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
@@ -261,6 +256,8 @@ public class LatestItemsActivity extends LocalizedActivity {
 	}
 	
 	private void setIdle() {
+		if (SynchronizationManager.getInstance().isSynchronizing()) return;
+		
 		refreshOrProgress.setDisplayedChild(0);
 	}
 	
@@ -368,7 +365,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 		this.setIdle();
 	}
 
-	private void viewChannels() {
+	private void showChannels() {
 		Intent intent = new Intent(this, MainActivity.class);
 		startActivity(intent);
 	}
@@ -391,14 +388,22 @@ public class LatestItemsActivity extends LocalizedActivity {
 		}
     };
     
-    private OnNewItemsListener onNewItemsListener = new OnNewItemsListener() {
-		public void onNewItems() {			
+    private SynchronizationListener synchronizationListener = new SynchronizationListener() {
+    	public void onStart() {			
+			runOnUiThread(new Runnable() {
+				public void run() {
+					setBusy();
+				}
+			});			
+		}
+    	
+		public void onFinish(int totalNewItems) {			
 			runOnUiThread(new Runnable() {
 				public void run() {
 					loadItems();
 				}
 			});			
-		}    	
+		}
     };        
 
     private void showTagsDialog() {
