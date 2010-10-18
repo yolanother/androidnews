@@ -213,14 +213,14 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 			scrollView.removeAllViews();
 		}
 		
-		int i = 0, currentItemIndex = 0;		
+		int i = 0, currentItemIndex = 0;
 		for (Item item : items) {
 			ItemView itemView = new ItemView(this);
 			itemView.setNightMode(Settings.getNightReadingMode());
 			if (item.equals(currentItem)) {
 				currentItemIndex = i;
-				itemView.setItem(currentItem);				
-			}			
+				itemView.setItem(currentItem);
+			}
 			scrollView.addView(itemView);
 			i++;
 		}

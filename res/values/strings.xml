@@ -76,6 +76,12 @@
     <string name="failed_to_save_subscriptions">Following feeds cannot be subscribed/unsubscribed:\n</string>
     <string name="synchorization_started">Synchronization started...</string>
     
+    <string name="synchronizing_tags">Synchronizing tags</string>
+    <string name="synchronizing_subscriptions">Synchronizing subscriptions</string>
+    <string name="synchronizing_articles_state">Synchronizing articles state</string>
+    <string name="updating_articles_of_tags">Updating articles of tags</string>
+    <string name="updating_feed">Updating {feed}</string>
+    
     <string name="star">Add star</string>
     <string name="unstar">Remove star</string>
     <string name="share">Share</string>

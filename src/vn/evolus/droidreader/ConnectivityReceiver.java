@@ -19,11 +19,11 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 		NetworkInfo info = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
 		if (hasGoodEnoughNetworkConnection(info, context)) {
 			// should start background service to update
-			Log.d("DEBUG", "Have WIFI or 3G connection, start updating feeds.");
+			if (Constants.DEBUG_MODE) Log.d(Constants.LOG_TAG, "Have WIFI or 3G connection, start background services...");
 			context.startService(updatingService);
 			context.startService(downloadingService);
 		} else {
-			Log.d("DEBUG", "No WIFI or 3G connection, stop updating feeds.");
+			if (Constants.DEBUG_MODE) Log.d(Constants.LOG_TAG, "No WIFI or 3G connection, stop background services...");
 			context.stopService(updatingService);
 			context.stopService(downloadingService);
 		}

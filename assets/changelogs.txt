@@ -1,12 +1,14 @@
-2010-09-24:
+1.0b4:
+    * Display synchronizing status on status bar
+    * Bugs fix
+1.0b3:
     * Offline images
-    * Apps2SD
+    * Apps2SD    
     * Synchronize read/starred state
     * View items by tag
     * Improved UI
-    * More storage options
 
-2010-09-19:
+1.0b2:
     * Fonts
     * Reading mode (Night/Day)
     * Read/Unread toggle
@@ -15,5 +17,5 @@
     * Fix bugs
         * ImageCache bug 
 
-2010-09-15:
-Google Reader support
+1.0b1:
+    * Google Reader support

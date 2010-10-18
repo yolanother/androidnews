@@ -6,9 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import vn.evolus.droidreader.Application;
 import vn.evolus.droidreader.ConnectivityReceiver;
 import vn.evolus.droidreader.Constants;
 import vn.evolus.droidreader.GoogleReaderFactory;
+import vn.evolus.droidreader.R;
 import vn.evolus.droidreader.Settings;
 import vn.evolus.droidreader.model.Channel;
 import vn.evolus.droidreader.model.Item;
@@ -16,6 +18,7 @@ import vn.evolus.droidreader.model.Job;
 import vn.evolus.droidreader.model.JobExecutor;
 import vn.evolus.droidreader.model.SyncItemTagJobExecutor;
 import vn.evolus.droidreader.model.Tag;
+import android.content.Context;
 import android.util.Log;
 
 import com.google.reader.GoogleReader;
@@ -26,7 +29,7 @@ import com.google.reader.atom.AtomHandler.OnNewEntryCallback;
 
 public class SynchronizationManager {
 	private static SynchronizationManager instance;	
-	private static final String TAG = "SynchronizationManager";	
+	private static final String TAG = "SynchronizationManager";
 		
 	private Object synRoot = new Object();
 	private boolean synchronizing = false;
@@ -57,7 +60,7 @@ public class SynchronizationManager {
 	public int startSynchronizing() {
 		synchronized (synRoot) {
 			if (synchronizing) {
-				Log.i(TAG, "Synchronizing... return now.");
+				if (Constants.DEBUG_MODE) Log.d(TAG, "Synchronizing... return now.");
 				return 0;
 			}
 			synchronizing = true;
@@ -66,14 +69,20 @@ public class SynchronizationManager {
 		onSynchronizationStart();		
 		int totalNewItems = 0;
 		if (ConnectivityReceiver.hasGoodEnoughNetworkConnection()) {
-			Log.i(TAG, "Start synchronization at " + new Date());
+			if (Constants.DEBUG_MODE) Log.d(TAG, "Start synchronization at " + new Date());
 			try {
+				Context context = Application.getInstance();
 				long timestamp = System.currentTimeMillis();
+				onSynchronizationProgress(context.getString(R.string.synchronizing_tags));
 				syncTags();
+				onSynchronizationProgress(context.getString(R.string.synchronizing_subscriptions));											
 				syncSubscriptions();
-				syncItemsOfBuiltInTags(timestamp);				
+				onSynchronizationProgress(context.getString(R.string.updating_articles_of_tags));
+				syncItemsOfBuiltInTags(timestamp);
 				totalNewItems = syncFeeds(timestamp);
-				executeJobs();				
+				onSynchronizationProgress(context.getString(R.string.synchronizing_articles_state));
+				executeJobs();
+				onSynchronizationProgress("");
 				// clean up database
 				if (totalNewItems > 0) {
 					ContentManager.cleanUp(Settings.getKeepMaxItems());
@@ -81,7 +90,7 @@ public class SynchronizationManager {
 			} catch (Throwable t) {
 				t.printStackTrace();
 			}
-			Log.i(TAG, "Stop synchronization at " + new Date());
+			if (Constants.DEBUG_MODE) Log.d(TAG, "Stop synchronization at " + new Date());
 		}
 		
 		synchronized (synRoot) {
@@ -95,7 +104,7 @@ public class SynchronizationManager {
 	public void stopSynchronizing() {
 		synchronized (synRoot) {
 			synchronizing = false;
-		}
+		}		
 	}
 	
 	public synchronized void registerSynchronizationListener(SynchronizationListener listener) {
@@ -116,6 +125,12 @@ public class SynchronizationManager {
 		}
 	}
 	
+	protected void onSynchronizationProgress(String progressText) {		
+		for (SynchronizationListener listener : synchronizationListeners) {
+			listener.onProgress(progressText);
+		}
+	}
+	
 	protected void onSynchronizationFinish(int totalNewItems) {
 		if (totalNewItems == 0) return;
 		
@@ -127,11 +142,14 @@ public class SynchronizationManager {
 	protected int syncFeeds(long timestamp) {
 		int totalNewItems = 0;
 		int maxItemsPerChannel = Settings.getMaxItemsPerChannel();		
-		List<Channel> channels = ContentManager.loadAllChannels(ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
-		for (Channel channel : channels) {
+		List<Channel> channels = ContentManager.loadAllChannels(ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);		
+		String synchronizingFeed = Application.getInstance().getString(R.string.updating_feed);
+		for (Channel channel : channels) {			
 			synchronized (synRoot) {
 				if (!synchronizing) break;
 			}
+			
+			onSynchronizationProgress(synchronizingFeed.replace("{feed}", channel.title));
 
 			try {
 				int newItems = channel.update(maxItemsPerChannel, timestamp);
@@ -255,7 +273,7 @@ public class SynchronizationManager {
 				} else {
 					removeExistingChannel(channel, currentChannels);
 				}
-				channel.title = subscription.getTitle();				
+				channel.title = subscription.getTitle();
 				ContentManager.saveChannel(channel);
 				
 				channelMap.put(channel.url, channel);

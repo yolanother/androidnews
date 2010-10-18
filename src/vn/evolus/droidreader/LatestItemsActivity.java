@@ -1,6 +1,7 @@
 package vn.evolus.droidreader;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import vn.evolus.droidreader.adapter.ItemAdapter;
@@ -25,11 +26,13 @@ import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,6 +58,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 	
 	private ViewSwitcher viewSwitcher;
 	private TextView title;
+	private TextView status;
 	private ItemListView itemListView;
 	private ViewSwitcher refreshOrProgress;
 	
@@ -70,6 +74,8 @@ public class LatestItemsActivity extends LocalizedActivity {
 						
 		title = (TextView)findViewById(R.id.title);
 		title.setText(title.getText().toString().toUpperCase());
+		
+		status = (TextView)findViewById(R.id.status);
 		        
         viewSwitcher = (ViewSwitcher)findViewById(R.id.viewSwitcher);
         
@@ -113,8 +119,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 			}
         });
         
-        startSynchronizationService();
-        
+        startServices();
         checkAndShowWhatsNew();
 	}
 	
@@ -202,13 +207,15 @@ public class LatestItemsActivity extends LocalizedActivity {
 		notificationManager.cancel(Constants.NOTIFICATION_ID);
 	}
 
-	private void startSynchronizationService() {
+	private void startServices() {
 		if (ConnectivityReceiver.hasGoodEnoughNetworkConnection()) {
+			if (Constants.DEBUG_MODE) Log.d(Constants.LOG_TAG, "Begin startServices " + new Date());
         	Intent service = new Intent(this, SynchronizationService.class);
         	startService(service);
         	
         	Intent downloadService = new Intent(this, DownloadingService.class);
         	startService(downloadService);
+        	if (Constants.DEBUG_MODE) Log.d(Constants.LOG_TAG, "End startServices " + new Date());
         }
 	}
 	
@@ -227,8 +234,6 @@ public class LatestItemsActivity extends LocalizedActivity {
 	
 	private void showWhatsNew() {
 		try {
-			
-			
 			AlarmManager am = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 			Intent intent = new Intent(this, ImageDownloadingService.class);
 			PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);
@@ -243,7 +248,30 @@ public class LatestItemsActivity extends LocalizedActivity {
 	}
 
 	private void logout() {
-		Settings.clearGoogleReaderAccessTokenAndSecret();
+		final ProgressDialog progress = new ProgressDialog(this);
+		progress.setMessage(getString(R.string.logout));
+		BetterAsyncTask<Void, Void, Void> logoutTask = 
+			new BetterAsyncTask<Void, Void, Void>(this) {			
+			protected void after(Context context, Void arg) {
+				itemListView.setItems(new ActiveList<Item>());
+				progress.dismiss();
+			}			
+			protected void handleError(Context context, Exception e) {
+				progress.dismiss();
+			}
+		};
+		logoutTask.setCallable(new BetterAsyncTaskCallable<Void, Void, Void>() {
+			public Void call(BetterAsyncTask<Void, Void, Void> task) {
+				SynchronizationManager.getInstance().stopSynchronizing();
+				Settings.clearGoogleReaderAccessTokenAndSecret();				
+				ContentManager.clearDatabase();
+				ImageCache.clearCacheFolder();
+				return null;
+			}
+		});
+		logoutTask.disableDialog();
+		progress.show();
+		logoutTask.execute();		
 	}
 	
 	private void showSettings() {
@@ -259,6 +287,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 		if (SynchronizationManager.getInstance().isSynchronizing()) return;
 		
 		refreshOrProgress.setDisplayedChild(0);
+		hideProgress();
 	}
 	
 	protected void loadMoreItems(final Item lastItem) {
@@ -397,6 +426,15 @@ public class LatestItemsActivity extends LocalizedActivity {
 			});			
 		}
     	
+    	public void onProgress(String progressText) {
+    		final String text = progressText;
+			runOnUiThread(new Runnable() {
+				public void run() {
+					showProgress(text);
+				}				
+			});			
+		}
+    	
 		public void onFinish(int totalNewItems) {			
 			runOnUiThread(new Runnable() {
 				public void run() {
@@ -404,7 +442,16 @@ public class LatestItemsActivity extends LocalizedActivity {
 				}
 			});			
 		}
-    };        
+    };
+    
+    private void showProgress(String text) {
+    	status.setVisibility(View.VISIBLE);
+		status.setText(text);
+	}
+    
+    private void hideProgress() {
+    	status.setVisibility(View.GONE);
+    }
 
     private void showTagsDialog() {
     	final Dialog dialog = new Dialog(this);

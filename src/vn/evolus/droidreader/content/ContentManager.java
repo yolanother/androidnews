@@ -900,4 +900,8 @@ public class ContentManager {
 			}
 		}
 	}
+	
+	public static void clearDatabase() {
+		Application.getInstance().deleteDatabase(ContentsProvider.DATABASE_NAME);
+	}
 }
