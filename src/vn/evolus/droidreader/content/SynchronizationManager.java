@@ -15,8 +15,6 @@ import vn.evolus.droidreader.Settings;
 import vn.evolus.droidreader.model.Channel;
 import vn.evolus.droidreader.model.Item;
 import vn.evolus.droidreader.model.Job;
-import vn.evolus.droidreader.model.JobExecutor;
-import vn.evolus.droidreader.model.SyncItemTagJobExecutor;
 import vn.evolus.droidreader.model.Tag;
 import android.content.Context;
 import android.util.Log;
@@ -235,20 +233,21 @@ public class SynchronizationManager {
 				synchronized (synRoot) {
 					if (!synchronizing) break;
 				}
-				
+
 				try {
-					JobExecutor jobExecutor = lookupJobExecutor(job);					
+					JobExecutor jobExecutor = lookupJobExecutor(job);
 					if (jobExecutor != null) {
+						if (Constants.DEBUG_MODE) Log.d(TAG, "Executing job " + job);
 						jobExecutor.execute(job);
-					}				
-					ContentManager.deleteJob(job.id);
+					}
 				} catch (Throwable t) {
 					t.printStackTrace();
-				}						
+				} finally {
+					ContentManager.deleteJob(job.id);
+				}
 				
-				try {
-					Thread.yield();
-					Thread.sleep(1000);
+				try {					
+					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
