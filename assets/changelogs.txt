@@ -1,3 +1,9 @@
+1.0rc:
+    * Mobilize
+    * Fix auto-reload bugs when come back to Latest view from Article view
+    * Fix 3G connection checking bug (update now runs well on 3G connection)       
+1.0b5:
+    * View articles by tags       
 1.0b4:
     * Display synchronizing status on status bar
     * Bugs fix
@@ -15,7 +21,6 @@
     * Notification options
     * Auto update latest items to LatestItemsActivity
     * Fix bugs
-        * ImageCache bug 
-
+    * ImageCache bug
 1.0b1:
     * Google Reader support

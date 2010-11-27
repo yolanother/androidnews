@@ -53,6 +53,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 	private static final int MENU_LOGOUT = 1;
 	private static final int MENU_SUBSCRIPTONS = 2;
 	private static final int MENU_SETTINGS = 3;
+	private static final int MENU_ABOUT = 3;
 	
 	private boolean loading = false;
 	
@@ -186,6 +187,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 		menu.add(0, MENU_LOGOUT, 0, R.string.logout).setIcon(R.drawable.ic_menu_logout);
 		menu.add(0, MENU_SUBSCRIPTONS, 0, R.string.subscriptions).setIcon(android.R.drawable.ic_menu_edit);
 		menu.add(0, MENU_SETTINGS, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
+		menu.add(0, MENU_ABOUT, 0, R.string.about).setIcon(android.R.drawable.ic_menu_info_details);
 		return super.onCreateOptionsMenu(menu);
 	}
 	

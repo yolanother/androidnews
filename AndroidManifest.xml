@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="vn.evolus.droidreader"
-      android:versionCode="9"
-      android:versionName="1.0b5"
+      android:versionCode="10"
+      android:versionName="1.0rc"
       android:installLocation="auto">
     <application 
         android:name="Application"
         android:icon="@drawable/icon" android:label="@string/applicationName"
-        android:debuggable="false">
+        android:debuggable="true">
         <activity android:name=".LatestItemsActivity"
                   android:label="@string/applicationName"
                   android:launchMode="singleTop">

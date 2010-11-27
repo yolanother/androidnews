@@ -18,7 +18,7 @@ public class GoogleReaderFactory {
 		GoogleReader reader = new GoogleReader(CONSUMER_KEY, CONSUMER_SECRET, 
 				context.getString(R.string.applicationName));		
 
-		String accessToken = Settings.getGoogleReaderAccessToken();		
+		String accessToken = Settings.getGoogleReaderAccessToken();
 		if (accessToken != null) {
 			String tokenSecret = Settings.getGoogleReaderTokenSecret();
 			try {

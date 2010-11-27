@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="applicationName">Droid Reader</string>
+    <string name="about">About</string>
     <string name="settings">Settings</string>
     <string name="back">Back</string>
     <string name="refresh">Refresh</string>       
@@ -89,7 +90,9 @@
     <string name="keep_unread">Keep unread</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="view_original">View original</string>
-    <string name="share_text">Hi,\n\nCheck this article: {link}</string>
+    <string name="share_text">Nice article: {link}</string>
+    <string name="mobilize">Mobilize</string>
+    <string name="mobilizing">Mobilizing article...</string>
     
     <string name="authorize">Authorize</string>
     <string name="register">Register</string>
@@ -111,5 +114,5 @@
     <string name="item_starred">This article has been starred.</string>
     <string name="item_unstarred">This article has been unstarred.</string>
     <string name="item_kept_unread">This article has been kept unread.</string>
-    <string name="item_marked_as_read">This article has been marked as read.</string>
+    <string name="item_marked_as_read">This article has been marked as read.</string>    
 </resources>

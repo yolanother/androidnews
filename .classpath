@@ -2,13 +2,13 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="google-reader-api"/>
+	<classpathentry kind="src" path="readability"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-	<classpathentry kind="lib" path="lib/htmlcleaner2_1.jar"/>
-	<classpathentry kind="lib" path="lib/admob-sdk-android.jar"/>
 	<classpathentry kind="lib" path="lib/droid-fu-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/signpost-commonshttp4-1.2.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/signpost-core-1.2.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/jsoup-1.4.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

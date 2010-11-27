@@ -44,7 +44,13 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 		    return info.isConnected();
 		} 
 		if (netType == ConnectivityManager.TYPE_MOBILE
-		        && netSubtype == TelephonyManager.NETWORK_TYPE_UMTS) {
+		        && (netSubtype == TelephonyManager.NETWORK_TYPE_UMTS
+			        	|| netSubtype == TelephonyManager.NETWORK_TYPE_EDGE
+			        	|| netSubtype == TelephonyManager.NETWORK_TYPE_HSDPA
+			        	|| netSubtype == TelephonyManager.NETWORK_TYPE_HSDPA
+			        	|| netSubtype == TelephonyManager.NETWORK_TYPE_HSPA
+			        	|| netSubtype == TelephonyManager.NETWORK_TYPE_EVDO_0
+			        	|| netSubtype == TelephonyManager.NETWORK_TYPE_EVDO_A)) {
 		   TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
 		   if (!telephonyManager.isNetworkRoaming()) {
 			   return info.isConnected();

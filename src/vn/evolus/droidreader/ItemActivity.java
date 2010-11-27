@@ -201,8 +201,19 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 			}
 		});
 		
+		ActionItem mobilize = new ActionItem();		
+		mobilize.setTitle(getResources().getString(R.string.mobilize));
+		mobilize.setIcon(getResources().getDrawable(R.drawable.ic_mobilize));		
+		mobilize.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				mobilizeItem();
+				quickAction.dismiss();
+			}
+		});
+		
 		quickAction.addActionItem(star);		
 		quickAction.addActionItem(keepUnread);
+		quickAction.addActionItem(mobilize);
 				
 		quickAction.setAnimStyle(QuickAction.ANIM_AUTO);		
 		quickAction.show();
@@ -217,7 +228,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		for (Item item : items) {
 			ItemView itemView = new ItemView(this);
 			itemView.setNightMode(Settings.getNightReadingMode());
-			if (item.equals(currentItem)) {
+			if (currentItem != null && currentItem.equals(item)) {
 				currentItemIndex = i;
 				itemView.setItem(currentItem);
 			}
@@ -240,7 +251,17 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 	
 	private void viewOriginal() {
 		Intent viewIntent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(currentItem.link));
-		startActivity(viewIntent);
+		startActivity(viewIntent);		
+	}
+	
+	private void mobilizeItem() {
+		int viewIndex = scrollView.getDisplayedChild();
+		if (viewIndex >= 0) {
+			ItemView itemView = (ItemView)scrollView.getChildAt(viewIndex);
+			if (itemView != null) {
+				itemView.mobilize();
+			}
+		}
 	}
 	
 	protected void changeReadingMode(boolean nightMode) {
@@ -292,7 +313,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 			showItem(selectedIndex + 1);
 		}
 		loadOlderItem(selectedIndex);
-		selectedIndex = loadNewerItem(selectedIndex, currentItem);		
+		selectedIndex = loadNewerItem(selectedIndex, currentItem);
 				
 		totalItems = ContentManager.countItems(
 				new LatestItems(

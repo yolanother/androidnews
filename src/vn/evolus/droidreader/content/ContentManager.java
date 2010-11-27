@@ -18,6 +18,7 @@ import vn.evolus.droidreader.content.loader.LightweightChannelLoader;
 import vn.evolus.droidreader.content.loader.LightweightItemLoader;
 import vn.evolus.droidreader.content.loader.WithImageChannelLoader;
 import vn.evolus.droidreader.content.processor.ImageItemProcessor;
+import vn.evolus.droidreader.content.processor.ScriptItemProcessor;
 import vn.evolus.droidreader.content.processor.VideoItemProcessor;
 import vn.evolus.droidreader.model.Channel;
 import vn.evolus.droidreader.model.Image;
@@ -74,6 +75,7 @@ public class ContentManager {
 		}
 		itemProcessors.add(new ImageItemProcessor(StreamUtils.readLines(is, "UTF-8")));
 		itemProcessors.add(new VideoItemProcessor());
+		itemProcessors.add(new ScriptItemProcessor());
 	}			
 	
 	public static ArrayList<Channel> loadAllChannels(ChannelLoader loader) {
