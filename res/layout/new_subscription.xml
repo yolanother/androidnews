@@ -18,7 +18,7 @@
         android:layout_width="fill_parent" 
         android:layout_height="wrap_content">
 	    <EditText
-	        android:id="@+id/channelUrl"
+	        android:id="@+id/siteUrl"
             android:text="http://"	        
 	        android:inputType="textUri"
 	        android:singleLine="true"
@@ -46,7 +46,26 @@
                 android:indeterminate="true" 
                 style="?android:progressBarStyleSmall" />	            
         </ViewSwitcher>        	        
-    </LinearLayout>        
+    </LinearLayout>
+    <!-- 
+    <TextView
+        android:text="@string/feed_url"
+        android:textColor="@color/buttonText"
+        android:singleLine="true"
+        android:maxLines="1"
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content"        
+        android:layout_gravity="center_vertical" />
+    <EditText
+        android:id="@+id/feedUrl"
+        android:text="http://"          
+        android:inputType="textUri"
+        android:singleLine="true"
+        android:maxLines="1"
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content"        
+        android:layout_gravity="center_vertical" />
+     -->        
     <ListView 
         android:id="@+id/results" 
         android:layout_width="fill_parent" 

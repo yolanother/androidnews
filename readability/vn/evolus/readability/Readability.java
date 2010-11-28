@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attribute;
@@ -31,14 +33,22 @@ public class Readability {
     private Document document;
     private boolean hasBlockLevelChildren;
     private Map<Element, Double> elementScores = new HashMap<Element, Double>();
+    private Element articleContent;
+    private String baseUrl;
     
-    public String beautify(String html) {
+    public Readability beautify(String html, String baseUrl) {
+    	this.baseUrl = baseUrl;
     	document = Jsoup.parse(html);
-        prepareDocument();
-        Element articleContent = grabArticle();
+        prepareDocument();        
+        articleContent = grabArticle();
         postProcessContent(articleContent);
-        return articleContent.outerHtml();
+        return this;
 	}
+    
+    public String getArticleContent() {
+    	return articleContent != null ? articleContent.outerHtml() : "";
+    }
+    
 	
 	private void prepareDocument() {
 		Elements scripts = document.getElementsByTag("script");
@@ -63,9 +73,9 @@ public class Readability {
      * @return Element
     **/
 	private Element grabArticle() {
-		// 1. Strip any unlikely candandiates
+		// 1. Strip any unlikely candidates
 		List<Element> elementsToScore = stripUnlikelyCandidates();
-		
+		    	
 		// 2. Find candidates for article content
 		List<Element> candidates = findCandidates(elementsToScore);
 		
@@ -114,7 +124,7 @@ public class Readability {
             int embedCount  = p.getElementsByTag("embed").size();
             int objectCount = p.getElementsByTag("object").size();
             
-            if(imgCount == 0 && embedCount == 0 && objectCount == 0 && p.text() == "") {
+            if(imgCount == 0 && embedCount == 0 && objectCount == 0 && p.text().length() == 0) {
                 p.remove();
             }
         }
@@ -155,12 +165,12 @@ public class Readability {
                 }
                 
                 /* First, check the elements attributes to see if any of them contain youtube or vimeo */
-                if (attributeValues.matches(REGEX_VIDEOS)) {
+                if (matches(attributeValues, REGEX_VIDEOS)) {
                     continue;
                 }
 
                 /* Then check the elements inside this element for the same. */
-                if (target.html().matches(REGEX_VIDEOS)) {
+                if (matches(target.html(), REGEX_VIDEOS)) {
                     continue;
                 }                
             }
@@ -191,10 +201,10 @@ public class Readability {
         **/
         for (int i = curTagsLength - 1; i >= 0; i-=1) {        
         	Element tag = tagsList.get(i);
-            int weight = getClassWeight(tag);
+            double weight = getClassWeight(tag);
             double contentScore = getContentScore(tag);
             
-            debug("Cleaning Conditionally " + tag + " (" + tag.className() + ":" + tag.id() + ")" + " with score " + contentScore);
+            debug("Cleaning Conditionally " + tag.tagName() + " (" + tag.className() + ":" + tag.id() + ")" + " with score " + contentScore);
 
             if (weight + contentScore < 0) {
                 tag.remove();
@@ -212,7 +222,7 @@ public class Readability {
                 Elements embeds = tag.getElementsByTag("embed");
                 for (Element embed : embeds) {
                 	String src = embed.attr("src"); 
-                    if (src != null && src.matches(REGEX_VIDEOS)) {
+                    if (src != null && matches(src, REGEX_VIDEOS)) {
                     	embedCount+=1; 
                     }
                 }
@@ -237,7 +247,7 @@ public class Readability {
                     toRemove = true;
                 }
 
-                if (toRemove) {
+                if (toRemove && tag.parent() != null) {
                     tag.remove();
                 }
             }
@@ -298,7 +308,7 @@ public class Readability {
         	Element siblingNode = siblingNodes.get(s);
             boolean append      = false;
 
-            debug("Looking at sibling node: " + siblingNode + " (" + siblingNode.className() + ":" + siblingNode.id() + ")" + " with score " + getContentScore(siblingNode));            
+            debug("Looking at sibling node: " + siblingNode.tagName() + " (" + siblingNode.className() + ":" + siblingNode.id() + ")" + " with score " + getContentScore(siblingNode));            
 
             if (siblingNode == topCandidate) {
                 append = true;
@@ -328,9 +338,9 @@ public class Readability {
             }
 
             if (append) {
-                debug("Appending node: " + siblingNode);
+                debug("Appending node: " + siblingNode.tagName());
                 
-                if (!tagName.equals("div") && tagName.equals("p")) {
+                if (!tagName.equals("div") && !tagName.equals("p")) {
                     /* We have a node that isn't a common block level element, like a form or td tag.
                        Turn it into a div so it doesn't get filtered out later by accident. */                    
                     debug("Altering siblingNode of " + tagName + " to div.");
@@ -368,7 +378,7 @@ public class Readability {
         	double contentScore = getContentScore(candidate) * (1 - getLinkDensity(candidate));        	
             setContentScore(candidate, contentScore);
 
-            debug("Candidate: " + candidate + " (" + candidate.className() + ":" + candidate.id() + ") with score " + contentScore);
+            debug("Candidate: " + candidate.tagName() + " (" + candidate.className() + ":" + candidate.id() + ") with score " + contentScore);
             
             if (topCandidate == null || contentScore > getContentScore(topCandidate)) {
                 topCandidate = candidate; 
@@ -406,10 +416,10 @@ public class Readability {
 		elementScores.clear();		
 		
 		List<Element> candidates = new ArrayList<Element>();		
-        for (Element e : elementsToScore) {
+        for (Element e : elementsToScore) {        	
             Element parentNode = e.parent();
             Element grandParentNode = parentNode != null ? parentNode.parent() : null;
-            String innerText = e.html();
+            String innerText = e.text();
 
             if (parentNode == null) {
                 continue;
@@ -435,7 +445,7 @@ public class Readability {
             int contentScore = 0;
 
             /* Add a point for the paragraph itself as a base. */
-            contentScore+=1;
+            contentScore += 1;
 
             /* Add points for any commas within this paragraph */
             contentScore += innerText.split(",").length;
@@ -447,7 +457,7 @@ public class Readability {
             setContentScore(parentNode, getContentScore(parentNode) + contentScore);            
 
             if (grandParentNode != null) {
-            	setContentScore(grandParentNode, getContentScore(grandParentNode) + (contentScore/2));                    
+            	setContentScore(grandParentNode, getContentScore(grandParentNode) + (contentScore / 2));                    
             }
         }
         return candidates;
@@ -507,7 +517,7 @@ public class Readability {
      * @param Element
      * @return number (Integer)
     **/
-	private int getClassWeight(Element e) {
+	private double getClassWeight(Element e) {
 		if (!flagIsActive(FLAG_WEIGHT_CLASSES)) {
             return 0;
         }
@@ -517,10 +527,10 @@ public class Readability {
         /* Look for a special classname */
         String className = e.className();
         if (className != null && className.length() != 0) {
-            if (className.matches(REGEX_NEGATIVE)) {
+            if (matches(className, REGEX_NEGATIVE)) {
                 weight -= 25; 
             }
-            if (className.matches(REGEX_POSITIVE)) {
+            if (matches(className, REGEX_POSITIVE)) {
                 weight += 25; 
             }
         }
@@ -528,11 +538,11 @@ public class Readability {
         /* Look for a special ID */
         String id = e.id();
         if (id != null && id.length() != 0) {
-            if (id.matches(REGEX_NEGATIVE)) {
+            if (matches(id, REGEX_NEGATIVE)) {
                 weight -= 25; 
             }
 
-            if (id.matches(REGEX_POSITIVE)) {
+            if (matches(id, REGEX_POSITIVE)) {
                 weight += 25; 
             }
         }
@@ -550,15 +560,16 @@ public class Readability {
      * TODO: Shouldn't this be a reverse traversal?
     **/
 	private List<Element> stripUnlikelyCandidates() {
-		final boolean stripUnlikely = flagIsActive(FLAG_STRIP_UNLIKELYS);		
+		final boolean stripUnlikely = flagIsActive(FLAG_STRIP_UNLIKELYS);
+		
 		final List<Element> nodesToScore = new ArrayList<Element>();
 		traverse(document.body(), new ElementVisitor() {
 			public void visit(Element node) {
 				String tagName = node.tagName();
 				if (stripUnlikely) {
 					String unlikelyMatchString = node.className() + node.id();
-	                if (unlikelyMatchString.matches(REGEX_UNLIKELY_CANDIDATES) &&
-	                	!unlikelyMatchString.matches(REGEX_OK_MAYBE_ITS_A_CANDIDATE) &&	                        
+	                if (matches(unlikelyMatchString, REGEX_UNLIKELY_CANDIDATES) &&
+	                	!matches(unlikelyMatchString, REGEX_OK_MAYBE_ITS_A_CANDIDATE) &&	                        
 	                    !tagName.equals("body")) {
 	                	
 	                    debug("Removing unlikely candidate - " + unlikelyMatchString);
@@ -570,28 +581,28 @@ public class Readability {
 				if (tagName.equals("p") || tagName.equals("td") || tagName.equals("pre")) {
 	                nodesToScore.add(node);
 	            }
-				
-				/* Turn all divs that don't have children block level elements into p's */								
-				hasBlockLevelChildren = false;
+	            
+	            /* Turn all divs that don't have children block level elements into p's */								
+				hasBlockLevelChildren = true;
 	            if (tagName.equals("div")) {
 	            	final Element divNode = node;
 	            	childTraverse(node, new ElementVisitor() {
 	            		public void visit(Element node) {
 	            			String tagName = node.tagName();	            			
-	            			if (tagName.matches(REGEX_DIV_TO_P_ELEMENTS)) {	            				
+	            			if (!matches(tagName, REGEX_DIV_TO_P_ELEMENTS)) {	            				
 	            				Element newNode = document.createElement("p");	            				
 	            				newNode.html(divNode.html());
 		                        divNode.replaceWith(newNode);
 		                        nodesToScore.add(newNode);
-		                        hasBlockLevelChildren = true;
+		                        hasBlockLevelChildren = false;
 	            			}
 	            		}
 	            	});
 	            	
-	            	if (!hasBlockLevelChildren) {
+	            	if (hasBlockLevelChildren) {
 	            		for(Node childNode : node.childNodes()) {
 	            			if (childNode instanceof TextNode) {
-	            				Element p = document.createElement("p");
+	            				Element p = document.createElement("p");	            				
 	            				p.html(((TextNode) childNode).text());
 	            				p.attr("style", "display: inline");
 	            				p.attr("class", "readability-styled");
@@ -606,10 +617,30 @@ public class Readability {
 	}
 
 	private void postProcessContent(Element articleContent) {
+		if (baseUrl != null) {
+			Elements images = articleContent.getElementsByAttribute("src");
+			for (Element img : images) {
+				if (img.tagName().equals("img")) {
+					img.attr("src", resolveUrl(baseUrl, img.attr("src")));					
+				}
+			}
+			
+			Elements anchors = articleContent.getElementsByAttribute("href");
+			for (Element a : anchors) {
+				if (a.tagName().equals("a")) {
+					a.attr("src", resolveUrl(baseUrl, a.attr("src")));					
+				}
+			}
+		}
 	}
 	
 	private boolean flagIsActive(int flag) {
 		return (this.flags & flag) > 0;
+	}
+	
+	private boolean matches(String input, String pattern) {
+		Matcher matcher = Pattern.compile(pattern).matcher(input);
+		return matcher.find();
 	}
 	
 	/**
@@ -632,7 +663,39 @@ public class Readability {
 		}
 	}
 	
-	private void debug(String message) {
+	private void debug(String message) {		
 		//System.out.println(message);
+	}
+	
+	private String resolveUrl(String baseUrl, String url) {
+		if (!url.startsWith("http://") && !url.startsWith("https://")) {
+			if (url.startsWith("/")) {
+				url = getRootUrl(baseUrl) + url;
+			} else {
+				url = getRelativeUrl(baseUrl) + "/" + url;
+			}
+		}
+		return url;
+	}
+	
+	private String getRootUrl(String baseUrl) {
+		if (baseUrl == null) return baseUrl;
+		if (!baseUrl.startsWith("http://")) {
+			baseUrl = "http://" + baseUrl;
+		}
+		int indexOfSlash = baseUrl.indexOf("/", 8);
+		if (indexOfSlash < 0) indexOfSlash = baseUrl.length();
+		return baseUrl.substring(0, indexOfSlash);
+	}
+	
+	private String getRelativeUrl(String baseUrl) {
+		if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+			baseUrl = "http://" + baseUrl;
+		}
+		int indexOfSlash = baseUrl.lastIndexOf("/");
+		if (indexOfSlash < (baseUrl.startsWith("https://") ? 8 : 7)) {
+			indexOfSlash = baseUrl.length();
+		}
+		return baseUrl.substring(0, indexOfSlash);
 	}
 }

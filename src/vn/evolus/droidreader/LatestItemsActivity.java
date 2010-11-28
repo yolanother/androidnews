@@ -23,6 +23,7 @@ import vn.evolus.droidreader.util.ImageCache;
 import vn.evolus.droidreader.util.ImageLoader;
 import vn.evolus.droidreader.widget.ItemListView;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -31,6 +32,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -53,7 +55,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 	private static final int MENU_LOGOUT = 1;
 	private static final int MENU_SUBSCRIPTONS = 2;
 	private static final int MENU_SETTINGS = 3;
-	private static final int MENU_ABOUT = 3;
+	private static final int MENU_ABOUT = 4;
 	
 	private boolean loading = false;
 	
@@ -199,6 +201,8 @@ public class LatestItemsActivity extends LocalizedActivity {
 			showSubscriptions();
 		} else if (item.getItemId() == MENU_SETTINGS) {
 			showSettings();
+		} else if (item.getItemId() == MENU_ABOUT) {
+			showAbout();
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -279,6 +283,32 @@ public class LatestItemsActivity extends LocalizedActivity {
 	private void showSettings() {
 		Intent intent = new Intent(this, SettingsActivity.class);
 		startActivity(intent);
+	}
+	
+	private void showAbout() {
+		AlertDialog.Builder builder;
+		AlertDialog aboutDialog;
+		TextView aboutTextView = new TextView(this);
+		aboutTextView.setLinksClickable(true);
+		aboutTextView.setPadding(10, 10, 10, 10);
+		aboutTextView.setTextSize(13.0f);
+		
+		String aboutText = getString(R.string.about_text);
+		try {
+			ComponentName comp = new ComponentName(this, LatestItemsActivity.class);
+    	    PackageInfo pinfo = this.getPackageManager().getPackageInfo(comp.getPackageName(), PackageManager.GET_ACTIVITIES);
+    	    aboutText = aboutText.replace("{version}", pinfo.versionName);
+		} catch (Exception e) {
+			aboutText = aboutText.replace("{version}", "1.0");
+		}
+		
+		builder = new AlertDialog.Builder(this);		
+		aboutDialog = builder.create();
+		aboutDialog.setTitle(getString(R.string.applicationName));
+		aboutDialog.setView(aboutTextView);
+		aboutTextView.setText(aboutText);
+		aboutDialog.setIcon(R.drawable.icon);
+		aboutDialog.show();
 	}
 
 	private void setBusy() {

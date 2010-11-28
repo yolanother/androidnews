@@ -40,12 +40,12 @@
     </string-array>
     <string-array name="language_titles">        
         <item>English</item>
-        <!-- <item>Français</item>  -->
+        <item>Français</item>
         <item>Tiếng Việt</item>                
     </string-array>
     <string-array name="language_values">        
         <item>en</item>
-        <!-- <item>fr</item> -->
+        <item>fr</item>
         <item>vn</item>
     </string-array>
     <string-array name="font_titles">        

@@ -66,6 +66,7 @@
     <string name="our_suggestion">Our suggestion</string>
     <string name="from_channel">from {channel}</string>
     <string name="edit">Edit</string>
+    <string name="subscribe_successfully">Your feeds have been subscribed successfully.</string>
     <string name="unsubscribe">Unsubscribe</string>
     <string name="unsubscribing_channel">Unsubscribing to {channel}...</string>
     <string name="unsubscribe_successfully">You has unsubscribed to {channel} successfully.</string>
@@ -100,6 +101,7 @@
     <string name="google_reader_registration_guideline">If you have not have a <b>Google Account</b>, tap on the <b>Register</b> button below to register your own account.</string>
     <string name="logout">Logout</string>
     <string name="website_url">Website URL</string>
+    <string name="feed_url">or Feed URL</string>
 
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -114,5 +116,13 @@
     <string name="item_starred">This article has been starred.</string>
     <string name="item_unstarred">This article has been unstarred.</string>
     <string name="item_kept_unread">This article has been kept unread.</string>
-    <string name="item_marked_as_read">This article has been marked as read.</string>    
+    <string name="item_marked_as_read">This article has been marked as read.</string>
+    <string name="about_text">
+Version: {version}\r\n\r\n
+Credits:\r\n
+\tApplication icon by 2ExpertDesign\r\n
+\tToolbar icons by GentleFace\r\n
+\tReadability by arc90
+\tFrench translation by Guillaume Gauthier
+    </string>
 </resources>

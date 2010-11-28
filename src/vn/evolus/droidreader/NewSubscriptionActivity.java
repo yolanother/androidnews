@@ -35,9 +35,10 @@ import com.github.droidfu.concurrent.BetterAsyncTask;
 import com.github.droidfu.concurrent.BetterAsyncTaskCallable;
 
 public class NewSubscriptionActivity extends LocalizedActivity {
+	private static final Pattern feedTag = Pattern.compile("<link[^>]*?type=\"application/(atom|rss)\\+xml\"[^>]*?/?>");
 	//private static final String SEARCH_FEED_URL = "http://ajax.googleapis.com/ajax/services/feed/find?v=1.0&q=";
 	
-	private TextView channelUrl;
+	private TextView siteUrl;
 	private ListView resultListView;
 	private SearchResultAdapter adapter;
 	private ViewSwitcher searchOrProgress;
@@ -52,7 +53,7 @@ public class NewSubscriptionActivity extends LocalizedActivity {
 		
 		searchOrProgress = (ViewSwitcher)findViewById(R.id.searchOrProgress);
 		
-		channelUrl = (TextView)findViewById(R.id.channelUrl);		
+		siteUrl = (TextView)findViewById(R.id.siteUrl);
 		ImageButton searchButton = (ImageButton)findViewById(R.id.search);
 		searchButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -111,7 +112,8 @@ public class NewSubscriptionActivity extends LocalizedActivity {
 			protected void after(Context context, Void arg1) {				
 				progressDialog.dismiss();				
 				clearSearchResults();
-				channelUrl.setText("http://");
+				siteUrl.setText("http://");
+				Toast.makeText(context, R.string.subscribe_successfully, 1000).show();
 			}
 			@Override
 			protected void handleError(Context context, Exception arg1) {
@@ -163,12 +165,10 @@ public class NewSubscriptionActivity extends LocalizedActivity {
     	searchTask.execute();
 	}
 	
-	private static final Pattern feedTag = Pattern.compile("<link[^>]*type=\"application/(atom|rss)\\+xml\"[^>]*/>");
-	
 	private List<Subscription> doSearch() throws Exception {			
 		List<Subscription> subscriptions = new ArrayList<Subscription>();
 		
-		String baseUrl = channelUrl.getText().toString();		
+		String baseUrl = siteUrl.getText().toString();
 		HttpClient client = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(baseUrl.trim());
 		httpGet.setHeader("User-Agent", "Mozilla/5.0 (Windows; U; Windows NT 6.1; ru; rv:1.9.2.3) Gecko/20100401 Firefox/4.0 (.NET CLR 3.5.30729)");
@@ -176,8 +176,9 @@ public class NewSubscriptionActivity extends LocalizedActivity {
 		HttpResponse response = (HttpResponse)client.execute(httpGet);
 		StatusLine statusLine = response.getStatusLine();
 		if (statusLine.getStatusCode() == 200) {
-			String responseText = StreamUtils.readAllText(response.getEntity().getContent());			
-			if (response.getFirstHeader("Content-Type").getValue().startsWith("text/html"));
+			//String contentType = response.getFirstHeader("Content-Type").getValue();
+			//if (!contentType.startsWith("text/html")) return subscriptions;
+			String responseText = StreamUtils.readAllText(response.getEntity().getContent());						
 			
 			Matcher matcher = feedTag.matcher(responseText);
 			while (matcher.find()) {				
