@@ -9,7 +9,8 @@ public class WithImageChannelLoader implements ChannelLoader {
 			Channels.ID,
 			Channels.TITLE,
 			Channels.URL,			
-			Channels.LATEST_ITEM_IMAGE_URL
+			Channels.LATEST_ITEM_IMAGE_URL,
+			Channels.OPTIONS
 		};
 	@Override
 	public String[] getProjection() {
@@ -19,10 +20,11 @@ public class WithImageChannelLoader implements ChannelLoader {
 	@Override
 	public Channel load(Cursor cursor) {
 		Channel channel = new Channel();
-		channel.id = cursor.getInt(0);//cursor.getColumnIndex(Channels.ID));
-		channel.title = cursor.getString(1);//cursor.getColumnIndex(Channels.TITLE));
-		channel.url = cursor.getString(2);//cursor.getColumnIndex(Channels.URL));
+		channel.id = cursor.getInt(0);
+		channel.title = cursor.getString(1);
+		channel.url = cursor.getString(2);
 		channel.imageUrl = cursor.getString(3);
+		channel.options = cursor.getLong(4);
 		return channel;
 	}
 

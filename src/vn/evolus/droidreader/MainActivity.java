@@ -177,9 +177,11 @@ public class MainActivity extends LocalizedActivity {
     }
     
     private void showChannelOptions(final Channel channel) {
+    	String mobilizeOrNot = channel.hasOptions(Channel.OPTIONS_MOBILIZE) ?
+    			getString(R.string.do_not_mobilize) : getString(R.string.mobilize);
     	AlertDialog dialog = new AlertDialog.Builder(this)
     		.setTitle(channel.title)
-    		.setItems(new String[] {getString(R.string.unsubscribe)}, 
+    		.setItems(new String[] { getString(R.string.unsubscribe), mobilizeOrNot }, 
     			new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
@@ -188,12 +190,26 @@ public class MainActivity extends LocalizedActivity {
 								dialog.dismiss();
 								confirmDeleteChannel(channel);							
 								break;
+							case 1: 
+								dialog.dismiss();
+								toggleChannelOptions(channel, Channel.OPTIONS_MOBILIZE);							
+								break;
 						}
 					}    			
     			}
     		).create();
     	dialog.show();
 	}
+    
+    private void toggleChannelOptions(Channel channel, long options) {
+    	if (channel.hasOptions(Channel.OPTIONS_MOBILIZE)) {
+    		channel.unsetOptions(Channel.OPTIONS_MOBILIZE);
+    		Toast.makeText(this, R.string.channel_not_mobilized, Toast.LENGTH_SHORT).show();
+    	} else {
+    		channel.setOptions(Channel.OPTIONS_MOBILIZE);
+    		Toast.makeText(this, R.string.channel_mobilized, Toast.LENGTH_SHORT).show();    		
+    	}
+    }
     
     private void confirmDeleteChannel(final Channel channel) {
     	String confirmMessage = getString(R.string.unsubscribe_confirmation)

@@ -93,7 +93,10 @@
     <string name="view_original">View original</string>
     <string name="share_text">Nice article: {link}</string>
     <string name="mobilize">Mobilize</string>
+    <string name="do_not_mobilize">Do not mobilize</string>
     <string name="mobilizing">Mobilizing article...</string>
+    <string name="channel_mobilized">This channel will be mobilized automatically.</string>
+    <string name="channel_not_mobilized">This channel will not be mobilized automatically.</string>
     
     <string name="authorize">Authorize</string>
     <string name="register">Register</string>
@@ -124,5 +127,5 @@ Credits:\r\n
 \tToolbar icons by GentleFace\r\n
 \tReadability by arc90
 \tFrench translation by Guillaume Gauthier
-    </string>
+    </string>    
 </resources>

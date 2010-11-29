@@ -113,6 +113,7 @@ public class ContentManager {
 		values.put(Channels.DESCRIPTION, channel.description);
 		values.put(Channels.LINK, channel.link);
 		values.put(Channels.IMAGE_URL, channel.imageUrl);
+		values.put(Channels.OPTIONS, channel.options);
 		if (channel.id == 0) {
 			Uri contentUri = cr.insert(Channels.CONTENT_URI, values);
 			channel.id = (int)ContentUris.parseId(contentUri);
@@ -126,6 +127,22 @@ public class ContentManager {
 		if (channelInCache != null) {
 			channelCache.remove(channel.id);
 			putChannelToCache(channel);
+		}
+	}
+	
+	public static void saveChannelOptions(Channel channel) {
+		ContentValues values = new ContentValues();		
+		values.put(Channels.OPTIONS, channel.options);
+		if (channel.id > 0) {
+			cr.update(Channels.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
+					new String[] { String.valueOf(channel.id) });
+			
+			// invalidate cache
+			Channel channelInCache = getChannelFromCache(channel.id);
+			if (channelInCache != null) {
+				channelCache.remove(channel.id);
+				putChannelToCache(channel);
+			}
 		}
 	}
 	
@@ -268,6 +285,16 @@ public class ContentManager {
 			}
 		} else {
 			values.put(Items.READ, item.read);
+			cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
+					new String[] { String.valueOf(item.id) });			
+		}
+		return true;
+	}
+	
+	public static boolean saveItemDescription(Item item) {
+		ContentValues values = new ContentValues();
+		if (item.id != 0) {
+			values.put(Items.DESCRIPTION, item.description);
 			cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID, 
 					new String[] { String.valueOf(item.id) });			
 		}

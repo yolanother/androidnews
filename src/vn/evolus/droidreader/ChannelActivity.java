@@ -90,7 +90,7 @@ public class ChannelActivity extends LocalizedActivity {
 			}			
 			protected void handleError(Context context, Exception e) {
 				e.printStackTrace();
-				Toast.makeText(context, "Cannot load the feed: " + e.getMessage(), 5).show();
+				Toast.makeText(context, "Cannot load the feed.", 5).show();
 				setIdle();
 			}
 		};
@@ -120,7 +120,8 @@ public class ChannelActivity extends LocalizedActivity {
 				onChannelUpdated(channel);				
 			}			
 			protected void handleError(Context context, Exception e) {
-				Toast.makeText(context, "Cannot load the feed: " + e.getMessage(), 5).show();
+				e.printStackTrace();
+				Toast.makeText(context, "Cannot load the feed.", 5).show();
 				setIdle();
 			}			
 		};

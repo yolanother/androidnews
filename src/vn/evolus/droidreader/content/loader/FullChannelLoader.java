@@ -11,7 +11,8 @@ public class FullChannelLoader implements ChannelLoader {
 			Channels.URL,
 			Channels.DESCRIPTION,
 			Channels.LINK,
-			Channels.IMAGE_URL
+			Channels.IMAGE_URL,
+			Channels.OPTIONS
 		};
 	@Override
 	public String[] getProjection() {
@@ -27,6 +28,7 @@ public class FullChannelLoader implements ChannelLoader {
 		channel.description = cursor.getString(3);//cursor.getColumnIndex(Channels.DESCRIPTION));
 		channel.link = cursor.getString(4);//cursor.getColumnIndex(Channels.LINK));
 		channel.imageUrl = cursor.getString(5);//cursor.getColumnIndex(Channels.IMAGE_URL));
+		channel.options = cursor.getLong(6);//cursor.getColumnIndex(Channels.IMAGE_URL));
 		return channel;
 	}
 

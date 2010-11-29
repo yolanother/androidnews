@@ -8,7 +8,8 @@ public class LightweightChannelLoader implements ChannelLoader {
 	private final String[] projection = new String[] {
 			Channels.ID,
 			Channels.TITLE,
-			Channels.URL
+			Channels.URL,
+			Channels.OPTIONS
 		};
 	@Override
 	public String[] getProjection() {
@@ -20,7 +21,8 @@ public class LightweightChannelLoader implements ChannelLoader {
 		Channel channel = new Channel();
 		channel.id = cursor.getInt(0);//cursor.getColumnIndex(Channels.ID));
 		channel.title = cursor.getString(1);//cursor.getColumnIndex(Channels.TITLE));
-		channel.url = cursor.getString(2);//cursor.getColumnIndex(Channels.URL));
+		channel.url = cursor.getString(2);
+		channel.options = cursor.getLong(3);
 		return channel;
 	}
 

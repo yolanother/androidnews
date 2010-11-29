@@ -15,6 +15,7 @@ import vn.evolus.droidreader.widget.ScrollView.OnScreenSelectedListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
@@ -392,7 +393,10 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 	private Item showItem(int itemIndex) {
 		ItemView itemView = (ItemView)scrollView.getChildAt(itemIndex);
 		Item item = items.get(itemIndex);
-		if (!itemView.hasItem()) {
+		if (item == null) {
+			Log.e("ERROR", "Ac ac, item at index " + itemIndex + " is null");
+		}
+		if (!itemView.hasItem()) {			
 			item = ContentManager.loadItem(item.id,
 					ContentManager.FULL_ITEM_LOADER,
 					ContentManager.LIGHTWEIGHT_CHANNEL_LOADER);
