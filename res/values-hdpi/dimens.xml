@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <dimen name="toolbarHeight">40.0sp</dimen>
+    <dimen name="toolbarIconWidth">40.0px</dimen>
+    <dimen name="gridItemSize">72dp</dimen>
+</resources>

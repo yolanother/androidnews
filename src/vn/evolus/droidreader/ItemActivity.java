@@ -394,7 +394,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		ItemView itemView = (ItemView)scrollView.getChildAt(itemIndex);
 		Item item = items.get(itemIndex);
 		if (item == null) {
-			Log.e("ERROR", "Ac ac, item at index " + itemIndex + " is null");
+			Log.e("ERROR", "Oops! Item at index " + itemIndex + " is null");
 		}
 		if (!itemView.hasItem()) {			
 			item = ContentManager.loadItem(item.id,

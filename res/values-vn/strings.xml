@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="applicationName">Droid Reader</string>
+    <string name="about">Giới thiệu</string>
+    <string name="settings">Tùy chọn</string>
+    <string name="back">Quay lại</string>
+    <string name="refresh">Cập nhật</string>       
+    <string name="subscribe">Đăng ký</string>
+    <string name="save">Lưu</string>
+	<string name="cancel">Hủy</string>
+    <string name="search">Tìm kiếm</string>
+    <string name="channel_already_exists">Kênh {url} đã tồn tại.</string>
+    <string name="enter_your_rss_url_hint">nhập địa chỉ kênh RSS/ATOM</string>
+    <string name="new_items_notification">{total} tin mới</string>
+    <string name="subscribing_channel">Đang đăng ký {channel}...</string>    
+	<string name="updating_channel">Đang cập nhật {channel}</string>
+    <string name="mark_all_as_read">Đánh dấu đã đọc</string>
+    <string name="no_channel_has_new_items">Không có kênh nào có tin chưa đọc.</string>
+    <string name="auto_update_key">auto_update</string>
+    <string name="auto_update_option_title">Tự động cập nhật?</string>
+    <string name="auto_update_on">Tin mới sẽ được tự động cập nhật ngay cả khi ứng dụng không chạy</string>
+    <string name="auto_update_off">Bạn phải tự mình cập nhật tin mới</string>
+    <string name="show_updated_channels_key">show_updated_channels</string>
+    <string name="show_updated_channels_option_title">Hiển thị những kênh</string>
+    <string name="show_updated_channels_on">có tin chưa đọc</string>
+    <string name="show_updated_channels_off">hiển thị tất cả các kênh</string>
+    <string name="update_interval_key">update_interval</string>
+    <string name="first_time_key">first_time</string>
+    <string name="update_interval_dialog_title">Thời gian cập nhật</string>
+    <string name="update_interval_dialog_message">Bao lâu chương trình sẽ cập nhật một lần?</string>
+    
+    <string name="language_key">locale</string>
+    <string name="language_dialog_title">Ngôn ngữ</string>
+    <string name="language_dialog_message">Tùy chọn ngôn ngữ hiển thị của ứng dụng</string>
+    
+    <string name="synchronization_options">Đồng bộ</string>        
+    <string name="display_options">Hiển thị</string>
+    <string name="notification_options">Thông báo</string>    
+    <string name="font_dialog_title">Phông chữ</string>
+    <string name="font_dialog_message">Phông chữ nào sẽ được dùng để hiển thị bài viết?</string>
+    <string name="font_size_dialog_title">Kích cỡ phông</string>
+    <string name="font_size_dialog_message">Kích cỡ chữ viết trong bài</string>
+    <string name="notification_sound_title">Âm thanh</string>
+    <string name="notification_vibrate_title">Rung</string>
+    <string name="notification_light_title">Đèn</string>
+    <string name="on">Bật</string>
+    <string name="off">Tắt</string>
+    
+    <string name="max_items_per_channel_key">max_items_per_channel</string>
+    <string name="max_items_per_channel_dialog_title">Số tin tối đa mỗi kênh</string>
+    <string name="max_items_per_channel_dialog_message">Chỉ lưu tối đa số lượng tin mới nhất cho mỗi kênh</string>
+    
+    <string name="keep_max_items_dialog_title">Số bài viết?</string>
+    <string name="keep_max_items_dialog_message">Chỉ giữ lại tối đa bao nhiêu bài viết?</string>
+    
+    <string name="latest">Tin mới cập nhật</string>
+    <string name="starred">Tin ưa thích</string>
+    <string name="shared">Tin chia sẻ</string>
+    <string name="subscriptions">Quản lý kênh</string>
+    <string name="subscribe_to">Đăng ký nhận kênh</string>
+    <string name="your_subscriptions">Những kênh bạn đã đăng ký</string>
+    <string name="our_suggestion">Đề nghị của chúng tôi</string>
+    <string name="from_channel">từ {channel}</string>
+    <string name="edit">Sửa</string>
+    <string name="subscribe_successfully">Bạn đã đăng ký nhận tin thành công.</string>
+    <string name="unsubscribe">Hủy đăng ký</string>
+    <string name="unsubscribing_channel">Đang hủy đăng ký kênh {channel}...</string>
+    <string name="unsubscribe_successfully">Bạn đã hủy đăng ký nhận tin từ {channel} thành công.</string>
+    <string name="unsubscribe_failed">Không thể hủy đăng ký kênh {channel}. Vui lòng thử lại.</string>
+	<string name="unsubscribe_confirmation">Bạn đang hủy đăng ký các kênh sau:\n\n{feeds}\n\nCác kênh này sẽ bị xóa khỏi danh sách kênh bạn đăng ký với Google Reader.\n\nBạn có chắc bạn muốn hủy đăng ký?</string>
+    <string name="confirmation">Xác nhận</string>
+    
+    <string name="saving_subscriptions">Đang đồng bộ danh sách kênh với Google Reader...</string>
+	<string name="failed_to_save_subscriptions">Các kênh sau không thể đăng ký/hủy đăng ký:\n</string>
+    <string name="synchorization_started">Bắt đầu quá trình đồng bộ dữ liệu...</string>
+    
+    <string name="synchronizing_tags">Đang đồng bộ thẻ</string>
+    <string name="synchronizing_subscriptions">Đang đồng bộ kênh</string>
+    <string name="synchronizing_articles_state">Đang đồng bộ trạng thái của bài viết</string>
+    <string name="updating_articles_of_tags">Đang cập nhật bài viết của các thẻ</string>
+    <string name="updating_feed">Đang cập nhật {feed}</string>
+        
+    <string name="star">Đánh dấu sao</string>
+    <string name="unstar">Bỏ dấu sao</string>
+    <string name="share">Chia sẻ</string>
+    <string name="unshare">Bỏ chia sẻ</string>
+    <string name="keep_unread">Giữ chưa đọc</string>
+    <string name="mark_as_read">Đã đọc</string>
+    <string name="view_original">Xem tin gốc</string>
+    <string name="share_text">Tin hay: {link}</string>
+    <string name="mobilize">Di động hóa</string>
+    <string name="do_not_mobilize">Bỏ di động hóa</string>
+    <string name="mobilizing">Đang tải và chuyển đổi tin gốc...</string>
+    
+    <string name="authorize">Cấp quyền truy cập</string>
+    <string name="register">Đăng ký</string>
+    <string name="google_reader_authorization_guideline">Để sử dụng chương trình này, bạn phải có một tài khoản Google.\n\nChương trình cần bạn cấp quyền để có thể truy cập thông tin từ tài khoản <b>Google Reader</b> của bạn. Để cấp quyền, mời bạn bấm vào nút <b>Cấp quyền truy cập</b> bên dưới</string>
+    <string name="google_reader_registration_guideline">Nếu bạn chưa có tài khoản Google, bạn có thể bấm nút <b>Đăng ký</b> bên dưới để tạo cho mình một tài khoản.</string>
+	<string name="logout">Đăng xuất</string>
+    <string name="website_url">Địa chỉ trang web có RSS/ATOM</string>
+    <string name="feed_url">Địa chỉ RSS/ATOM</string>
+    
+	<string name="yes">Có</string>
+    <string name="no">Không</string>
+    
+    <string name="source">Nguồn: &lt;strong&gt;{source}&lt;/strong&gt;</string>
+    <string name="published">Xuất bản: {on}</string>
+    <string name="article">Bài viết {no}</string>
+    
+    <string name="select_tag_dialog_title">Chọn một thẻ</string>
+    <string name="no_unread_article">Không có tin nào chưa đọc</string>
+    
+    <string name="item_starred">Bài viết đã được đánh dấu ưa thích.</string>
+    <string name="item_unstarred">Bài viết đã được bỏ ưa thích.</string>
+    <string name="item_kept_unread">Bài viết đã được giữ như chưa đọc.</string>
+    <string name="item_marked_as_read">Bài viết đã được đánh dấu đã đọc.</string>
+    
+    <string name="about_text">
+Phiên bản: {version}\r\n\r\n
+Cảm ơn:\r\n
+\tBiểu tượng chương trình thiết kế bởi 2ExpertDesign\r\n
+\tBiểu tượng thanh công cụ thiết kế bởi GentleFace\r\n
+\tGiải thuật Readability từ arc90
+\tDịch sang tiếng Pháp bởi Guillaume Gauthier
+    </string>
+</resources>

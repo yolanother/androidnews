@@ -209,6 +209,7 @@ public class MainActivity extends LocalizedActivity {
     		channel.setOptions(Channel.OPTIONS_MOBILIZE);
     		Toast.makeText(this, R.string.channel_mobilized, Toast.LENGTH_SHORT).show();    		
     	}
+    	ContentManager.saveChannelOptions(channel);
     }
     
     private void confirmDeleteChannel(final Channel channel) {
