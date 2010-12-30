@@ -122,6 +122,8 @@ public class LatestItemsActivity extends LocalizedActivity {
 			}
         });
         
+        ContentManager.cleanUp(1000);
+                
         startServices();
         checkAndShowWhatsNew();
 	}

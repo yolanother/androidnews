@@ -40,6 +40,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 import com.google.reader.GoogleReader;
 
@@ -199,7 +200,7 @@ public class ContentManager {
 				Items.UPDATE_TIME + " DESC, " +
 				Items.PUB_DATE + " DESC, " +
 				Items.ID + " ASC");
-		if (cursor.moveToNext()) {			
+		if (cursor.moveToNext()) {
 			long id = cursor.getLong(0);
 			long lastPubDate = cursor.getLong(1);
 			long updateTime = cursor.getLong(2);
@@ -208,7 +209,8 @@ public class ContentManager {
 			String selection = Items.KEPT + "=0 AND ("				
 				+ Items.UPDATE_TIME + "<? OR (" + Items.UPDATE_TIME + "=? AND (" 
 				+ Items.PUB_DATE + "<? OR (" + Items.PUB_DATE + " =? AND " + Items.ID + ">?))))";
-			cr.delete(Items.CONTENT_URI,
+			
+			int deletedRows = cr.delete(Items.CONTENT_URI,
 					selection,
 					new String[] {											
 						String.valueOf(updateTime),
@@ -216,8 +218,11 @@ public class ContentManager {
 						String.valueOf(lastPubDate),
 						String.valueOf(lastPubDate),
 						String.valueOf(id) });
+			Log.d("DEBUG", "Number of deleted rows: " + deletedRows);
+		} else {
+			Log.d("DEBUG", "No item to be deleted");
+			cursor.close();
 		}
-		cursor.close();
 	}
 	
 	public static void cleanChannel(Channel channel, int keepMaxItems) {

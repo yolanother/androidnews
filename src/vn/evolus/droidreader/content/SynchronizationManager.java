@@ -34,6 +34,8 @@ public class SynchronizationManager {
 	private Map<String, Channel> channelMap;
 	private Map<String, JobExecutor> jobExecutors;
 	private List<SynchronizationListener> synchronizationListeners;
+	int existItems = 0;
+	int totalNewItems = 0;
 	
 	static {
 		instance = new SynchronizationManager();
@@ -76,15 +78,12 @@ public class SynchronizationManager {
 				onSynchronizationProgress(context.getString(R.string.synchronizing_subscriptions));											
 				syncSubscriptions();
 				onSynchronizationProgress(context.getString(R.string.updating_articles_of_tags));
-				syncItemsOfBuiltInTags(timestamp);
-				totalNewItems = syncFeeds(timestamp);
+				totalNewItems = syncItemsOfBuiltInTags(timestamp);
+				//totalNewItems = syncFeeds(timestamp);
 				onSynchronizationProgress(context.getString(R.string.synchronizing_articles_state));
 				executeJobs();
 				onSynchronizationProgress("");
-				// clean up database
-				if (totalNewItems > 0) {
-					ContentManager.cleanUp(Settings.getKeepMaxItems());
-				}
+				ContentManager.cleanUp(Settings.getKeepMaxItems());				
 			} catch (Throwable t) {
 				t.printStackTrace();
 			}
@@ -170,33 +169,36 @@ public class SynchronizationManager {
 		return totalNewItems;
 	}
 	
-	private void syncItemsOfBuiltInTags(long timestamp) {		
+	private int syncItemsOfBuiltInTags(long timestamp) {		
 		try {			
 			GoogleReader reader = GoogleReaderFactory.getGoogleReader();
 			syncItemsOfTag(reader, GoogleReader.ITEM_STATE_STARRED,
 					Constants.MAX_ITEMS_PER_BUILT_IN_TAG, timestamp);
 			syncItemsOfTag(reader, GoogleReader.ITEM_STATE_SHARED,
 					Constants.MAX_ITEMS_PER_BUILT_IN_TAG, timestamp);
-			//syncItemsOfTag(reader, GoogleReader.ITEM_STATE_READING, MAX_ITEMS_PER_SYNC, timestamp);
+			return syncItemsOfTag(reader, GoogleReader.ITEM_STATE_READING, Settings.getKeepMaxItems(), timestamp);			
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}		
+		return 0;
 	}
-
+	
 	private int syncItemsOfTag(GoogleReader reader, final String tag, int maxItems, 
 			final long timestamp) 
-		throws Exception {
-		int totalNewItems = 0;
+		throws Exception {		
 		String continution = null;
-		while (true) {
+		existItems = 0;
+		totalNewItems = 0;
+		while (true && synchronizing && existItems < Constants.STOP_SYNC_THRESHOLD) {
 			int numberOfFetchedItems = 0;
 			AtomFeed feed = reader.fetchEntriesOfTag(tag,
 					Constants.MAX_ITEMS_PER_FETCH,
 					continution,
-					new OnNewEntryCallback() {
+					new OnNewEntryCallback() {				
 						public void onNewEntry(Entry entry) {
 							Item item = Item.fromEntry(entry);
 							if (ContentManager.existItem(entry.getLink())) {
+								existItems++;
 								ContentManager.saveItemTags(item);
 							} else {
 								String feedUrl = entry.getFeedUrl();								
@@ -204,7 +206,8 @@ public class SynchronizationManager {
 									item.channel = channelMap.get(feedUrl);
 									item.kept = true;
 									item.updateTime = timestamp;
-									ContentManager.saveItem(item);									
+									ContentManager.saveItem(item);
+									totalNewItems++;
 								}
 							}
 						}

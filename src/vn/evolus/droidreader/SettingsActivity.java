@@ -42,12 +42,18 @@ public class SettingsActivity extends LocalizedPreferenceActivity
 		if (Settings.AUTO_UPDATE_KEY.equals(key)) {
 			if (Settings.getAutoUpdate()) {
 				startSynchronizationService();
-			}
-		} else if (Settings.DOWNLOAD_IMAGES_KEY.equals(key)) {
-			if (Settings.getAutoUpdate()) {
-				startDownloadingService();
+			} else {
+				SynchronizationService.cancelScheduledUpdates();
 			}
 		} 
+		
+		if (Settings.DOWNLOAD_IMAGES_KEY.equals(key)) {
+			if (Settings.getDownloadImages()) {
+				startDownloadingService();			
+			} else {
+				DownloadingService.cancelScheduledDownloads();
+			}
+		}
 		
 		Preference pref = findPreference(key);
 	    if (pref instanceof ListPreference) {

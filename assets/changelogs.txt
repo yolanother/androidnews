@@ -1,3 +1,6 @@
+1.0:
+    * Bugs fixed
+        * Downloading images when AutoUpdate is off
 1.0rc:
     * Mobilize
     * Fix auto-reload bugs when come back to Latest view from Article view

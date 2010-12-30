@@ -49,7 +49,9 @@ public class SynchronizationService extends Service {
 			notifyNewItems(totalNewItems);
 		}
 							
-		scheduleNextUpdate();
+		if (Settings.getAutoUpdate()) {
+			scheduleNextUpdate();
+		}
 		stopSelf();
 	}
 	
@@ -91,5 +93,13 @@ public class SynchronizationService extends Service {
 		int updateInterval = Settings.getUpdateInterval() * 1000 * 60;
 		long firstWake = System.currentTimeMillis() + updateInterval;
 		am.set(AlarmManager.RTC, firstWake, pendingIntent);
-	}	
+	}
+
+	public static void cancelScheduledUpdates() {
+		Context context = Application.getInstance();
+		AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+		Intent intent = new Intent(context, SynchronizationService.class);
+		PendingIntent pendingIntent = PendingIntent.getService(Application.getInstance(), 0, intent, 0);
+		am.cancel(pendingIntent);
+	}
 }

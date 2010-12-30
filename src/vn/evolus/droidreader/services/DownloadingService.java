@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import vn.evolus.droidreader.Application;
 import vn.evolus.droidreader.ConnectivityReceiver;
 import vn.evolus.droidreader.Constants;
 import vn.evolus.droidreader.Settings;
@@ -93,7 +94,9 @@ public class DownloadingService extends Service {
 		}		
 		if (Constants.DEBUG_MODE) Log.d(TAG, "Stop downloading service at " + new Date());
 		
-		scheduleNextDownload();		
+		if (Settings.getDownloadImages()) {
+			scheduleNextDownload();
+		}
 		stopSelf();
 	}
 
@@ -188,6 +191,14 @@ public class DownloadingService extends Service {
 		PendingIntent pendingIntent = PendingIntent.getService(this, 0, intent, 0);		
 		long firstWake = System.currentTimeMillis() + UPDATE_INTERVAL;
 		am.set(AlarmManager.RTC, firstWake, pendingIntent);
+	}
+	
+	public static void cancelScheduledDownloads() {
+		Context context = Application.getInstance();
+		AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+		Intent intent = new Intent(context, DownloadingService.class);
+		PendingIntent pendingIntent = PendingIntent.getService(Application.getInstance(), 0, intent, 0);
+		am.cancel(pendingIntent);
 	}
 	
 	private interface DownloadCallback {
