@@ -42,7 +42,9 @@ public class ConnectivityReceiver extends BroadcastReceiver {
 		int netSubtype = info.getSubtype();
 		if (netType == ConnectivityManager.TYPE_WIFI) {
 		    return info.isConnected();
-		} 
+		}
+		if (Settings.getWifiOnly()) return false;
+		
 		if (netType == ConnectivityManager.TYPE_MOBILE
 		        && (netSubtype == TelephonyManager.NETWORK_TYPE_UMTS
 			        	|| netSubtype == TelephonyManager.NETWORK_TYPE_EDGE

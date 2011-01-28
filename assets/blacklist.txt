@@ -17,3 +17,4 @@ commindo-media-ressourcen.de
 javascript:void
 pixel.quantserve.com
 segment-pixel.invitemedia.com
+wp-digg-this/i/

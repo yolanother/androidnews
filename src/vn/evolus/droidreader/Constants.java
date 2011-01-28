@@ -8,7 +8,7 @@ public class Constants {
 	public static final int MAX_ITEMS_PER_SYNC = 500;
 	public static final int JOB_SYNC_BATCH_SIZE = 50;
 	public static final int STOP_SYNC_THRESHOLD = 5;
-	public static final boolean DEBUG_MODE = true;
+	public static final boolean DEBUG_MODE = false;
 	public static final String LOG_TAG = "DroidReader";
 	
 }

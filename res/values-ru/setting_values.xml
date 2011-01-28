@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="update_interval_titles">        
-        <item>5 minutes</item>
-        <item>15 minutes</item>
-        <item>30 minutes</item>
-        <item>1 hour</item>
-        <item>2 hours</item>
-        <item>3 hours</item>
-        <item>4 hours</item>
-        <item>5 hours</item>
-        <item>1 day</item>
+        <item>5 минут</item>
+        <item>15 минут</item>
+        <item>30 минут</item>
+        <item>1 час</item>
+        <item>2 часа</item>
+        <item>3 часа</item>
+        <item>4 часа</item>
+        <item>5 часов</item>
+        <item>1 день</item>
     </string-array>    
     <string-array name="font_size_titles">        
-        <item>Smaller</item>
-        <item>Normal</item>
-        <item>Larger</item>        
+        <item>Маленький</item>
+        <item>Нормальный</item>
+        <item>Большой</item>        
     </string-array>    
 </resources>

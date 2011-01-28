@@ -9,6 +9,7 @@ public class Settings {
 	public static final String DOWNLOAD_IMAGES_KEY = "download_images";
 	public static final String UPDATE_INTERVAL_KEY = "update_interval";
 	public static final String KEEP_MAX_ITEMS_KEY = "keep_max_items";
+	public static final String WIFI_ONLY_KEY = "wifi_only";
 	private static Context context;
 	
 	static {
@@ -39,6 +40,7 @@ public class Settings {
 		
 		editor.putString(KEEP_MAX_ITEMS_KEY, "2000");
 		editor.putBoolean(DOWNLOAD_IMAGES_KEY, false);
+		editor.putBoolean(WIFI_ONLY_KEY, false);
 		
 		editor.commit();
 	}
@@ -178,6 +180,10 @@ public class Settings {
 	public static boolean getDownloadImages() {
 		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
 		return prefs.getBoolean(DOWNLOAD_IMAGES_KEY, false);
+	}
+	public static boolean getWifiOnly() {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+		return prefs.getBoolean(WIFI_ONLY_KEY, false);
 	}
 
 	public static int getKeepMaxImages() {

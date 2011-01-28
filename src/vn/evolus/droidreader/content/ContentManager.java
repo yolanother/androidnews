@@ -5,10 +5,13 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import vn.evolus.droidreader.Application;
+import vn.evolus.droidreader.Constants;
 import vn.evolus.droidreader.GoogleReaderFactory;
 import vn.evolus.droidreader.content.loader.ChannelLoader;
 import vn.evolus.droidreader.content.loader.FullChannelLoader;
@@ -60,6 +63,7 @@ public class ContentManager {
 	private static final Map<Integer, WeakReference<Channel>> channelCache = 
 		new HashMap<Integer, WeakReference<Channel>>();
 	private static final Map<Tag, Integer> tagCache = new HashMap<Tag, Integer>();
+	private static Set<String> recentReadArticles = new HashSet<String>();
 	
 	private static List<ItemProcessor> itemProcessors;
 	
@@ -205,8 +209,8 @@ public class ContentManager {
 			long lastPubDate = cursor.getLong(1);
 			long updateTime = cursor.getLong(2);
 			cursor.close();
-			
-			String selection = Items.KEPT + "=0 AND ("				
+						
+			String selection = /*Items.KEPT + "=0 AND */"("				
 				+ Items.UPDATE_TIME + "<? OR (" + Items.UPDATE_TIME + "=? AND (" 
 				+ Items.PUB_DATE + "<? OR (" + Items.PUB_DATE + " =? AND " + Items.ID + ">?))))";
 			
@@ -218,9 +222,9 @@ public class ContentManager {
 						String.valueOf(lastPubDate),
 						String.valueOf(lastPubDate),
 						String.valueOf(id) });
-			Log.d("DEBUG", "Number of deleted rows: " + deletedRows);
+			if (Constants.DEBUG_MODE) Log.d("DEBUG", "Number of deleted rows: " + deletedRows);
 		} else {
-			Log.d("DEBUG", "No item to be deleted");
+			if (Constants.DEBUG_MODE) Log.d("DEBUG", "No item to be deleted");
 			cursor.close();
 		}
 	}
@@ -394,6 +398,14 @@ public class ContentManager {
 		cr.delete(Items.CONTENT_URI, Items.ID + "=?", new String[] { String.valueOf(item.id) });		
 	}
 	
+	public static void clearReadArticles() {
+		recentReadArticles.clear();
+	}
+	
+	public static boolean isItemRead(int itemId) {
+		return recentReadArticles.contains(String.valueOf(itemId));
+	}
+	
 	public static void markItemAsRead(Item item) {
 		saveItemReadState(item, Item.READ);
 	}
@@ -406,7 +418,12 @@ public class ContentManager {
 		values.put(Items.READ, readState);
 		cr.update(Items.CONTENT_URI, values, ContentsProvider.WHERE_ID,
 				new String[] { String.valueOf(item.id) });
-				
+		
+		String key = String.valueOf(item.id);
+		if (!recentReadArticles.contains(key)) {
+			recentReadArticles.add(key);
+		}
+		
 		addTagToItem(item, GoogleReader.ITEM_STATE_READ);
 	}		
 	

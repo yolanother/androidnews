@@ -46,6 +46,10 @@
     <string name="on">On</string>
     <string name="off">Off</string>
     
+    <string name="wifi_only_option_title">WIFI only?</string>
+    <string name="wifi_only_on">Only synchronizing on WIFI</string>
+    <string name="wifi_only_off">Synchronizing on both 3G and WIFI</string>
+    
     <string name="download_images_option_title">Download images?</string>
     <string name="download_images_on">Download articles images for offline reading (slow!)</string>
     <string name="download_images_off">Do not download article images</string>
@@ -81,7 +85,7 @@
     <string name="synchronizing_tags">Synchronizing tags</string>
     <string name="synchronizing_subscriptions">Synchronizing subscriptions</string>
     <string name="synchronizing_articles_state">Synchronizing articles state</string>
-    <string name="updating_articles_of_tags">Updating articles of tags</string>
+    <string name="updating_articles_of_tags">Updating articles</string>
     <string name="updating_feed">Updating {feed}</string>
     
     <string name="star">Add star</string>
@@ -97,7 +101,7 @@
     <string name="mobilizing">Mobilizing article...</string>
     <string name="channel_mobilized">This channel will be mobilized automatically.</string>
     <string name="channel_not_mobilized">This channel will not be mobilized automatically.</string>
-    
+
     <string name="authorize">Authorize</string>
     <string name="register">Register</string>
     <string name="google_reader_authorization_guideline">To use this application, you must have a Google Account.\n\nThis application will need your permission to access your feeds. To grant your permission to <b>Droid Reader</b>, tap on <b>Authorize</b> button.</string>

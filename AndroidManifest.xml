@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="vn.evolus.droidreader"
-      android:versionCode="10"
-      android:versionName="1.0rc"
+      android:versionCode="13"
+      android:versionName="1.0.2"
       android:installLocation="auto">
     <application 
         android:name="Application"
         android:icon="@drawable/icon" android:label="@string/applicationName"
-        android:debuggable="true">
+        android:debuggable="false">
         <activity android:name=".LatestItemsActivity"
                   android:label="@string/applicationName"
                   android:launchMode="singleTop">
@@ -17,8 +17,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity" />
+        <activity android:name=".AboutActivity" />
         <activity android:name=".ChannelActivity" />
-        <activity android:name=".ItemActivity"  android:launchMode="singleInstance"/>
+        <activity android:name=".ItemActivity" />
         <activity android:name=".SubscriptionActivity" />
         <activity android:name=".NewSubscriptionActivity" />
         <activity android:name=".SettingsActivity">
@@ -36,7 +37,7 @@
 				<data android:scheme="droidreader" android:host="authorization"></data>
             </intent-filter>
         </activity>
-        
+                
         <service android:name=".services.SynchronizationService" />
         <service android:name=".services.DownloadingService" />
         <service android:name=".services.ContentSynchronizationService" />
@@ -52,8 +53,6 @@
 		        <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
 		    </intent-filter>
 		</receiver>
-		
-		<meta-data android:value="a14c777fa0be570" android:name="ADMOB_PUBLISHER_ID" /> 
     </application>    
     <uses-sdk android:minSdkVersion="4" />
     

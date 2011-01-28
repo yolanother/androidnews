@@ -89,16 +89,19 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 			itemId = savedInstanceState.getInt(ITEM_ID_PARAM);
 		} else {
 			itemId = 0;
+			itemId = getIntent().getIntExtra(ITEM_ID_PARAM, itemId);			
 		}
 		if (savedInstanceState != null) {
 			tagId = savedInstanceState.getInt(TAG_ID_PARAM);
 		} else {
 			tagId = LatestItems.ALL_TAGS;
+			tagId = getIntent().getIntExtra(TAG_ID_PARAM, tagId);
 		}
 		if (savedInstanceState != null) {
 			channelId = savedInstanceState.getInt(CHANNEL_ID_PARAM);
 		} else {
 			channelId = LatestItems.ALL_CHANNELS;
+			channelId = getIntent().getIntExtra(CHANNEL_ID_PARAM, channelId);
 		}
 	}		
 	
@@ -119,10 +122,6 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 	@Override
 	protected void onStart() {
 		super.onStart();
-				
-		itemId = getIntent().getIntExtra(ITEM_ID_PARAM, itemId);
-		tagId = getIntent().getIntExtra(TAG_ID_PARAM, tagId);
-		channelId = getIntent().getIntExtra(CHANNEL_ID_PARAM, channelId);
 		
 		currentItem = ContentManager.loadItem(itemId,
 				ContentManager.FULL_ITEM_LOADER,
@@ -395,6 +394,7 @@ public class ItemActivity extends LocalizedActivity implements OnScreenSelectedL
 		Item item = items.get(itemIndex);
 		if (item == null) {
 			Log.e("ERROR", "Oops! Item at index " + itemIndex + " is null");
+			finish();
 		}
 		if (!itemView.hasItem()) {			
 			item = ContentManager.loadItem(item.id,

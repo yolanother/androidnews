@@ -23,7 +23,6 @@ import vn.evolus.droidreader.util.ImageCache;
 import vn.evolus.droidreader.util.ImageLoader;
 import vn.evolus.droidreader.widget.ItemListView;
 import android.app.AlarmManager;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -32,7 +31,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -65,7 +64,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 	private ItemListView itemListView;
 	private ViewSwitcher refreshOrProgress;
 	
-	private int tagId = LatestItems.ALL_TAGS;	
+	private int tagId = LatestItems.ALL_TAGS;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -122,16 +121,9 @@ public class LatestItemsActivity extends LocalizedActivity {
 			}
         });
         
-        ContentManager.cleanUp(1000);
-                
         startServices();
         checkAndShowWhatsNew();
-	}
-	
-	@Override
-	protected void onStart() {	
-		super.onStart();
-		
+        
 		if (!Settings.isAuthenticated()) {			
 			Intent intent = new Intent(this, AuthorizationActivity.class);
 			startActivity(intent);			
@@ -143,25 +135,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 		}
 		
 		cancelNotification();
-	}
-
-	private void onFirstTime() {
-		ImageCache.clearCacheFolder();
 		
-		Intent intent = new Intent(this, SubscriptionActivity.class);
-		startActivity(intent);
-	}
-	
-	@Override
-	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);		
-		tagId = intent.getIntExtra("TagId", LatestItems.ALL_TAGS);	
-	}
-	
-	@Override
-	protected void onResume() {
-		super.onResume();
-										
 		if (tagId == LatestItems.ALL_TAGS) {
 			tagId = getIntent().getIntExtra("TagId", LatestItems.ALL_TAGS);
 		}
@@ -170,7 +144,19 @@ public class LatestItemsActivity extends LocalizedActivity {
 			title.setText(tag.name.toUpperCase());
 		}
 		loadItems();
+	}
+
+	private void onFirstTime() {
+		//ImageCache.clearCacheFolder();		
+		Intent intent = new Intent(this, SubscriptionActivity.class);
+		startActivity(intent);
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
 		
+		refreshReadStateOfItems();		
 		SynchronizationManager.getInstance().registerSynchronizationListener(synchronizationListener);
 	}
 	
@@ -183,7 +169,13 @@ public class LatestItemsActivity extends LocalizedActivity {
 	@Override
 	protected void onDestroy() {	
 		super.onDestroy();
-		ImageCache.clearCacheIfNecessary();
+		AsyncTask<Void, Void, Void> clearCacheTask = new AsyncTask<Void, Void, Void>() {
+			protected Void doInBackground(Void... params) {
+				ImageCache.clearCacheIfNecessary();
+				return null;
+			}			
+		};
+		clearCacheTask.execute();		
 	}
 	
 	@Override
@@ -288,29 +280,8 @@ public class LatestItemsActivity extends LocalizedActivity {
 	}
 	
 	private void showAbout() {
-		AlertDialog.Builder builder;
-		AlertDialog aboutDialog;
-		TextView aboutTextView = new TextView(this);
-		aboutTextView.setLinksClickable(true);
-		aboutTextView.setPadding(10, 10, 10, 10);
-		aboutTextView.setTextSize(13.0f);
-		
-		String aboutText = getString(R.string.about_text);
-		try {
-			ComponentName comp = new ComponentName(this, LatestItemsActivity.class);
-    	    PackageInfo pinfo = this.getPackageManager().getPackageInfo(comp.getPackageName(), PackageManager.GET_ACTIVITIES);
-    	    aboutText = aboutText.replace("{version}", pinfo.versionName);
-		} catch (Exception e) {
-			aboutText = aboutText.replace("{version}", "1.0");
-		}
-		
-		builder = new AlertDialog.Builder(this);		
-		aboutDialog = builder.create();
-		aboutDialog.setTitle(getString(R.string.applicationName));
-		aboutDialog.setView(aboutTextView);
-		aboutTextView.setText(aboutText);
-		aboutDialog.setIcon(R.drawable.icon);
-		aboutDialog.show();
+		Intent intent = new Intent(this, AboutActivity.class);
+		startActivity(intent);
 	}
 
 	private void setBusy() {
@@ -364,6 +335,11 @@ public class LatestItemsActivity extends LocalizedActivity {
 		loadMoreItemsTask.execute();
 	}
 	
+	private void refreshReadStateOfItems() {
+		((ItemAdapter)itemListView.getAdapter()).refreshReadState();
+		ContentManager.clearReadArticles();
+	}
+	
 	private void loadItems() {
 		this.setBusy();
 		BetterAsyncTask<Void, Void, ActiveList<Item>> task = 
@@ -378,7 +354,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 					viewSwitcher.setDisplayedChild(0);
 				}
 				
-				onItemsUpdated();
+				setIdle();
 			}			
 			protected void handleError(Context context, Exception e) {
 				e.printStackTrace();
@@ -406,7 +382,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 		BetterAsyncTask<Void, Void, Void> task = new BetterAsyncTask<Void, Void, Void>(this) {			
 			protected void after(Context context, Void args) {
 				if (!SynchronizationManager.getInstance().isSynchronizing()) {
-					onItemsUpdated();
+					setIdle();
 				}
 			}			
 			protected void handleError(Context context, Exception e) {
@@ -424,10 +400,6 @@ public class LatestItemsActivity extends LocalizedActivity {
 		task.execute();		       
 	}
 	
-	private void onItemsUpdated() {
-		this.setIdle();
-	}
-
 	private void showChannels() {
 		Intent intent = new Intent(this, MainActivity.class);
 		startActivity(intent);
@@ -442,7 +414,7 @@ public class LatestItemsActivity extends LocalizedActivity {
 		Intent intent = new Intent(this, ItemActivity.class);		
 		intent.putExtra(ItemActivity.ITEM_ID_PARAM, item.id);
 		intent.putExtra(ItemActivity.TAG_ID_PARAM, this.tagId);
-		startActivity(intent);		
+		startActivity(intent);
 	}		
 
 	private OnItemRequestListener onItemRequestListener = new OnItemRequestListener() {
@@ -469,10 +441,13 @@ public class LatestItemsActivity extends LocalizedActivity {
 			});			
 		}
     	
-		public void onFinish(int totalNewItems) {			
+		public void onFinish(final int totalNewItems) {			
 			runOnUiThread(new Runnable() {
 				public void run() {
-					loadItems();
+					setIdle();
+					if (totalNewItems > 0) {
+						loadItems();
+					}
 				}
 			});			
 		}
@@ -551,7 +526,8 @@ public class LatestItemsActivity extends LocalizedActivity {
 			item = new TagItem();
 			item.id = tag.id;
 			item.title = tag.name;
-			item.unreadCount = tag.unreadCount;			
+			item.unreadCount = tag.unreadCount;
+			item.icon = "" + R.drawable.tag;
 			tagItems.add(item);			
 		}
 		return tagItems;

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="applicationName">Droid Reader</string>
+    <string name="about">A propos</string>
+    <string name="settings">Préférences</string>
+    <string name="back">Retour</string>
+    <string name="refresh">Rafraichir</string>       
+    <string name="subscribe">S\'abonner</string>
+    <string name="save">Sauver</string>
+    <string name="cancel">Annuler</string>
+    <string name="search">Recherche</string>
+    <string name="channel_already_exists">Le flux à l\'URL {url} existe déjà.</string>
+    <string name="enter_your_rss_url_hint">entrer l\'url RSS/ATOM du flux</string>
+    <string name="new_items_notification">{total} nouveaux éléments</string>
+    <string name="subscribing_channel">Abonnement à {channel}...</string>
+    <string name="updating_channel">Mise à jour de {channel}</string>
+    <string name="mark_all_as_read">Marquer lu</string>
+    <string name="no_channel_has_new_items">Il n\'y a pas de nouveaux articles.</string>
+    <string name="auto_update_key">auto_update</string>
+    <string name="auto_update_option_title">Mise à jour automatique</string>
+    <string name="auto_update_on">Les flux seront mis à jour automatiquement</string>
+    <string name="auto_update_off">Vous devez faire les mises à jour manuellement</string>
+    <string name="show_updated_channels_key">show_updated_channels</string>
+    <string name="show_updated_channels_option_title">Voir les flux</string>
+    <string name="show_updated_channels_on">ceux qui ont des éléments non lu</string>    
+    <string name="show_updated_channels_off">voir tous les flux</string>
+    <string name="update_interval_key">update_interval</string>
+    <string name="first_time_key">first_time</string>
+    <string name="update_interval_dialog_title">Intervalle de mise à jour</string>
+    <string name="update_interval_dialog_message">A quelle fréquence seront mis à jour les flux?</string>
+    
+    <string name="language_key">locale</string>
+    <string name="language_dialog_title">Langage</string>
+    <string name="language_dialog_message">Dans quelle langue sera l\'application?</string>
+        
+    <string name="synchronization_options">Synchronisation</string>        
+    <string name="display_options">Affichage</string>
+    <string name="notification_options">Notification</string>    
+    <string name="font_dialog_title">Police</string>
+    <string name="font_dialog_message">Quelle police sera utilisée pour afficher les articles?</string>
+    <string name="font_size_dialog_title">Taille de police</string>
+    <string name="font_size_dialog_message">Quelle sera la taille de la police utilisée pour les articles?</string>
+    <string name="notification_sound_title">Son</string>
+    <string name="notification_vibrate_title">Vibration</string>
+    <string name="notification_light_title">LED</string>
+    <string name="on">Marche</string>
+    <string name="off">Arrêt</string>
+    
+    <string name="wifi_only_option_title">WIFI seulement?</string>
+    <string name="wifi_only_on">Ne synchroniser que en WIFI</string>
+    <string name="wifi_only_off">Synchroniser en 3G ou en WIFI</string>
+
+    <string name="download_images_option_title">Télécharger les images?</string>
+    <string name="download_images_on">Télécharger les images des articles pour les lectures hors ligne (lent!)</string>
+    <string name="download_images_off">Ne pas télécharger les images</string>
+    
+    <string name="max_items_per_channel_key">max_items_per_channel</string>
+    <string name="max_items_per_channel_dialog_title">Maximum d\'éléments par flux?</string>
+    <string name="max_items_per_channel_dialog_message">Combien d\'éléments par flux voulez-vous conserver?</string>
+        
+    <string name="keep_max_items_dialog_title">Conserver le maximum d\'articles?</string>
+    <string name="keep_max_items_dialog_message">Conbien d\'articles voulez-vous conserver?</string>
+    
+    <string name="latest">Derniers articles</string>
+    <string name="starred">Articles favoris</string>
+    <string name="shared">Articles partagés</string>
+    <string name="subscriptions">Abonnement</string>
+    <string name="subscribe_to">S\'abonner à</string>
+    <string name="your_subscriptions">Vos abonnements</string>
+    <string name="our_suggestion">Nos suggestions</string>
+    <string name="from_channel">de {channel}</string>
+    <string name="edit">Editer</string>
+    <string name="subscribe_successfully">L\'abonnement a été ajouté avec succès.</string>
+    <string name="unsubscribe">Désabonnement</string>
+    <string name="unsubscribing_channel">Désabonnement de {channel}...</string>
+    <string name="unsubscribe_successfully">Vous êtes désabonné de {channel}.</string>
+    <string name="unsubscribe_failed">Echec lors du désabonnement à {channel}. Veuillez réessayer.</string>
+    <string name="unsubscribe_confirmation">Vous êtes en train de vous désabonner des flux suivant:\n\n{feeds}\n\nCes flux seront enlevés de vos abonnements Google Reader.\n\nEtes vous sur de vouloir vous désabonner?</string>
+    <string name="confirmation">Confirmation</string>
+    
+    <string name="saving_subscriptions">Synchronisation des abonnements avec Google Reader...</string>
+    <string name="failed_to_save_subscriptions">Impossible de s\'abonner/se désabonner des flux suivant:\n</string>
+    <string name="synchorization_started">Début de la synchronisation...</string>
+    
+    <string name="synchronizing_tags">Synchronisation des tags</string>
+    <string name="synchronizing_subscriptions">Synchronisation des abonnements</string>
+    <string name="synchronizing_articles_state">Synchronisation du status des articles</string>
+    <string name="updating_articles_of_tags">Mise à jour des articles de marques</string>
+    <string name="updating_feed">Mise à jour de {feed}</string>
+    
+    <string name="star">Ajouter des favoris</string>
+    <string name="unstar">Enlever des favoris</string>
+    <string name="share">Partager</string>
+    <string name="unshare">Ne plus partager</string>
+    <string name="keep_unread">Garder non lu</string>
+    <string name="mark_as_read">Marquer lu</string>
+    <string name="view_original">Voir l\'originale</string>
+    <string name="share_text">Bon article: {link}</string>
+    <string name="mobilize">Rendre mobile</string>
+    <string name="do_not_mobilize">Ne pas rendre mobile</string>
+    <string name="mobilizing">Mobilisation de l\'article...</string>
+    <string name="channel_mobilized">Ce flux sera rendu mobile automatiquement.</string>
+    <string name="channel_not_mobilized">Ce flux ne sera pas rendu mobile automatiquement.</string>
+
+    <string name="authorize">Autoriser</string>
+    <string name="register">S\'enregistrer</string>
+    <string name="google_reader_authorization_guideline">Pour utiliser cette application, vous devez avoir un compte Google.\n\nCette application aura besoin de votre permission pour accéder à vos flux. Pour donner votre permission à <b>Droid Reader</b>, tappez sur le bouton <b>Autoriser</b>.</string>
+    <string name="google_reader_registration_guideline">Si vous n\'avez pas de compte <b>Google</b>, tappez sur le bouton <b>S\'enregistrer</b> ci-dessous pour créer votre compte.</string>
+    <string name="logout">Quitter</string>
+    <string name="website_url">URL du site</string>
+    <string name="feed_url">ou URL du flux</string>
+
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+    
+    <string name="source">Source: &lt;strong&gt;{source}&lt;/strong&gt;</string>
+    <string name="published">Publié: {on}</string>
+    <string name="article">Article {no}</string>
+    
+    <string name="select_tag_dialog_title">Voir les articles par tag</string>
+    <string name="no_unread_article">pas d\'article non lu.</string>
+    
+    <string name="item_starred">Cet article a été ajouté aux favoris.</string>
+    <string name="item_unstarred">Cet article a été enlevé des favoris.</string>
+    <string name="item_kept_unread">Cet article est gardé non lu.</string>
+    <string name="item_marked_as_read">Cet article a été marqué lu.</string>
+</resources>

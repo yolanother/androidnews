@@ -10,5 +10,10 @@
         <item>4 giờ</item>
         <item>5 giờ</item>
         <item>1 ngày</item>
-    </string-array>          
+    </string-array>
+    <string-array name="font_size_titles">        
+        <item>Nhỏ</item>
+        <item>Bình thường</item>
+        <item>Lớn</item>        
+    </string-array>      
 </resources>

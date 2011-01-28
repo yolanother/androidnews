@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import vn.evolus.droidreader.R;
+import vn.evolus.droidreader.content.ContentManager;
 import vn.evolus.droidreader.model.Item;
 import vn.evolus.droidreader.util.ActiveList;
 import vn.evolus.droidreader.util.ImageLoader;
@@ -62,10 +63,8 @@ public class ItemAdapter extends BaseAdapter {
 		}
 	};
 	
-	private void refresh() {	
-		Message message = handler.obtainMessage();
-		message.what = REFRESH_MESSAGE;
-		handler.sendMessage(message);		
+	private void refresh() {
+		handler.sendEmptyMessage(REFRESH_MESSAGE);		
 	}
 
 	public ItemAdapter(Context context) {
@@ -185,5 +184,14 @@ public class ItemAdapter extends BaseAdapter {
 	
 	public interface OnItemRequestListener {
 		void onRequest(Item lastItem);
+	}
+
+	public void refreshReadState() {
+		for (Item item : this.items) {
+			if (ContentManager.isItemRead(item.id)) {
+				item.read = Item.READ;
+			}
+		}
+		this.notifyDataSetChanged();
 	}
 }

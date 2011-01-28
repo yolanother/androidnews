@@ -46,6 +46,14 @@
     <string name="on">Bật</string>
     <string name="off">Tắt</string>
     
+    <string name="wifi_only_option_title">Chỉ dùng WIFI?</string>
+    <string name="wifi_only_on">Chỉ đồng bộ khi đang bật WIFI</string>
+    <string name="wifi_only_off">Đồng bộ khi có kết nối 3G hoặc WIFI</string>
+    
+    <string name="download_images_option_title">Tải hình ảnh?</string>
+    <string name="download_images_on">Tải hình ảnh để đọc khi không có mạng</string>
+    <string name="download_images_off">Không tải hình ảnh</string>    
+    
     <string name="max_items_per_channel_key">max_items_per_channel</string>
     <string name="max_items_per_channel_dialog_title">Số tin tối đa mỗi kênh</string>
     <string name="max_items_per_channel_dialog_message">Chỉ lưu tối đa số lượng tin mới nhất cho mỗi kênh</string>
@@ -77,7 +85,7 @@
     <string name="synchronizing_tags">Đang đồng bộ thẻ</string>
     <string name="synchronizing_subscriptions">Đang đồng bộ kênh</string>
     <string name="synchronizing_articles_state">Đang đồng bộ trạng thái của bài viết</string>
-    <string name="updating_articles_of_tags">Đang cập nhật bài viết của các thẻ</string>
+    <string name="updating_articles_of_tags">Đang cập nhật bài viết</string>
     <string name="updating_feed">Đang cập nhật {feed}</string>
         
     <string name="star">Đánh dấu sao</string>

@@ -176,6 +176,7 @@ public class ContentsProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         dbHelper = new DatabaseHelper(getContext());
+        dbHelper.getWritableDatabase().rawQuery("PRAGMA synchronous=OFF", null);
         return true;
     }
 

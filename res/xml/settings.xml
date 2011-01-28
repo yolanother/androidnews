@@ -15,6 +15,11 @@
 	        android:entries="@array/update_interval_titles"
 	        android:dialogTitle="@string/update_interval_dialog_title" />
         <CheckBoxPreference
+            android:key="wifi_only"
+            android:title="@string/wifi_only_option_title" 
+            android:summaryOff="@string/wifi_only_off" 
+            android:summaryOn="@string/wifi_only_on" />	        
+        <CheckBoxPreference
             android:key="download_images"
             android:title="@string/download_images_option_title" 
             android:summaryOff="@string/download_images_off" 

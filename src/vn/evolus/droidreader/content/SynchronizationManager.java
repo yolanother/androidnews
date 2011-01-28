@@ -36,6 +36,7 @@ public class SynchronizationManager {
 	private List<SynchronizationListener> synchronizationListeners;
 	int existItems = 0;
 	int totalNewItems = 0;
+	private String progress;
 	
 	static {
 		instance = new SynchronizationManager();
@@ -107,6 +108,9 @@ public class SynchronizationManager {
 	public synchronized void registerSynchronizationListener(SynchronizationListener listener) {
 		if (!synchronizationListeners.contains(listener)) {
 			synchronizationListeners.add(listener);
+			if (progress != null) {
+				listener.onProgress(progress);
+			}
 		}
 	}
 	
@@ -123,14 +127,14 @@ public class SynchronizationManager {
 	}
 	
 	protected void onSynchronizationProgress(String progressText) {		
+		this.progress = progressText;
 		for (SynchronizationListener listener : synchronizationListeners) {
 			listener.onProgress(progressText);
 		}
 	}
 	
 	protected void onSynchronizationFinish(int totalNewItems) {
-		if (totalNewItems == 0) return;
-		
+		progress = null;		
 		for (SynchronizationListener listener : synchronizationListeners) {
 			listener.onFinish(totalNewItems);
 		}
